@@ -1,0 +1,38 @@
+{
+  "name": "ecommerce-web3-enterprise",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write .",
+    "dev:up": "docker compose -f infra/docker/docker-compose.dev.yml up -d",
+    "dev:down": "docker compose -f infra/docker/docker-compose.dev.yml down",
+    "dev:logs": "docker compose -f infra/docker/docker-compose.dev.yml logs -f",
+    "prepare": "husky",
+    "publicar": "node scripts/publicar-sin-comentarios.mjs",
+    "test:scripts": "node --test scripts/publicar-sin-comentarios.test.mjs"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.0",
+    "@ecommerce/eslint-config": "workspace:*",
+    "eslint": "^9.5.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.3.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.10.0",
+    "prisma": "8.0.0-rc.19"
+  }
+}

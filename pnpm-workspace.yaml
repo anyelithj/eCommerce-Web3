@@ -1,0 +1,5 @@
+packages:
+  - "apps/ecommerce-express"
+  - "apps/ecommerce-next"
+  - "apps/ecommerce-nuxt"
+  - "packages/*"

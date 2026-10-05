@@ -1,0 +1,229 @@
+name: ecommerce-web3
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ecommerce-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-ecommerce_db}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ecommerce-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    container_name: ecommerce-mongodb
+    restart: unless-stopped
+    command: ["--wiredTigerCacheSizeGB", "0.25"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - ecommerce-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "volatile-lru"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - ecommerce-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ecommerce-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - ecommerce-net
+
+  ecommerce-express:
+    profiles: ["app"]
+    build:
+      context: ../..
+      dockerfile: apps/ecommerce-express/Dockerfile
+      target: development
+    container_name: ecommerce-express
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file:
+      - path: ../../apps/ecommerce-express/.env
+        required: false
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ecommerce_db}
+      MONGO_URL: mongodb://mongodb:27017/ecommerce_docs
+      REDIS_URL: redis://redis:6379
+      SMTP_HOST: mailpit
+      FASTAPI_URL: http://ecommerce-fastapi:8000
+      STOREFRONT_REVALIDATE_URL: http://ecommerce-next:3000/api/revalidate
+    volumes:
+      - ../../apps/ecommerce-express:/repo/apps/ecommerce-express
+      - /repo/apps/ecommerce-express/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  ecommerce-next:
+    profiles: ["app"]
+    build:
+      context: ../..
+      dockerfile: apps/ecommerce-next/Dockerfile
+      target: development
+    container_name: ecommerce-next
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: ../../apps/ecommerce-next/.env
+        required: false
+    environment:
+      INTERNAL_API_URL: http://ecommerce-express:4000/api/v1
+    volumes:
+      - ../../apps/ecommerce-next:/repo/apps/ecommerce-next
+      - /repo/apps/ecommerce-next/node_modules
+      - /repo/apps/ecommerce-next/.next
+    depends_on:
+      - ecommerce-express
+    networks:
+      - ecommerce-net
+
+  ecommerce-fastapi:
+    profiles: ["fastapi"]
+    build:
+      context: ../..
+      dockerfile: apps/ecommerce-fastapi/Dockerfile
+      target: development
+    container_name: ecommerce-fastapi
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ../../apps/ecommerce-fastapi/.env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ecommerce_db}
+      REDIS_URL: redis://redis:6379/1
+      EXPRESS_API_URL: http://ecommerce-express:4000
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    volumes:
+      - ../../apps/ecommerce-fastapi:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  ecommerce-rust:
+    profiles: ["rust"]
+    build:
+      context: ../..
+      dockerfile: apps/ecommerce-rust/Dockerfile
+      target: development
+    container_name: ecommerce-rust
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - path: ../../apps/ecommerce-rust/.env
+        required: false
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ecommerce_db}
+      REDIS_URL: redis://redis:6379
+      EXPRESS_API_URL: http://ecommerce-express:4000
+      FASTAPI_URL: http://ecommerce-fastapi:8000
+    volumes:
+      - ../../apps/ecommerce-rust/src:/app/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  ecommerce-nuxt:
+    profiles: ["nuxt"]
+    build:
+      context: ../..
+      dockerfile: apps/ecommerce-nuxt/Dockerfile
+      target: development
+    container_name: ecommerce-nuxt
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    env_file:
+      - path: ../../apps/ecommerce-nuxt/.env
+        required: false
+    environment:
+      NUXT_API_INTERNAL_URL: http://ecommerce-express:4000/api/v1
+    volumes:
+      - ../../apps/ecommerce-nuxt:/repo/apps/ecommerce-nuxt
+      - /repo/apps/ecommerce-nuxt/node_modules
+    networks:
+      - ecommerce-net
+
+  gateway:
+    profiles: ["app"]
+    image: nginx:1.27-alpine
+    container_name: ecommerce-gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-8088}:80"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - ecommerce-next
+      - ecommerce-express
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/gateway/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - ecommerce-net
+
+networks:
+  ecommerce-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  mongodata:
+  redisdata:
