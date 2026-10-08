@@ -1,4 +1,3 @@
-// checkout.exception.ts => errores de dominio del módulo Checkout.
 import type { CheckoutStatus } from "@prisma/client";
 import {
   ConflictException,
@@ -18,7 +17,6 @@ export class EmptyCartException extends UnprocessableException {
   }
 }
 
-// Algún ítem ya no tiene stock suficiente al reservar (otro cliente lo compró antes)
 export class StockReservationException extends UnprocessableException {
   constructor(sku: string) {
     super(`No hay stock suficiente de ${sku} para reservar`, "STOCK_RESERVATION_FAILED", { sku });

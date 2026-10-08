@@ -1,7 +1,3 @@
-// CustomersAdmin.tsx (Client Component) => CRM: clientes con segmento (VIP/regular/nuevo/inactivo), valor de vida
-// (LTV), puntaje, etiquetas y notas; vista 360° (pedidos recientes, categorías favoritas, fidelidad y próxima compra
-// estimada). Express sincroniza con SuiteCRM por un Adapter (D-DIP): esta vista no sabe si el CRM externo existe.
-// Patrones: Facade (GET /crm/customer/:id arma la vista 360 en una petición) + Composite (configuración de la tabla).
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -105,12 +101,11 @@ export function CustomersAdmin() {
           { name: "note", label: t("addNote"), type: "textarea" },
         ],
       }}
-      remove={(row) => !row.archived} // DELETE = archivar (los datos se conservan para reportes)
+      remove={(row) => !row.archived}
     />
   );
 }
 
-// Customer360View => ficha completa del cliente (se consulta solo al abrir el diálogo)
 function Customer360View({ id }: { id: string }) {
   const t = useTranslations("admin.customers");
   const tOrder = useTranslations("order");

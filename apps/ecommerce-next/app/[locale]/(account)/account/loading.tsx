@@ -1,6 +1,3 @@
-// loading.tsx (/account/*) => carga al cambiar de sección del hub. El loading.tsx de (account) envuelve el segmento
-// "account" entero y NO se vuelve a mostrar al navegar entre secciones hermanas (/account/orders -> /account/wishlist);
-// este sí, porque envuelve cada sección (el aside y el header quedan fijos). Spinner + esqueleto de una sección.
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/shared/ui/Skeleton";
 import { Spinner } from "@/shared/ui/Spinner";

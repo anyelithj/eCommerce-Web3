@@ -1,5 +1,3 @@
-// NotificationBell.tsx => campana del header: conteo de no leídas + escucha en tiempo real (GraphQL Subscription).
-// Patrón Observer: al llegar un evento "notification" se invalida la cache y se muestra un toast.
 "use client";
 
 import { Link } from "@/shared/lib/i18n/navigation";
@@ -19,11 +17,10 @@ export function NotificationBell() {
   const { receive } = useLiveNotification();
   const { data: unread = 0 } = useUnreadCount();
 
-  // Suscripción WebSocket (solo con sesión): cada notificación nueva refresca el conteo y la bandeja
   useWebSocket(NOTIFICATION_RECEIVED, isAuthenticated, ({ notificationReceived }) => {
     receive(notificationReceived);
     void queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    void queryClient.invalidateQueries({ queryKey: ["cart"] }); // Ej.: stock o precio pudieron cambiar
+    void queryClient.invalidateQueries({ queryKey: ["cart"] });
   });
 
   if (!isAuthenticated) return null;

@@ -1,4 +1,3 @@
-// Badge.tsx (shadcn/ui + cva) => etiqueta de estado (pedido, pago, descuento). Colores con contraste AA.
 import type { ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../lib/cn";
@@ -20,7 +19,6 @@ export const badgeVariants = cva(
   }
 );
 
-// "NonNullable" => "tone" es opcional pero nunca null (tipado estricto con exactOptionalPropertyTypes)
 type Tone = NonNullable<VariantProps<typeof badgeVariants>["tone"]>;
 
 export function Badge({

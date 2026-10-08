@@ -1,4 +1,3 @@
-// Avatar.tsx => foto de perfil con fallback de iniciales (accesible: alt descriptivo o iniciales con aria-label).
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/lib/cn";
@@ -6,11 +5,10 @@ import { cn } from "@/shared/lib/cn";
 interface AvatarProps {
   name: string;
   src?: string | null;
-  size?: number; // px
+  size?: number;
   className?: string;
 }
 
-// initials => "Ana María Pérez" => "AP" (primera y última palabra) — función pura
 const initials = (name: string) => {
   const parts = name.trim().split(/\s+/);
   return `${parts[0]?.[0] ?? ""}${parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : ""}`.toUpperCase();

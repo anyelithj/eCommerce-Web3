@@ -1,6 +1,3 @@
-// AnalyticsPanel.tsx (Client Component) => analítica del panel: serie por período (día/semana/mes), totales,
-// embudo de conversión paso a paso, abandono de carrito y reportes por dimensión (producto, categoría, marca, ruta,
-// canal, evento). Lee GET /analytic/metric y /analytic/report (CQRS: read models cacheados 5 min en Redis).
 "use client";
 
 import dynamic from "next/dynamic";
@@ -23,7 +20,7 @@ const SalesChart = dynamic(() => import("./SalesChart"), {
 
 const GRANULARITIES = ["day", "week", "month"] as const;
 const DIMENSIONS = ["product", "category", "brand", "path", "channel", "event"] as const;
-const MONEY_DIMENSIONS = new Set(["product", "category", "brand"]); // Ranking por ingresos (los demás por conteo)
+const MONEY_DIMENSIONS = new Set(["product", "category", "brand"]);
 
 export function AnalyticsPanel() {
   const t = useTranslations("admin.analytics");
@@ -80,7 +77,6 @@ export function AnalyticsPanel() {
 
       <SalesChart data={metrics.data?.series ?? []} title={t("salesChart")} />
 
-      {/* Embudo de conversión: barras proporcionales accesibles (texto con conteo y tasa en cada paso) */}
       <section aria-labelledby="funnel-title" className="flex flex-col gap-2">
         <h3 id="funnel-title" className="text-sm font-semibold text-slate-700">
           {t("funnel")}
@@ -168,9 +164,6 @@ export function AnalyticsPanel() {
   );
 }
 
-// ---------- Análisis relacional de productos (AI Graph Analysis, Express /product-graph) ----------
-
-// GraphQuery => resultado guardado de un análisis (GraphQueryDto de Express)
 interface GraphQuery {
   id: string;
   queryType: "RELATED" | "PURCHASED_TOGETHER" | "SIMILAR" | "CLUSTER";
@@ -181,7 +174,6 @@ interface GraphQuery {
   createdAt: string;
 }
 
-// clusterSchema => CLUSTER agrupa productos comprados juntos; "explain" pide el resumen al LLM (opcional: cuesta energía)
 const clusterSchema = z.object({
   minWeight: z.coerce.number().int().min(1).max(100),
   explain: z.boolean(),
@@ -229,7 +221,6 @@ function GraphPanel() {
             header: t("size"),
             cell: (row) => t("graphSize", { nodes: row.nodes.length, edges: row.edges.length }),
           },
-          // Grupos (comunidades) con sus productos: lectura textual del grafo (accesible, sin librería de grafos)
           { key: "groups", header: t("groups"), cell: (row) => <GraphGroups nodes={row.nodes} /> },
           {
             key: "summary",
@@ -243,7 +234,6 @@ function GraphPanel() {
   );
 }
 
-// GraphGroups => nodos agrupados por comunidad ("Map" conserva el orden de inserción); máx. 3 grupos visibles
 function GraphGroups({ nodes }: { nodes: GraphQuery["nodes"] }) {
   const groups = new Map<number, string[]>();
   nodes.forEach((node) => groups.set(node.group, [...(groups.get(node.group) ?? []), node.name]));

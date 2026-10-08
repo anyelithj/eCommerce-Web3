@@ -1,6 +1,3 @@
-// dashboard.validator.ts => schemas Zod de los formularios del panel admin (mismas reglas que los schemas de Express:
-// el usuario ve el error antes de enviar y el backend vuelve a validar). Los mensajes son CLAVES de traducción
-// ("validation.required") que Input traduce al idioma actual. Paradigma funcional/declarativo; patrón Schema.
 import { z } from "zod";
 
 const text = (min = 1, max = 200) =>
@@ -15,8 +12,7 @@ const optionalText = (max = 200) =>
     .trim()
     .max(max)
     .optional()
-    .transform((value) => value || undefined); // "" => sin valor
-// money => el formulario pide pesos (con decimales) y la API recibe la unidad mínima (centavos): 12.500 -> 1.250.000
+    .transform((value) => value || undefined);
 const money = z.coerce
   .number({ invalid_type_error: "validation.required" })
   .min(0, "validation.positive")
@@ -27,7 +23,6 @@ const integer = (min = 0) =>
     .int()
     .min(min, "validation.positive");
 
-// --- Pedidos / Envíos / Facturas / Devoluciones ("as const" => tuplas readonly: tipos y opciones de los selects) ---
 export const ORDER_STATUSES = [
   "CONFIRMED",
   "PREPARING",
@@ -61,7 +56,6 @@ export const shipmentUpdateSchema = z.object({
   description: optionalText(300),
   location: optionalText(120),
 });
-// approve llega del <select> como texto "true"/"false" y se convierte a booleano (lo que espera PATCH /refund/:id/approve)
 export const refundReviewSchema = z.object({
   approve: z.enum(["true", "false"]).transform((value) => value === "true"),
   note: optionalText(500),
@@ -69,7 +63,6 @@ export const refundReviewSchema = z.object({
 export const invoiceSchema = z.object({ orderId: z.string().trim().uuid("validation.uuid") });
 export const creditNoteSchema = z.object({ amount: money, reason: text(5, 300) });
 
-// --- Inventario ---
 export const stockAdjustSchema = z.object({ stock: integer(0), reason: text(3) });
 export const movementSchema = z.object({
   type: z.enum(["IN", "OUT", "RETURN", "DAMAGE"]),
@@ -78,7 +71,6 @@ export const movementSchema = z.object({
   reference: optionalText(100),
 });
 
-// --- Proveedores ---
 export const supplierSchema = z.object({
   name: text(2, 150),
   taxId: z
@@ -99,7 +91,6 @@ export const supplierSchema = z.object({
   contractEndsAt: optionalText(10),
 });
 
-// --- CRM ---
 export const customerSchema = z.object({
   email: z.string().trim().email("validation.emailInvalid"),
   firstName: text(1, 80),
@@ -135,7 +126,6 @@ export const customerUpdateSchema = z.object({
   note: optionalText(1000),
 });
 
-// --- Marketing / Email / Cupones ---
 export const campaignSchema = z.object({
   name: text(3, 120),
   channel: z.enum(["EMAIL", "PUSH", "WHATSAPP"]),
@@ -155,7 +145,6 @@ export const sendEmailSchema = z.object({
   variables: z
     .string()
     .default("")
-    // "nombre=Ana, codigo=X1" -> { nombre: "Ana", codigo: "X1" }
     .transform((value) =>
       Object.fromEntries(
         value
@@ -179,8 +168,6 @@ export const couponSchema = z.object({
   endsAt: optionalText(10),
 });
 
-// --- Productos ---
-// Imágenes del producto: subidas a Cloudinary por MediaUploader; el texto alternativo es obligatorio (WCAG 1.1.1 + SEO)
 export const productImageSchema = z.object({
   url: z.string().url(),
   publicId: z.string().min(1),
@@ -209,7 +196,6 @@ export const productSchema = z.object({
   images: z.array(productImageSchema).max(20),
 });
 
-// --- Configuración ---
 export const webhookSchema = z.object({
   name: text(3, 120),
   url: z.string().trim().url("validation.url"),
@@ -223,7 +209,7 @@ export const roleSchema = z.object({
     .trim()
     .regex(/^[A-Z_]+$/, "validation.roleName"),
   description: optionalText(200),
-  permissionIds: z.array(z.string()).default([]), // Casillas del formulario => IDs de permisos asignados al rol
+  permissionIds: z.array(z.string()).default([]),
 });
 export const PERMISSION_ACTIONS = ["CREATE", "READ", "UPDATE", "DELETE"] as const;
 export const permissionSchema = z.object({
@@ -235,7 +221,6 @@ export const permissionSchema = z.object({
   description: optionalText(200),
 });
 export const permissionUpdateSchema = z.object({ description: text(1, 200) });
-// Automatización n8n: el evento es obligatorio solo si el disparador es EVENT (misma regla que automation.schema.ts)
 export const TRIGGER_TYPES = ["EVENT", "MANUAL", "SCHEDULE", "WEBHOOK"] as const;
 export const workflowSchema = z
   .object({
@@ -254,10 +239,8 @@ export const workflowSchema = z
     message: "validation.required",
     path: ["event"],
   });
-// MCP: motivo del rollback manual de una transacción Saga
 export const rollbackSchema = z.object({ reason: text(3, 200) });
 
-// --- Catálogo: categorías, marcas, colecciones y reseñas ---
 const optionalUrl = z
   .string()
   .trim()
@@ -272,7 +255,7 @@ export const categorySchema = z.object({
   name: text(2, 80),
   description: optionalText(1000),
   imageUrl: optionalUrl,
-  parentId: optionalText(40).transform((value) => value ?? null), // "" => categoría raíz (null en Express)
+  parentId: optionalText(40).transform((value) => value ?? null),
   isActive: z.boolean(),
 });
 export const brandSchema = z.object({
@@ -297,7 +280,6 @@ export const reviewModerationSchema = z.object({
 });
 export const reviewReplySchema = z.object({ vendorReply: text(3, 1500) });
 
-// --- Usuarios: perfil + roles (dos peticiones en Express: PATCH /user/:id y PATCH /user/:id/roles) ---
 export const userSchema = z.object({
   firstName: text(1, 80),
   lastName: text(1, 80),

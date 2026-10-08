@@ -1,4 +1,3 @@
-// NotificationToast.tsx => aviso emergente de una notificación en tiempo real (región aria-live polite).
 "use client";
 
 import { useEffect } from "react";
@@ -13,7 +12,7 @@ export function NotificationToast() {
 
   useEffect(() => {
     if (!latest) return;
-    const timer = setTimeout(dismiss, 6000); // Se oculta sola; el historial queda en la bandeja
+    const timer = setTimeout(dismiss, 6000);
     return () => clearTimeout(timer);
   }, [latest, dismiss]);
 

@@ -1,6 +1,3 @@
-// sitemap.ts => genera /sitemap.xml (convención de archivos de Next.js 15, sin dependencias).
-// Lista las páginas indexables (home, catálogo, categorías, marcas, productos) en CADA idioma, con sus alternativas
-// hreflang (es/en) para que los buscadores muestren la versión correcta a cada usuario (SEO internacional).
 import type { MetadataRoute } from "next";
 import { getBrands, getCategories, getProducts } from "@/features/product/api/product.api";
 import type { CategoryNode } from "@/entities/product/model/product.types";
@@ -9,13 +6,12 @@ import { routing } from "@/shared/lib/i18n/routing";
 import { config } from "@/shared/constants/config";
 import { routes } from "@/shared/constants/routes";
 
-export const revalidate = 3600; // 1 h: el sitemap no necesita la frescura de las fichas
+export const revalidate = 3600;
 
-const MAX_PRODUCT_PAGES = 10; // ponytail: tope 1.000 productos; dividir en varios sitemaps (generateSitemaps) al crecer
+const MAX_PRODUCT_PAGES = 10;
 
 type Entry = { href: string; changeFrequency: "daily" | "weekly"; priority: number };
 
-// flatten => recorre el árbol de categorías (Composite) en profundidad y lo aplana (recursión)
 const flatten = (nodes: CategoryNode[]): CategoryNode[] =>
   nodes.flatMap((node) => [node, ...flatten(node.children)]);
 
@@ -35,7 +31,6 @@ async function productEntries(): Promise<Entry[]> {
   return entries;
 }
 
-// localize => una URL por idioma, cada una con el mapa hreflang completo (formato que Google recomienda)
 function localize(entry: Entry): MetadataRoute.Sitemap {
   const languages = Object.fromEntries(
     routing.locales.map((locale) => [
@@ -52,7 +47,6 @@ function localize(entry: Entry): MetadataRoute.Sitemap {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Si el backend no responde se publican al menos las rutas estáticas (degradación elegante)
   const [categories, brands, products] = await Promise.all([
     getCategories().catch(() => []),
     getBrands().catch(() => []),

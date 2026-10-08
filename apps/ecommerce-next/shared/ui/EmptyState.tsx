@@ -1,5 +1,4 @@
-// EmptyState.tsx => estado vacío con mensaje y acción sugerida (UX: nunca dejar una pantalla en blanco sin salida).
-import { Link } from "../lib/i18n/navigation"; // Link con idioma (conserva /en al navegar)
+import { Link } from "../lib/i18n/navigation";
 import type { ReactNode } from "react";
 
 interface EmptyStateProps {

@@ -1,4 +1,3 @@
-// order.exception.ts => errores de dominio del módulo Order.
 import type { OrderStatus } from "@prisma/client";
 import { ConflictException, NotFoundException } from "../../../shared/filter/http-exception.filter";
 
@@ -26,7 +25,6 @@ export class OrderNotCancellableException extends ConflictException {
   }
 }
 
-// El pago aún no fue confirmado por Stripe (el webhook no ha llegado): el cliente debe reintentar en unos segundos
 export class PaymentNotConfirmedException extends ConflictException {
   constructor() {
     super("El pago aún no ha sido confirmado", "PAYMENT_NOT_CONFIRMED");

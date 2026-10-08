@@ -1,4 +1,3 @@
-// page.tsx (/account/orders) => historial de pedidos (filtros y paginación dentro de OrderList).
 import { getTranslations } from "next-intl/server";
 import { OrderList } from "@/features/order/ui/OrderList";
 import { AccountHeading, accountMetadata } from "../AccountSection";

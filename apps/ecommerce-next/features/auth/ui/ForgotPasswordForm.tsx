@@ -1,4 +1,3 @@
-// ForgotPasswordForm.tsx => solicitud del enlace de recuperación de contraseña.
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
@@ -20,7 +19,6 @@ export default function ForgotPasswordForm() {
     onSubmit: (values: ForgotPasswordFormValues) => resetMutation.mutate(values),
   });
 
-  // Tras el envío: mensaje genérico SIEMPRE (nunca se confirma si el email existe: previene enumeración de usuarios)
   if (resetMutation.isSuccess) {
     return (
       <p role="status" className="max-w-sm text-sm text-slate-700">

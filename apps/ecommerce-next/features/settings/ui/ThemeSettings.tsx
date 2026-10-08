@@ -1,11 +1,8 @@
-// ThemeSettings.tsx => preferencias de visualización (accesibilidad): tamaño de texto y reducir animaciones.
-// Complementan las preferencias del sistema operativo (prefers-reduced-motion) que ya respeta Tailwind (motion-reduce:).
 "use client";
 
 import { useTranslations } from "next-intl";
 import { useDisplayPreferences, type TextSize } from "../model/settings.store";
 
-// Tamaños disponibles; el texto sale de messages/*.json -> settings.display.sizes.<valor>
 const SIZES: TextSize[] = ["normal", "large", "x-large"];
 
 export function ThemeSettings() {

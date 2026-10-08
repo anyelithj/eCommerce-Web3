@@ -1,5 +1,3 @@
-// error.tsx => Error Boundary de ruta (App Router): captura errores de renderizado de cualquier página hija
-// y ofrece reintentar sin recargar toda la aplicación. Debe ser Client Component (usa "reset").
 "use client";
 
 import { useEffect } from "react";
@@ -15,7 +13,6 @@ export default function GlobalError({
 }) {
   const t = useTranslations("common.routeError");
   useEffect(() => {
-    // "digest" => ID del error en los logs del servidor (sin exponer el stack al usuario)
     console.error("[route-error]", error.digest ?? error.message);
   }, [error]);
 

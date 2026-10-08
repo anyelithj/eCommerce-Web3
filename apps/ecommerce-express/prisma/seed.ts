@@ -1,26 +1,17 @@
-// seed.ts => script ejecutado con "pnpm prisma:seed"; puebla datos MÍNIMOS para poder probar
-// el sistema (RBAC completo, un usuario por rol, catálogo de muestra, cupón). Nunca contiene datos de producción reales.
-// IDEMPOTENTE: usa "upsert" en todo => correrlo 2 veces no duplica datos (seguro en CI y en cada "docker compose up").
-import { PrismaClient, Prisma } from "@prisma/client"; // Cliente tipado generado a partir de schema.prisma
+import { PrismaClient, Prisma } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { Actions, Resources, RolePolicies, Roles } from "../src/shared/constants/roles.constants"; // Fuente única RBAC (DRY)
+import { Actions, Resources, RolePolicies, Roles } from "../src/shared/constants/roles.constants";
 
-// Instancia única de PrismaClient para este script (Singleton local, se cierra al final)
 const prisma = new PrismaClient();
 
-// Imágenes de muestra del CDN público de Cloudinary ("demo"): dominio ya permitido en next.config.ts
 const DEMO_IMAGE = (publicId: string) =>
   `https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/${publicId}`;
 
-// --- 1. RBAC: todos los permisos ACCIÓN × recurso + roles base ---
 async function seedRbac(): Promise<void> {
-  // "flatMap" => producto cartesiano Actions × Resources en un arreglo plano (programación funcional)
   const allPermissions = Resources.flatMap((resource) =>
     Actions.map((action) => ({ action, resource }))
   );
 
-  // "Promise.all" => ejecuta todas las creaciones EN PARALELO (asíncrono no bloqueante),
-  // más rápido que un "for" con await secuencial cuando las operaciones son independientes entre sí
   const created = await Promise.all(
     allPermissions.map((permission) =>
       prisma.permission.upsert({
@@ -30,12 +21,10 @@ async function seedRbac(): Promise<void> {
       })
     )
   );
-  // Índice "ACCIÓN:recurso" -> id para resolver las políticas por rol
   const idByCode = new Map(
     created.map((permission) => [`${permission.action}:${permission.resource}`, permission.id])
   );
 
-  // ADMIN => todos los permisos | VENDOR/CUSTOMER => los definidos en RolePolicies (roles.constants.ts)
   const policies: Record<string, string[]> = {
     [Roles.ADMIN]: created.map((permission) => permission.id),
     [Roles.VENDOR]: RolePolicies.VENDOR.map((code) => idByCode.get(code)).filter(
@@ -49,14 +38,12 @@ async function seedRbac(): Promise<void> {
     [Roles.CUSTOMER]: "Rol por defecto de comprador final",
   };
 
-  // "Object.entries" + "for...of" => itera las políticas; secuencial porque cada rol hace varias escrituras
   for (const [name, permissionIds] of Object.entries(policies)) {
     const role = await prisma.role.upsert({
       where: { name },
       update: { description: descriptions[name] ?? null },
       create: { name, description: descriptions[name] ?? null },
     });
-    // Reemplazo idempotente de la relación N-N (borrar + crear) => la política del código es la verdad
     await prisma.rolePermission.deleteMany({ where: { roleId: role.id } });
     await prisma.rolePermission.createMany({
       data: permissionIds.map((permissionId) => ({ roleId: role.id, permissionId })),
@@ -64,7 +51,6 @@ async function seedRbac(): Promise<void> {
   }
 }
 
-// --- 2. Un usuario de prueba por rol (credenciales configurables por entorno; listadas en PASOS_LEVANTAR_SERVICIOS.md) ---
 const SEED_USERS = [
   {
     role: Roles.ADMIN,
@@ -92,7 +78,6 @@ const SEED_USERS = [
   },
 ] as const;
 
-// seedUsers => crea (o deja intacto si ya existe) cada usuario verificado con su rol; devuelve el ID del admin
 async function seedUsers(): Promise<string> {
   const ids = new Map<string, string>();
   for (const seed of SEED_USERS) {
@@ -117,7 +102,6 @@ async function seedUsers(): Promise<string> {
   return ids.get(Roles.ADMIN) as string;
 }
 
-// --- 3. Catálogo de muestra: árbol de categorías (Composite), marcas, productos con variantes, colección ---
 async function seedCatalog(vendorId: string): Promise<void> {
   const ropa = await prisma.category.upsert({
     where: { slug: "ropa" },
@@ -145,7 +129,6 @@ async function seedCatalog(vendorId: string): Promise<void> {
     },
   });
 
-  // Productos de muestra con variantes (talla) y precio en centavos
   const products: Array<{
     slug: string;
     name: string;
@@ -180,7 +163,6 @@ async function seedCatalog(vendorId: string): Promise<void> {
     },
   ];
 
-  // Colección creada UNA vez antes del bucle; cada producto se vincula a ella
   const collection = await prisma.collection.upsert({
     where: { slug: "lanzamiento" },
     update: {},
@@ -191,7 +173,6 @@ async function seedCatalog(vendorId: string): Promise<void> {
     },
   });
 
-  // ".entries()" => pares [índice, elemento] para usar el índice como posición en la colección
   for (const [index, item] of products.entries()) {
     const product = await prisma.product.upsert({
       where: { slug: item.slug },
@@ -230,7 +211,6 @@ async function seedCatalog(vendorId: string): Promise<void> {
         },
       },
     });
-    // Colección destacada con orden manual ("position" = índice del producto en la lista)
     await prisma.collectionProduct.upsert({
       where: { collectionId_productId: { collectionId: collection.id, productId: product.id } },
       update: {},
@@ -239,7 +219,6 @@ async function seedCatalog(vendorId: string): Promise<void> {
   }
 }
 
-// --- 4. Cupón de bienvenida ---
 async function seedCoupons(): Promise<void> {
   await prisma.coupon.upsert({
     where: { code: "BIENVENIDA10" },
@@ -256,8 +235,6 @@ async function seedCoupons(): Promise<void> {
   });
 }
 
-// "async function main()" => punto de entrada; se usa async porque TODAS las queries de Prisma
-// devuelven Promesas (paradigma asíncrono no bloqueante, igual que en los services de Express)
 async function main(): Promise<void> {
   await seedRbac();
   const adminId = await seedUsers();
@@ -268,14 +245,11 @@ async function main(): Promise<void> {
   );
 }
 
-// "main().catch().finally()" => patrón estándar de Prisma para scripts standalone
 main()
   .catch((error: unknown) => {
-    // "unknown" en vez de "any" en el catch => tipado seguro obligatorio, se debe verificar el tipo antes de usarlo
     console.error("Error ejecutando el seed:", error);
-    process.exit(1); // Código de salida distinto de 0 => CI/CD detecta el fallo
+    process.exit(1);
   })
   .finally(async () => {
-    // "finally" garantiza cerrar la conexión a la DB pase lo que pase (éxito o error)
     await prisma.$disconnect();
   });

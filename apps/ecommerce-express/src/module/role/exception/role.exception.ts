@@ -1,4 +1,3 @@
-// role.exception.ts => jerarquía de errores propia del módulo Role (mismo patrón que auth.exception.ts)
 export abstract class RoleException extends Error {
   public abstract readonly statusCode: number;
   public abstract readonly code: string;
@@ -26,7 +25,6 @@ export class RoleAlreadyExistsException extends RoleException {
   }
 }
 
-// Se lanza al intentar eliminar el rol ADMIN o un rol que aún tiene usuarios asignados
 export class RoleCannotBeDeletedException extends RoleException {
   public readonly statusCode = 409;
   public readonly code = "ROLE_CANNOT_BE_DELETED";

@@ -1,5 +1,3 @@
-// page.tsx (/dashboard/products/[id]/edit) => edición de un producto existente.
-// "params" es una Promesa en Next.js 15: se espera (await) para leer el segmento dinámico [id].
 import { getTranslations } from "next-intl/server";
 import { ProductForm } from "@/features/admin-dashboard/ui/ProductsAdmin";
 import { AdminHeading, adminMetadata } from "../../../AdminSection";

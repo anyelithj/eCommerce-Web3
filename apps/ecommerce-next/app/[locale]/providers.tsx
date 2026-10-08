@@ -1,9 +1,3 @@
-// providers.tsx => agrupa TODOS los Context Providers en un solo Client Component, para mantener el
-// app/layout.tsx raíz como Server Component limpio (mejor performance por defecto).
-// Estado de la app (regla del proyecto):
-//   - Server State (datos del backend) => TanStack Query (lecturas con useQuery, escrituras con useMutation).
-//   - Client State global (UI)         => Redux Toolkit (store armado aquí con los slices de cada feature).
-//   - Estado local de un componente    => useState.
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
@@ -31,7 +25,6 @@ import {
   type DisplayPreferencesState,
 } from "@/features/settings/model/settings.store";
 
-// "combineSlices" => reducer raíz; cada slice queda bajo la clave de su "name" (la que lee createSliceHook)
 const rootReducer = combineSlices(
   cartUiSlice,
   toastSlice,
@@ -45,14 +38,12 @@ const rootReducer = combineSlices(
   adminDashboardSlice
 );
 
-// makeStore => Factory: un store por pestaña del navegador (y uno por petición en el render del servidor)
 function makeStore() {
   const store = configureStore({ reducer: rootReducer });
-  registerBrowserStore(store); // toast.success(...) despacha a este store
+  registerBrowserStore(store);
   return store;
 }
 
-// Slices que sobreviven a una recarga (mismas claves que usaba la versión anterior)
 const PERSISTED = [
   {
     name: displayPreferencesSlice.name,
@@ -74,14 +65,12 @@ const PERSISTED = [
   },
 ] as const;
 
-// sessionToken => access token vigente de next-auth (renovado por la sesión); lo piden Apollo HTTP y WebSocket
 async function sessionToken(): Promise<string | undefined> {
   const session = (await getSession()) as { accessToken?: string } | null;
   return session?.accessToken;
 }
 
 export function Providers({ children }: { children: ReactNode }) {
-  // "useState(() => ...)" => inicialización perezosa: UN cliente de cada tipo por pestaña (no uno por render)
   const errorMessage = useErrorMessage();
   const [queryClient] = useState(() =>
     makeQueryClient((error) => toast.error(errorMessage(error)))
@@ -89,8 +78,6 @@ export function Providers({ children }: { children: ReactNode }) {
   const [apolloClient] = useState(() => makeApolloClient(sessionToken));
   const [store] = useState(makeStore);
 
-  // Solo en el navegador y después de hidratar: restaura lo guardado y aplica las preferencias de visualización
-  // en TODAS las páginas (antes solo se aplicaban al abrir Configuraciones)
   useEffect(() => {
     const unsubscribePersist = persistSlices(store, [...PERSISTED]);
     const apply = () =>
@@ -104,18 +91,12 @@ export function Providers({ children }: { children: ReactNode }) {
   }, [store]);
 
   return (
-    // "SessionProvider" (next-auth) DEBE envolver todo lo que use useSession()/signIn()/signOut().
-    // "refetchInterval" => revisa la sesión cada 5 min: dispara la renovación del access token antes de vencer
     <SessionProvider refetchInterval={5 * 60}>
-      {/* "ReduxProvider" (react-redux) habilita los hooks de los slices (Client State) en toda la app */}
       <ReduxProvider store={store}>
-        {/* "ApolloProvider" (Apollo Client) habilita useMutation/useSubscription de GraphQL en toda la app */}
         <ApolloProvider client={apolloClient}>
-          {/* "QueryClientProvider" (TanStack Query) habilita useQuery/useMutation sobre la API REST (Server State) */}
           <QueryClientProvider client={queryClient}>
             {children}
             <Toaster />
-            {/* Analítica propia (Fase 7): page_view + eventos de e-commerce en lotes hacia Express */}
             <AnalyticsTracker />
           </QueryClientProvider>
         </ApolloProvider>

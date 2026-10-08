@@ -1,12 +1,6 @@
-// order.event.ts => catálogo de eventos de dominio del flujo de comercio + bus tipado (patrón Observer / Pub-Sub).
-// Coreografía de la saga post-pago: la orden publica "order.placed" y CADA módulo interesado reacciona por su
-// cuenta (envío crea el shipment, facturación emite la factura, notificaciones avisa al cliente). Ningún módulo
-// importa a los demás => sin dependencias circulares y cada módulo se puede evolucionar de forma independiente (OCP).
-// Este archivo NO importa services: solo define el contrato; cada módulo registra sus suscriptores en el bootstrap.
 import { TypedEventBus } from "../../../shared/util/event-bus.util";
 import type { OrderStatus, RefundStatus, ShipmentStatus, LoyaltyTier } from "@prisma/client";
 
-// Datos mínimos de la orden que viajan en los eventos (evita re-consultar en cada suscriptor)
 export interface OrderEventPayload {
   orderId: string;
   orderNumber: string;
@@ -15,7 +9,6 @@ export interface OrderEventPayload {
   currency: string;
 }
 
-// "type" (no interface): cumple la restricción Record<string, unknown> del TypedEventBus
 export type CommerceEvents = {
   "order.placed": OrderEventPayload;
   "order.status-changed": OrderEventPayload & { from: OrderStatus; to: OrderStatus };
@@ -44,5 +37,4 @@ export type CommerceEvents = {
   "review.replied": { userId: string; reviewId: string; productId: string };
 };
 
-// Bus único del dominio de comercio (Singleton de módulo)
 export const commerceEvents = new TypedEventBus<CommerceEvents>("commerce");

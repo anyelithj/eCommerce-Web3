@@ -1,5 +1,3 @@
-// useIntersection.ts (React Hook + IntersectionObserver API nativa) => ¿el elemento es visible en el viewport?
-// Uso: carga perezosa de secciones bajo el pliegue (productos recomendados, reseñas) => mejor LCP/TTI.
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -12,12 +10,12 @@ export function useIntersection<T extends Element>(
 
   useEffect(() => {
     const element = ref.current;
-    if (!element || isVisible) return; // Una vez visible no se vuelve a observar (carga única)
+    if (!element || isVisible) return;
     const observer = new IntersectionObserver(([entry]) => {
       if (entry?.isIntersecting) setIsVisible(true);
     }, options);
     observer.observe(element);
-    return () => observer.disconnect(); // Cleanup: libera el observer al desmontar
+    return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- "options" es configuración estática del llamador
   }, [isVisible]);
 

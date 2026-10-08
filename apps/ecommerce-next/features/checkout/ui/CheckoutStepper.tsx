@@ -1,8 +1,6 @@
-// CheckoutStepper.tsx => indicador de progreso del checkout (lista ordenada con aria-current="step").
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/lib/cn";
 
-// Pasos del checkout; el texto visible sale de messages/*.json -> checkout.steps.<key>
 const STEPS = [{ key: "address" }, { key: "payment" }, { key: "confirm" }] as const;
 
 export type CheckoutStep = (typeof STEPS)[number]["key"];
@@ -11,7 +9,6 @@ export function CheckoutStepper({ current }: { current: CheckoutStep }) {
   const t = useTranslations("checkout.steps");
   const currentIndex = STEPS.findIndex((step) => step.key === current);
   return (
-    // <nav> + <ol> => secuencia ordenada anunciada como "paso 2 de 3" por los lectores de pantalla
     <nav aria-label={t("label")}>
       <ol className="flex items-center gap-2 text-sm">
         {STEPS.map((step, index) => (

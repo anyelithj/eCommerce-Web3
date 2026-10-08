@@ -1,13 +1,8 @@
-// messages.constants.ts => textos que GENERA el backend (notificaciones, emails, conceptos de puntos) en es/en.
-// Tipado estricto: cada clave declara sus parámetros y el tipo "Dictionary" obliga a que AMBOS idiomas definan
-// exactamente las mismas claves con las mismas firmas (si falta una traducción, no compila).
-// Paradigma funcional: cada mensaje es una función pura (parámetros -> texto).
 import type { LoyaltyTier, OrderStatus, RefundStatus, ShipmentStatus } from "@prisma/client";
 import { formatMoney, type Locale } from "../util/i18n.util";
 
 type NoParams = Record<string, never>;
 
-// NotificationParams => clave de notificación -> forma de sus parámetros (se guardan en MongoDB junto a la clave)
 export interface NotificationParams {
   passwordChanged: NoParams;
   orderPlaced: { orderNumber: string; totalCents: number; currency: string };
@@ -38,7 +33,6 @@ export const NOTIFICATION_KEYS = [
   "reviewReplied",
 ] as const satisfies readonly NotificationKey[];
 
-// LoyaltyReasonParams => concepto de un movimiento de puntos generado por el sistema
 export interface LoyaltyReasonParams {
   PURCHASE: { orderNumber: string };
   REFUND_ADJUSTMENT: NoParams;
@@ -50,7 +44,6 @@ export const LOYALTY_REASON_CODES = [
   "REFUND_ADJUSTMENT",
   "EXPIRATION",
 ] as const satisfies readonly LoyaltyReasonCode[];
-// LoyaltyReason => unión distributiva { code, params } correlacionados, o texto libre escrito por un administrador
 export type LoyaltyReason =
   | string
   | { [K in LoyaltyReasonCode]: { code: K; params: LoyaltyReasonParams[K] } }[LoyaltyReasonCode];
@@ -60,7 +53,6 @@ export interface RenderedNotification {
   body: string;
 }
 
-// Dictionary => contrato que cumple cada idioma ("mapped types": una función por clave con SUS parámetros)
 interface Dictionary {
   notifications: {
     [K in NotificationKey]: (params: NotificationParams[K]) => RenderedNotification;
@@ -100,7 +92,6 @@ interface Dictionary {
   };
 }
 
-// --- Español (por defecto) ---
 const ORDER_ES: Record<OrderStatus, string> = {
   CONFIRMED: "fue confirmado",
   PREPARING: "se está preparando",
@@ -223,7 +214,6 @@ const es: Dictionary = {
   },
 };
 
-// --- Inglés ---
 const ORDER_EN: Record<OrderStatus, string> = {
   CONFIRMED: "was confirmed",
   PREPARING: "is being prepared",
@@ -351,7 +341,6 @@ const en: Dictionary = {
 
 export const MESSAGES: Record<Locale, Dictionary> = { es, en };
 
-// renderNotification => genérico "<K>": los parámetros deben corresponder a la clave (tipado de punta a punta)
 export function renderNotification<K extends NotificationKey>(
   locale: Locale,
   key: K,
@@ -360,8 +349,6 @@ export function renderNotification<K extends NotificationKey>(
   return MESSAGES[locale].notifications[key](params);
 }
 
-// renderStoredNotification => para documentos leídos de MongoDB (clave y parámetros llegan sin tipo): valida la
-// clave y aplica los parámetros guardados. Devuelve null si la clave es desconocida (el llamador usa el texto guardado)
 export function renderStoredNotification(
   locale: Locale,
   key: string | null | undefined,
@@ -374,7 +361,6 @@ export function renderStoredNotification(
   return render(params ?? {});
 }
 
-// renderLoyaltyReason => concepto del movimiento de puntos en el idioma pedido; texto libre (ajuste manual) tal cual
 export function renderLoyaltyReason(
   locale: Locale,
   code: string | null,

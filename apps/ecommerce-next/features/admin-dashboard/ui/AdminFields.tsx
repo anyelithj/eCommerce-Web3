@@ -1,6 +1,3 @@
-// AdminFields.tsx (Client Components) => campos de formulario del panel que no cubre shared/ui/Input: select,
-// textarea, filtro de búsqueda y encabezado de sección. Mismo contrato accesible que Input (label asociado, error con
-// role="alert", aria-invalid/aria-describedby) y compatibles con Formik (getFieldProps). DRY entre las 9 secciones.
 "use client";
 
 import {
@@ -15,7 +12,6 @@ import { cn } from "@/shared/lib/cn";
 const CONTROL =
   "w-full rounded-md border bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-// useFieldIds => IDs estables (useId) + traducción del error si es clave de i18n (Template Method común)
 function useField(error: string | undefined) {
   const t = useTranslations();
   const id = useId();
@@ -95,7 +91,6 @@ export function TextAreaField({ label, error, hint, className, ...rest }: TextAr
   );
 }
 
-// SearchField => búsqueda de los listados (role="search"); el valor llega ya "debounced" desde quien lo usa
 export function SearchField({
   label,
   value,
@@ -123,7 +118,6 @@ export function SearchField({
   );
 }
 
-// SectionHeader => título de sección + acciones a la derecha (responsive: se apilan en móvil)
 export function SectionHeader({
   title,
   description,

@@ -1,5 +1,3 @@
-// WishlistView.tsx (Client Component) => lista de deseos del usuario reutilizando la grilla del catálogo
-// (cada tarjeta ya trae su botón de corazón para quitarla: misma UX en todo el sitio).
 "use client";
 
 import { useTranslations } from "next-intl";

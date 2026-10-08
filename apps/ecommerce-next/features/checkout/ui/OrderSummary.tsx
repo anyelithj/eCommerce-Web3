@@ -1,4 +1,3 @@
-// OrderSummary.tsx => resumen del pedido en el checkout: ítems congelados (snapshot) y totales desglosados.
 import { useTranslations } from "next-intl";
 import type { CheckoutSession } from "@/entities/order/model/order.types";
 import { ProductImage } from "@/entities/product/ui/ProductImage";
@@ -33,7 +32,6 @@ export function OrderSummary({ session }: { session: CheckoutSession }) {
           </li>
         ))}
       </ul>
-      {/* <dl> => pares término/valor: estructura semántica correcta para un desglose de totales */}
       <dl className="flex flex-col gap-2 border-t border-slate-200 pt-3 text-sm">
         <div className="flex justify-between">
           <dt>{t("subtotal")}</dt>

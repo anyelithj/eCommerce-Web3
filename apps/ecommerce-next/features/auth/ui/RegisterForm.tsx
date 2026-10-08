@@ -1,5 +1,3 @@
-// RegisterForm.tsx => registro de cuenta. Tras registrarse NO se inicia sesión: la cuenta requiere verificar el
-// email (regla de negocio del backend). Se muestra la confirmación con opción de reenviar el enlace.
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
@@ -26,7 +24,6 @@ export default function RegisterForm() {
   const email = form.values.email.trim();
   const resendMutation = useMutation({ mutationFn: () => resendVerificationRequest(email) });
 
-  // Estado de éxito: el formulario se reemplaza por instrucciones (role="status" => anunciado por lectores de pantalla)
   if (registerMutation.isSuccess) {
     return (
       <div role="status" className="flex w-full max-w-sm flex-col gap-3 text-center">
@@ -47,7 +44,6 @@ export default function RegisterForm() {
 
   return (
     <form onSubmit={form.handleSubmit} noValidate className="flex w-full max-w-sm flex-col gap-4">
-      {/* "grid-cols-1 sm:grid-cols-2" => responsive: 1 columna en móvil, 2 desde el breakpoint "sm" */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           label={t("firstName")}

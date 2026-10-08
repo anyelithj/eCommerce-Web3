@@ -1,4 +1,3 @@
-// NotifSettings.tsx => preferencias por canal (interruptores role="switch" accesibles). Cada cambio se guarda al instante.
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -8,7 +7,6 @@ import { toast } from "@/shared/ui/Toast";
 import { useErrorMessage } from "@/shared/hook/useErrorMessage";
 import { cn } from "@/shared/lib/cn";
 
-// Canales configurables; título y descripción salen de messages/*.json -> settings.notifications.<canal>
 const OPTIONS: Array<keyof NotificationPreferences> = ["inApp", "email", "push", "marketing"];
 
 export function NotifSettings() {
@@ -29,7 +27,6 @@ export function NotifSettings() {
               </p>
               <p className="text-sm text-slate-600">{t(`${key}.description`)}</p>
             </div>
-            {/* role="switch" + aria-checked => interruptor on/off anunciado correctamente (WAI-ARIA Switch pattern) */}
             <button
               type="button"
               role="switch"

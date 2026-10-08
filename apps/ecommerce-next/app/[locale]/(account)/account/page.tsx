@@ -1,11 +1,9 @@
-// page.tsx (/account) => resumen de la cuenta (Server Component con metadata; el contenido es de cliente).
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { AccountOverview } from "./AccountOverview";
 import { initPage } from "@/shared/lib/i18n/server";
 import type { PageProps } from "@/shared/types/next.types";
 
-// "absolute" => ignora el template del layout (evita "Mi cuenta · Mi cuenta")
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const t = await getTranslations({ locale: (await params).locale, namespace: "account" });
   return { title: { absolute: t("title") } };

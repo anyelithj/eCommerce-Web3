@@ -1,6 +1,3 @@
-// useCart.ts (Redux Toolkit) => estado de UI del carrito compartido entre widgets (Header) y features (Cart, Product).
-// Vive en "shared" porque SOLO guarda si el drawer está abierto: los datos del carrito son Server State y los
-// gestiona TanStack Query en features/cart (regla FSD: una capa inferior nunca importa de capas superiores).
 import { createSlice } from "@reduxjs/toolkit";
 import { createSliceHook } from "../lib/store";
 

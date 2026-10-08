@@ -1,6 +1,4 @@
-// Input.tsx (shadcn/ui Input + Radix Label) => campo de formulario accesible: label asociado, ayuda y error anunciados.
-// Compatible con Formik ({...form.getFieldProps("campo")}): recibe name/value/onChange/onBlur como un <input> nativo.
-"use client"; // Radix Label es un Client Component
+"use client";
 
 import { forwardRef, useId, type InputHTMLAttributes } from "react";
 import * as LabelPrimitive from "@radix-ui/react-label";
@@ -18,15 +16,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   ref
 ) {
   const t = useTranslations();
-  // Los schemas Zod usan CLAVES de traducción como mensaje ("validation.required"): aquí se traducen al idioma
-  // actual. Un texto que no es clave (ej. error del backend) se muestra tal cual.
   const errorText = error && t.has(error) ? t(error) : error;
-  // "useId" => ID único y estable entre servidor y cliente (sin desajustes de hidratación)
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const errorId = `${inputId}-error`;
   const hintId = `${inputId}-hint`;
-  // aria-describedby => el lector de pantalla lee la ayuda y el error al enfocar el campo (WCAG 1.3.1 / 3.3.1)
   const describedBy =
     [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ") || undefined;
 

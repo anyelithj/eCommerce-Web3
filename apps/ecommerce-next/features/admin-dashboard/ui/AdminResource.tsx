@@ -1,17 +1,8 @@
-// AdminResource.tsx (Client Components: React + TanStack Query + Formik/Zod) => bloque CRUD genérico del panel admin.
-// Cada recurso (proveedores, cupones, campañas, webhooks...) solo DECLARA columnas, filtros y campos; este archivo pone
-// el listado paginado, la búsqueda con debounce, el diálogo crear/editar, el borrado con confirmación y los avisos.
-// Patrones: Template Method (estructura fija, piezas variables por props), Strategy (render de cada tipo de campo:
-// tabla FIELD_RENDERERS), Command (MutationRequest describe la petición) y Composite (columnas/campos como datos).
-// Paradigma: declarativo + funcional (props inmutables). Principios: DRY (≈15 recursos con un solo componente),
-// OCP (un tipo de campo nuevo = una entrada en FIELD_RENDERERS), SRP (los datos viven en dashboard.api).
-// Ahorro: debounce de 400 ms (menos peticiones) y solo se monta el formulario cuando el diálogo está abierto.
-"use client"; // Directiva de Next.js: este módulo usa estado y eventos => se ejecuta en el navegador
+"use client";
 
-// "import type" (TypeScript) => importa solo tipos: no agrega bytes al bundle de JavaScript
 import { useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl"; // next-intl: textos en el idioma activo
-import { getIn } from "formik"; // Formik: lee valores anidados ("variants.0.sku") de forma segura
+import { useTranslations } from "next-intl";
+import { getIn } from "formik";
 import type { z } from "zod";
 import {
   useAdminList,
@@ -29,21 +20,14 @@ import { useZodForm } from "@/shared/hook/useZodForm";
 import { useDebounce } from "@/shared/hook/useDebounce";
 import { useErrorMessage } from "@/shared/hook/useErrorMessage";
 
-// ---------- Tipos (TypeScript) ----------
-
-// "export type" => alias reutilizable por todas las secciones
 export type Option = { value: string; label: string };
 
-// FormSchema => el mismo tipo de schema que acepta useZodForm (derivado: si cambia el hook, cambia aquí; DRY)
 type FormSchema = Parameters<typeof useZodForm>[0]["schema"];
-// FormApi => objeto que devuelve useZodForm (valores, errores, getFieldProps...) para un schema cualquiera
 type FormApi = ReturnType<typeof useZodForm<FormSchema>>;
 
-// FieldDef => descripción declarativa de un campo del formulario ("interface" => contrato de forma)
 export interface FieldDef {
-  name: string; // Clave en los valores del formulario (igual a la del schema Zod)
-  label: string; // Texto visible y nombre accesible
-  // Unión de literales => solo se admiten estos tipos (error de compilación con cualquier otro)
+  name: string;
+  label: string;
   type?:
     | "text"
     | "email"
@@ -55,25 +39,20 @@ export interface FieldDef {
     | "textarea"
     | "checkbox"
     | "checkboxes";
-  options?: ReadonlyArray<Option>; // Para "select" y "checkboxes"
-  hint?: string; // Ayuda bajo el campo (aria-describedby)
+  options?: ReadonlyArray<Option>;
+  hint?: string;
 }
 
-// FormConfig<S> => genérico: schema + campos + valores iniciales del MISMO schema (tipado de punta a punta)
 export interface FormConfig<S extends FormSchema> {
   schema: S;
   fields: FieldDef[];
   initialValues: z.input<S>;
 }
 
-// ---------- Formulario declarativo ----------
-
-// FIELD_RENDERERS => Strategy: cada tipo de campo sabe dibujarse; "Record<K, V>" obliga a cubrir todos los tipos
 const FIELD_RENDERERS: Record<
   NonNullable<FieldDef["type"]>,
   (field: FieldDef, form: FormApi) => ReactNode
 > = {
-  // "{...form.getFieldProps(name)}" => name/value/onChange/onBlur conectados a Formik en una línea
   select: (field, form) => (
     <SelectField
       label={field.label}
@@ -90,7 +69,6 @@ const FIELD_RENDERERS: Record<
       {...form.getFieldProps(field.name)}
     />
   ),
-  // checkbox => booleano: "checked" en lugar de "value" (control nativo: accesible sin JavaScript extra)
   checkbox: (field, form) => (
     <label className="flex min-h-11 items-center gap-2 text-sm">
       <input
@@ -102,9 +80,8 @@ const FIELD_RENDERERS: Record<
       {field.label}
     </label>
   ),
-  // checkboxes => selección múltiple (arreglo de strings) agrupada en <fieldset> + <legend> (WCAG 1.3.1)
   checkboxes: (field, form) => {
-    const selected: string[] = getIn(form.values, field.name) ?? []; // "??" => valor por defecto si es undefined/null
+    const selected: string[] = getIn(form.values, field.name) ?? [];
     const toggle = (value: string) =>
       void form.setFieldValue(
         field.name,
@@ -135,7 +112,6 @@ const FIELD_RENDERERS: Record<
       </fieldset>
     );
   },
-  // Los tipos nativos de <input> comparten el mismo control (DRY): el navegador aporta teclado y selector de fecha
   text: (field, form) => <NativeInput field={field} form={form} />,
   email: (field, form) => <NativeInput field={field} form={form} />,
   number: (field, form) => <NativeInput field={field} form={form} />,
@@ -144,7 +120,6 @@ const FIELD_RENDERERS: Record<
   "datetime-local": (field, form) => <NativeInput field={field} form={form} />,
 };
 
-// NativeInput => <input> accesible de shared/ui (label, error traducido, aria-invalid)
 function NativeInput({ field, form }: { field: FieldDef; form: FormApi }) {
   return (
     <Input
@@ -159,10 +134,9 @@ function NativeInput({ field, form }: { field: FieldDef; form: FormApi }) {
 
 interface ResourceFormProps<S extends FormSchema> extends FormConfig<S> {
   submitLabel: string;
-  onSubmit: (values: z.output<S>) => Promise<unknown>; // Recibe los valores YA transformados por Zod
+  onSubmit: (values: z.output<S>) => Promise<unknown>;
 }
 
-// ResourceForm => formulario completo a partir de la configuración (Formik + Zod vía useZodForm)
 export function ResourceForm<S extends FormSchema>({
   schema,
   fields,
@@ -172,7 +146,6 @@ export function ResourceForm<S extends FormSchema>({
 }: ResourceFormProps<S>) {
   const form = useZodForm({ schema, initialValues, onSubmit: (values) => onSubmit(values) });
   return (
-    // "noValidate" => sin burbujas nativas del navegador: los errores los muestra Zod de forma accesible y traducida
     <form noValidate onSubmit={form.handleSubmit} className="flex flex-col gap-4">
       {fields.map((field) => (
         <div key={field.name}>
@@ -186,14 +159,9 @@ export function ResourceForm<S extends FormSchema>({
   );
 }
 
-// ---------- Mutaciones con avisos (hook reutilizable) ----------
-
-// useAdminCommand => ejecuta un MutationRequest, muestra el aviso de éxito/error e invalida SOLO los recursos dados.
-// Devuelve una función async que nunca rechaza (los formularios no quedan con promesas sin capturar).
 export function useAdminCommand(resources: string[]) {
   const t = useTranslations("admin.common");
   const errorMessage = useErrorMessage();
-  // Identidad: la entrada YA es la petición (Command); el hook genérico se encarga del token y la invalidación
   const mutation = useAdminMutation<MutationRequest>(resources, (request) => request);
   const run = async (request: MutationRequest, success = t("saved")): Promise<boolean> => {
     try {
@@ -201,28 +169,25 @@ export function useAdminCommand(resources: string[]) {
       toast.success(success);
       return true;
     } catch (error) {
-      toast.error(errorMessage(error)); // Mensaje traducido por código de error del backend
+      toast.error(errorMessage(error));
       return false;
     }
   };
   return { run, isPending: mutation.isPending };
 }
 
-// ---------- Recurso CRUD completo ----------
-
-// "interface ... <T, C, E>" => genéricos: T = fila del listado, C/E = schemas de crear/editar
 interface AdminResourceProps<T, C extends FormSchema, E extends FormSchema> {
-  resource: string; // Clave de caché ["admin", resource]
-  path: string; // Endpoint REST del listado (ej. "/supplier")
-  title: string; // Título de la sección y nombre accesible de la tabla
+  resource: string;
+  path: string;
+  title: string;
   columns: Column<T>[];
-  rowKey?: (row: T) => string; // Por defecto "row.id"
-  rowLabel?: (row: T) => string; // Nombre de la fila para lectores de pantalla ("Editar Acme S.A.")
-  search?: string; // Parámetro de búsqueda del backend ("q", "to", "action"); sin valor => sin buscador
-  filters?: Array<{ name: string; label: string; options: Option[] }>; // Selects con opción "Todos"
-  query?: Query; // Parámetros fijos del listado
-  baseUrl?: string; // Otro backend con el mismo contrato (FastAPI)
-  invalidate?: string[]; // Otros recursos que cambian con estas mutaciones (ej. inventario -> KPIs)
+  rowKey?: (row: T) => string;
+  rowLabel?: (row: T) => string;
+  search?: string;
+  filters?: Array<{ name: string; label: string; options: Option[] }>;
+  query?: Query;
+  baseUrl?: string;
+  invalidate?: string[];
   create?: FormConfig<C> & { toBody?: (values: z.output<C>) => unknown };
   edit?: Omit<FormConfig<E>, "initialValues"> & {
     toValues: (row: T) => z.input<E>;
@@ -230,13 +195,12 @@ interface AdminResourceProps<T, C extends FormSchema, E extends FormSchema> {
     path?: (row: T) => string;
     when?: (row: T) => boolean;
   };
-  remove?: boolean | ((row: T) => boolean); // true => botón eliminar (DELETE path/:id)
-  actions?: (row: T, run: ReturnType<typeof useAdminCommand>["run"]) => ReactNode; // Acciones extra por fila
-  toolbar?: ReactNode; // Botones extra junto a "Nuevo"
+  remove?: boolean | ((row: T) => boolean);
+  actions?: (row: T, run: ReturnType<typeof useAdminCommand>["run"]) => ReactNode;
+  toolbar?: ReactNode;
   empty?: string;
 }
 
-// Dialog => estado del diálogo: cerrado (null), crear ({}) o editar ({ row })
 type Dialog<T> = { row?: T } | null;
 
 export function AdminResource<
@@ -261,18 +225,15 @@ export function AdminResource<
     empty,
   } = props;
   const t = useTranslations("admin.common");
-  // "as" => aserción: por convención todos los recursos del backend exponen "id"
   const rowKey = props.rowKey ?? ((row: T) => (row as { id: string }).id);
   const rowLabel = props.rowLabel ?? rowKey;
 
-  // Estado local de la vista (useState: no se comparte con otras pantallas => no va a Redux)
   const [page, setPage] = useState(1);
   const [term, setTerm] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
   const [dialog, setDialog] = useState<Dialog<T>>(null);
-  const debounced = useDebounce(term, 400); // Espera a que el usuario deje de escribir
+  const debounced = useDebounce(term, 400);
 
-  // Spread condicional: el parámetro de búsqueda solo viaja si hay buscador y texto
   const list = useAdminList<T>(
     resource,
     path,
@@ -282,21 +243,18 @@ export function AdminResource<
   const command = useAdminCommand([resource, ...(props.invalidate ?? [])]);
   const withBase = (request: MutationRequest): MutationRequest =>
     baseUrl ? { ...request, baseUrl } : request;
-  const idPath = (row: T) => `${path}/${encodeURIComponent(rowKey(row))}`; // encodeURIComponent: IDs con "/" (Cloudinary)
+  const idPath = (row: T) => `${path}/${encodeURIComponent(rowKey(row))}`;
 
-  // onFilter => cambia un filtro y vuelve a la página 1 (la página 3 de otro filtro podría no existir)
   const onFilter = (name: string, value: string) => {
     setValues((current) => ({ ...current, [name]: value }));
     setPage(1);
   };
 
   const onDelete = async (row: T) => {
-    // "window.confirm" => diálogo nativo del navegador: accesible por teclado y lector de pantalla, 0 KB de JS extra
     if (!window.confirm(t("confirmDelete", { name: rowLabel(row) }))) return;
     await command.run(withBase({ path: idPath(row), method: "DELETE" }), t("deleted"));
   };
 
-  // Columna de acciones: solo si hay algo que hacer por fila (editar, eliminar o acciones propias)
   const canRemove = (row: T) => (typeof remove === "function" ? remove(row) : Boolean(remove));
   const allColumns: Column<T>[] =
     edit || remove || actions
@@ -332,7 +290,6 @@ export function AdminResource<
         ]
       : columns;
 
-  // submit => crea (POST path) o edita (PATCH path/:id); cierra el diálogo solo si salió bien
   const submit = async (request: MutationRequest) => {
     if (await command.run(withBase(request))) setDialog(null);
   };
@@ -376,7 +333,6 @@ export function AdminResource<
         {...(empty ? { empty } : {})}
       />
 
-      {/* El formulario solo existe con el diálogo abierto (no se crean estados Formik ocultos) */}
       <Modal
         open={dialog !== null}
         onClose={() => setDialog(null)}
@@ -416,10 +372,6 @@ export function AdminResource<
   );
 }
 
-// ---------- Acciones con diálogo (detalle o formulario propio) ----------
-
-// DialogButton => botón que abre un diálogo; el contenido es una FUNCIÓN (render prop) que solo se ejecuta abierto
-// (lazy: las consultas del detalle no se disparan hasta que el usuario lo pide) y recibe "close" para cerrarse
 export function DialogButton({
   label,
   title,
@@ -444,11 +396,10 @@ export function DialogButton({
   );
 }
 
-// FormAction => DialogButton + ResourceForm + comando: acciones como "registrar movimiento" o "enviar correo"
 interface FormActionProps<S extends FormSchema> extends FormConfig<S> {
   label: ReactNode;
   title: string;
-  resources: string[]; // Recursos a invalidar al terminar
+  resources: string[];
   toRequest: (values: z.output<S>) => MutationRequest;
   submitLabel?: string;
   success?: string;
@@ -480,9 +431,6 @@ export function FormAction<S extends FormSchema>({
   );
 }
 
-// ---------- Utilidades de presentación compartidas ----------
-
-// toOptions => ["A", "B"] -> [{ value: "A", label: t("A") }] (Factory de opciones traducidas; DRY en todas las secciones)
 export function toOptions(
   values: readonly string[],
   label: (value: string) => string = (value) => value
@@ -490,6 +438,5 @@ export function toOptions(
   return values.map((value) => ({ value, label: label(value) }));
 }
 
-// isoOrUndefined => "2026-10-05T10:00" (hora local del navegador) -> ISO UTC que entiende el backend
 export const isoOrUndefined = (value: string | undefined) =>
   value ? new Date(value).toISOString() : undefined;

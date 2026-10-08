@@ -1,4 +1,3 @@
-// page.tsx (/account/orders/[id]) => detalle del pedido: estado, tracking, factura, cancelación y reembolso.
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { OrderDetail } from "@/features/order/ui/OrderDetail";

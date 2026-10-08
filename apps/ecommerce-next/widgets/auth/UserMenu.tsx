@@ -1,19 +1,15 @@
-// UserMenu.tsx (widget FSD · React + Tailwind) => menú de cuenta del header (patrón Composite de UI: sesión + navegación + logout).
-// DropdownMenu de Radix (shadcn/ui): foco atrapado, flechas ↑/↓, Escape, clic fuera y portal sobre el resto de la página
-// (el panel ya no queda detrás/encima del aside del hub de cuenta). Paradigma declarativo: LINKS = datos, no JSX repetido.
-"use client"; // Directiva de Next.js: componente de cliente (usa hooks, eventos del DOM y signOut del navegador)
+"use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu"; // Primitiva accesible (WAI-ARIA menu button)
-import { signOut } from "next-auth/react"; // next-auth v5: cierra la sesión (dispara events.signOut => revoca en el backend)
-import { useLocale, useTranslations } from "next-intl"; // next-intl: idioma activo y textos traducidos
-import { getPathname, Link, usePathname } from "@/shared/lib/i18n/navigation"; // Adapter de next-intl: Link con prefijo de idioma
-import { useAuth } from "@/shared/hook/useAuth"; // Facade sobre la sesión de next-auth
-import { routes } from "@/shared/constants/routes"; // Rutas tipadas centralizadas (DRY)
-import { Avatar } from "@/entities/user/ui/Avatar"; // Entidad FSD: avatar con fallback de iniciales
-import { LinkPending } from "@/shared/ui/Spinner"; // Spinner mientras navega a la sección elegida
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { signOut } from "next-auth/react";
+import { useLocale, useTranslations } from "next-intl";
+import { getPathname, Link, usePathname } from "@/shared/lib/i18n/navigation";
+import { useAuth } from "@/shared/hook/useAuth";
+import { routes } from "@/shared/constants/routes";
+import { Avatar } from "@/entities/user/ui/Avatar";
+import { LinkPending } from "@/shared/ui/Spinner";
 
-// Íconos SVG inline (trazo 1.5, 24×24, estilo outline): sin dependencia de íconos; "aria-hidden" porque el texto ya los describe
 const icon = (path: ReactNode) => (
   <svg
     viewBox="0 0 24 24"
@@ -29,7 +25,6 @@ const icon = (path: ReactNode) => (
   </svg>
 );
 
-// "as const" (TypeScript) => tupla de solo lectura con tipos literales: t(link.key) queda tipado y sin errores de clave
 const LINKS = [
   {
     href: routes.account,
@@ -75,24 +70,20 @@ const LINKS = [
   },
 ] as const;
 
-// Clases compartidas por enlaces y botón (DRY). Radix marca el ítem enfocado (teclado o hover) con "data-highlighted"
 const ITEM =
   "flex w-full cursor-pointer select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm outline-none transition-colors";
 
 export default function UserMenu() {
-  const t = useTranslations("nav.userMenu"); // Hook de next-intl: textos del namespace del menú
+  const t = useTranslations("nav.userMenu");
   const locale = useLocale();
   const { user, isLoading } = useAuth();
   const pathname = usePathname();
-  // Controlado: al elegir una sección el menú sigue abierto con su spinner y se cierra cuando la ruta ya cambió
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [pathname]);
 
-  // Placeholder con el mismo tamaño mientras se resuelve la sesión (evita parpadeo y CLS — Core Web Vitals)
   if (isLoading)
     return <div className="h-9 w-24 animate-pulse rounded-full bg-muted" aria-hidden="true" />;
 
-  // Guard clause: sin sesión => enlaces de acceso en lugar del menú
   if (!user) {
     return (
       <div className="flex items-center gap-2 text-sm">
@@ -110,7 +101,6 @@ export default function UserMenu() {
   }
 
   return (
-    // "modal={false}" => no bloquea el scroll de la página al abrir (menú de header, no diálogo)
     <DropdownMenu.Root modal={false} open={open} onOpenChange={setOpen}>
       <DropdownMenu.Trigger
         aria-label={t("label")}
@@ -120,7 +110,6 @@ export default function UserMenu() {
         <span className="hidden max-w-[8rem] truncate text-sm font-medium text-foreground md:inline">
           {user.name.split(" ")[0]}
         </span>
-        {/* Chevron: rota 180° al abrir (Radix expone el estado en data-state del Trigger) */}
         <svg
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -135,7 +124,6 @@ export default function UserMenu() {
         </svg>
       </DropdownMenu.Trigger>
 
-      {/* Portal => se pinta al final de <body>: ningún z-index/overflow del header o del aside lo recorta */}
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           align="end"
@@ -143,7 +131,6 @@ export default function UserMenu() {
           collisionPadding={16}
           className="z-50 w-64 rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2"
         >
-          {/* Cabecera de identidad: confirma con qué cuenta se está operando */}
           <DropdownMenu.Label className="flex items-center gap-3 px-2.5 py-2">
             <Avatar name={user.name} src={user.avatarUrl} size={36} />
             <div className="min-w-0">
@@ -153,9 +140,7 @@ export default function UserMenu() {
           </DropdownMenu.Label>
           <DropdownMenu.Separator className="-mx-1 my-1 h-px bg-border" />
 
-          {/* "asChild" => el ítem de Radix ES el <Link> (navegación real + teclado del menú) */}
           {LINKS.map((link) => (
-            // preventDefault en onSelect => Radix no cierra el menú; si ya estás en esa ruta, se cierra al instante
             <DropdownMenu.Item
               key={link.href}
               asChild
@@ -176,7 +161,7 @@ export default function UserMenu() {
           <DropdownMenu.Item
             onSelect={() =>
               void signOut({ callbackUrl: getPathname({ href: routes.home, locale }) })
-            } // "void" => descarta la promesa a propósito
+            }
             className={`${ITEM} text-destructive data-[highlighted]:bg-destructive/10`}
           >
             {icon(

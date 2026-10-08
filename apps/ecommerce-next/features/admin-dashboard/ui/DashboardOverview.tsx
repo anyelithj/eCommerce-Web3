@@ -1,8 +1,3 @@
-// DashboardOverview.tsx (Client Component) => portada del panel: KPIs con tendencia, contadores operativos, gráfico
-// de ventas, productos top y widgets personalizables por administrador (GET/POST/DELETE /dashboard/widget).
-// Patrones: Facade (una sola petición /dashboard/kpi alimenta todo), Strategy (cada tipo de widget se dibuja con su
-// componente: tabla WIDGETS) y Observer (modo "en vivo": Socket.io invalida los KPIs al llegar actividad).
-// Rendimiento: SalesChart (Recharts) se carga con next/dynamic solo aquí; "en vivo" está apagado por defecto.
 "use client";
 
 import dynamic from "next/dynamic";
@@ -26,7 +21,6 @@ import { Skeleton } from "@/shared/ui/Skeleton";
 import { Link } from "@/shared/lib/i18n/navigation";
 import { routes } from "@/shared/constants/routes";
 
-// "ssr: false" => el gráfico solo existe en el navegador (Recharts mide el contenedor); placeholder sin saltos (CLS)
 const SalesChart = dynamic(() => import("./SalesChart"), {
   ssr: false,
   loading: () => <Skeleton className="h-64 w-full" />,
@@ -52,7 +46,6 @@ export function DashboardOverview() {
     setLastTick(t("tick", { events: tick.events, orders: tick.orders }))
   );
 
-  // formatKpi => Factory de formato por indicador (dinero, porcentaje o número)
   const formatKpi = (key: KpiKey, value: number) =>
     key === "revenueCents" || key === "aovCents"
       ? format.money(value)
@@ -61,7 +54,6 @@ export function DashboardOverview() {
         : value.toLocaleString();
   const data = kpis.data;
 
-  // WIDGETS => estrategia de render por tipo de widget (agregar un tipo = agregar una entrada: OCP)
   const WIDGETS: Record<Widget["type"], (widget: Widget) => ReactNode> = {
     KPI: (widget) => {
       const key = (widget.config["metric"] as KpiKey | undefined) ?? "orders";
@@ -141,12 +133,10 @@ export function DashboardOverview() {
           </>
         }
       />
-      {/* aria-live => el lector de pantalla anuncia la actividad nueva sin mover el foco */}
       <p aria-live="polite" className="text-xs text-slate-500">
         {realtime ? (lastTick ?? t("waiting")) : ""}
       </p>
 
-      {/* Contadores operativos con acceso directo a su sección (acciones rápidas) */}
       <section aria-label={t("operations")} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <OperationLink
           href={routes.adminOrders}
@@ -165,7 +155,6 @@ export function DashboardOverview() {
         />
       </section>
 
-      {/* Cuadrícula de 12 columnas (escritorio) con la posición guardada de cada widget; una columna en móvil */}
       <section aria-label={t("widgets")} className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         {(widgets.data ?? []).map((widget, index) => (
           <div
@@ -203,7 +192,6 @@ function OperationLink({
   );
 }
 
-// RemoveWidget / AddWidget => personalización del panel (los widgets por defecto no se guardan hasta personalizar)
 function RemoveWidget({ id }: { id: string }) {
   const t = useTranslations("admin.overview");
   const remove = useAdminMutation<void>(["dashboard-config"], () => ({

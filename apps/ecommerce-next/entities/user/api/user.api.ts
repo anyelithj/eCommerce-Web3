@@ -1,5 +1,3 @@
-// user.api.ts (capa entities) => operaciones de la ENTIDAD usuario compartidas por varias features:
-// perfil, direcciones y lista de deseos (product agrega a favoritos; account/checkout usan direcciones).
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +7,6 @@ import { useAuth } from "@/shared/hook/useAuth";
 import type { Address, UserProfile } from "../model/user.types";
 import type { ProductCard } from "@/entities/product/model/product.types";
 
-// "string | undefined" explícito: compatible con exactOptionalPropertyTypes (los formularios entregan undefined)
 export type AddressInput = Omit<Address, "id" | "isDefault" | "line2" | "label"> & {
   line2?: string | undefined;
   label?: string | undefined;
@@ -61,7 +58,6 @@ export const userApi = {
     }).then((response) => response.data),
 };
 
-// useProfile => perfil completo con direcciones (Account hub y paso de dirección del checkout)
 export function useProfile() {
   const { user, accessToken } = useAuth();
   return useQuery({
@@ -71,7 +67,6 @@ export function useProfile() {
   });
 }
 
-// useWishlist => lista de deseos + mutaciones que actualizan la cache con la lista devuelta
 export function useWishlist() {
   const { user, accessToken } = useAuth();
   const queryClient = useQueryClient();

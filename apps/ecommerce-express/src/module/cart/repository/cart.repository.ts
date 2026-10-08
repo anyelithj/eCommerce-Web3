@@ -1,4 +1,3 @@
-// cart.repository.ts => acceso a datos del carrito (PostgreSQL = fuente de verdad).
 import type { PrismaClient } from "@prisma/client";
 import { prisma } from "../../../config/database.config";
 
@@ -20,7 +19,6 @@ const CART_SELECT = {
 export class CartRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  // findActive => carrito ACTIVE más reciente del usuario (regla: uno por usuario)
   public async findActive(userId: string): Promise<CartRow | null> {
     return this.prisma.cart.findFirst({
       where: { userId, status: "ACTIVE" },
@@ -33,7 +31,6 @@ export class CartRepository {
     return this.prisma.cart.create({ data: { userId, expiresAt }, select: CART_SELECT });
   }
 
-  // markAbandoned => carrito vencido: se conserva como ABANDONED (insumo para campañas de recuperación)
   public async markAbandoned(cartId: string): Promise<void> {
     await this.prisma.cart.update({ where: { id: cartId }, data: { status: "ABANDONED" } });
   }
@@ -42,7 +39,6 @@ export class CartRepository {
     await this.prisma.cart.update({ where: { id: cartId }, data: { expiresAt } });
   }
 
-  // upsertItem => si la variante ya está en el carrito suma la cantidad; si no, crea la línea (@@unique cartId+variantId)
   public async upsertItem(
     cartId: string,
     variantId: string,

@@ -1,6 +1,3 @@
-// cart.store.ts (Redux Toolkit + sessionStorage) => cupón aplicado en el carrito que se lleva al iniciar el checkout.
-// Client State: el usuario elige el cupón; el carrito (Server State) sigue en TanStack Query.
-// sessionStorage (no localStorage): el cupón vive solo mientras dura la pestaña de compra (ver providers.tsx).
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { createSliceHook } from "@/shared/lib/store";
 

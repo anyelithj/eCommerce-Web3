@@ -1,4 +1,3 @@
-// NotificationList.tsx => bandeja completa: filtro leídas/no leídas, marcar como leída, eliminar y limpiar.
 "use client";
 
 import { Link } from "@/shared/lib/i18n/navigation";

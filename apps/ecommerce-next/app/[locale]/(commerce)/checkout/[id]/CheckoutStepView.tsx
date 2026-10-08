@@ -1,5 +1,3 @@
-// CheckoutStepView.tsx (capa app, Client Component) => plantilla común de los 3 pasos del checkout
-// (Template Method: carga la sesión, muestra stepper + resumen y cada paso aporta solo su contenido central).
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -19,7 +17,6 @@ export function CheckoutStepView({ id, step }: { id: string; step: CheckoutStep 
   const errorMessage = useErrorMessage();
   const { data: session, isLoading, isError, error } = useCheckout(id);
 
-  // La confirmación no depende de la sesión (el webhook la completa): se muestra sola, centrada
   if (step === "confirm") {
     return (
       <div className="mx-auto flex max-w-xl flex-col gap-8">
@@ -39,7 +36,6 @@ export function CheckoutStepView({ id, step }: { id: string; step: CheckoutStep 
       </div>
     );
   }
-  // Sesión vencida/completada => los pasos editables ya no aplican (el stock reservado se liberó o ya es pedido)
   if (session.status !== "OPEN") {
     return (
       <div role="alert" className="flex flex-col items-start gap-3">

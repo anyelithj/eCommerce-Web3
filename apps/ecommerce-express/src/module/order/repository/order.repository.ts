@@ -1,5 +1,3 @@
-// order.repository.ts => acceso a datos de pedidos. "placeFromCheckout" es la transacción central del
-// commerce flow: convierte una sesión de checkout PAGADA en un pedido, de forma atómica e idempotente.
 import { Prisma, type OrderStatus, type PrismaClient } from "@prisma/client";
 import { prisma } from "../../../config/database.config";
 import { generateOrderNumber } from "../model/order.model";
@@ -25,7 +23,6 @@ const DETAIL_INCLUDE = {
 
 type DetailRow = Prisma.OrderGetPayload<{ include: typeof DETAIL_INCLUDE }>;
 
-// OrderScope => qué pedidos puede ver quien consulta (propios, de sus productos o todos)
 export type OrderScope = { userId: string } | { vendorId: string } | { all: true };
 
 export class OrderRepository {
@@ -38,7 +35,6 @@ export class OrderRepository {
   ): Promise<Paginated<OrderSummaryDto>> {
     const where: Prisma.OrderWhereInput = {
       ...("userId" in scope ? { userId: scope.userId } : {}),
-      // VENDOR: pedidos que contienen al menos un producto suyo
       ...("vendorId" in scope
         ? { items: { some: { product: { vendorId: scope.vendorId } } } }
         : {}),
@@ -85,20 +81,15 @@ export class OrderRepository {
     return this.prisma.order.findUnique({ where: { checkoutSessionId }, select: { id: true } });
   }
 
-  // vendorOwnsAnyItem => ¿el vendedor tiene productos en este pedido? (visibilidad y despacho del VENDOR)
   public async vendorOwnsAnyItem(orderId: string, vendorId: string): Promise<boolean> {
     return (await this.prisma.orderItem.count({ where: { orderId, product: { vendorId } } })) > 0;
   }
 
-  // placeFromCheckout => TRANSACCIÓN (Unit of Work): pedido + ítems + stock + carrito + checkout + pago + cupón.
-  // Si CUALQUIER paso falla, Postgres revierte todo: nunca queda un pedido sin descuento de stock ni al revés.
-  // Devuelve null si el checkout no está listo (sin pago confirmado).
   public async placeFromCheckout(
     checkoutSessionId: string
   ): Promise<{ orderId: string; created: boolean } | null> {
     return this.prisma.$transaction(
       async (tx) => {
-        // Idempotencia: el webhook de Stripe puede llegar dos veces; la segunda vez se devuelve el pedido existente
         const existing = await tx.order.findUnique({
           where: { checkoutSessionId },
           select: { id: true },
@@ -112,7 +103,6 @@ export class OrderRepository {
         });
         if (!checkout || checkout.status !== "PAYMENT_PENDING" || !payment) return null;
 
-        // Los snapshots Json se validan con Zod: si la forma no es la esperada, la transacción aborta
         const items = CheckoutItemsSchema.parse(checkout.items);
         const shippingAddress = ShippingAddressSnapshotSchema.parse(checkout.shippingAddress);
 
@@ -147,7 +137,6 @@ export class OrderRepository {
           select: { id: true },
         });
 
-        // La reserva hecha en el checkout se convierte en venta: stock -= q y reservedStock -= q (SQL atómico)
         for (const item of items) {
           await tx.$executeRaw`UPDATE "product_variants" SET "stock" = "stock" - ${item.quantity}, "reservedStock" = "reservedStock" - ${item.quantity} WHERE "id" = ${item.variantId}`;
         }
@@ -178,14 +167,10 @@ export class OrderRepository {
         }
         return { orderId: order.id, created: true };
       },
-      // Serializable => evita que dos webhooks concurrentes creen dos pedidos para el mismo checkout
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
   }
 
-  // createManual => TRANSACCIÓN (Unit of Work) del pedido creado por el ADMIN: carrito y sesión de checkout cerrados
-  // (el esquema los exige: el pedido sigue siendo trazable), pago MANUAL cobrado, ítems y descuento de stock.
-  // El descuento usa SQL condicional: si una variante no alcanza, "throw" revierte TODO (nunca stock negativo).
   public async createManual(data: {
     userId: string;
     items: CheckoutItemSnapshot[];
@@ -197,7 +182,6 @@ export class OrderRepository {
   }): Promise<string> {
     return this.prisma.$transaction(async (tx) => {
       for (const item of data.items) {
-        // "$executeRaw`...`" (Prisma) => tagged template parametrizado (sin inyección SQL); devuelve filas afectadas
         const affected = await tx.$executeRaw`
           UPDATE "product_variants" SET "stock" = "stock" - ${item.quantity}
           WHERE "id" = ${item.variantId} AND "isActive" = true AND "stock" - "reservedStock" >= ${item.quantity}`;
@@ -213,7 +197,7 @@ export class OrderRepository {
           userId: data.userId,
           cartId: cart.id,
           status: "COMPLETED",
-          items: data.items as unknown as Prisma.InputJsonValue, // Snapshot validado por Zod al leerlo
+          items: data.items as unknown as Prisma.InputJsonValue,
           shippingAddress: data.shippingAddress,
           currency: data.currency,
           ...data.totals,
@@ -229,7 +213,6 @@ export class OrderRepository {
           currency: data.currency,
           ...data.totals,
           shippingAddress: data.shippingAddress,
-          // Destructuring con descarte ("weightGrams: _weight") => el peso no es columna de OrderItem
           items: {
             create: data.items.map(({ weightGrams: _weight, ...item }) => ({
               ...item,
@@ -242,7 +225,6 @@ export class OrderRepository {
         },
         select: { id: true },
       });
-      // Pago MANUAL (efectivo, transferencia, prueba): "manual_<uuid>" cumple el índice único sin tocar Stripe
       await tx.payment.create({
         data: {
           userId: data.userId,
@@ -259,7 +241,6 @@ export class OrderRepository {
     });
   }
 
-  // changeStatus => actualiza el estado + bitácora en la misma transacción
   public async changeStatus(
     id: string,
     from: OrderStatus,
@@ -277,7 +258,6 @@ export class OrderRepository {
     });
   }
 
-  // cancelAndRestock => cancelación + devolución de unidades al inventario (atómico)
   public async cancelAndRestock(
     id: string,
     from: OrderStatus,

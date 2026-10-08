@@ -1,5 +1,3 @@
-// ProductCarousel.tsx => carrusel horizontal con CSS scroll-snap (desplazamiento nativo: táctil, teclado y
-// lector de pantalla funcionan sin librería) + botones anterior/siguiente. También exporta "Vistos recientemente".
 "use client";
 
 import { useRef } from "react";
@@ -19,7 +17,6 @@ export function ProductCarousel({
   const trackRef = useRef<HTMLUListElement>(null);
   if (products.length === 0) return null;
 
-  // scroll => desplaza el ancho visible del carrusel (una "página" de tarjetas)
   const scroll = (direction: 1 | -1) =>
     trackRef.current?.scrollBy({
       left: direction * trackRef.current.clientWidth * 0.9,
@@ -49,7 +46,6 @@ export function ProductCarousel({
           </button>
         </div>
       </div>
-      {/* "snap-x snap-mandatory" + "snap-start" => cada tarjeta se alinea al soltar el desplazamiento */}
       <ul
         ref={trackRef}
         className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 motion-reduce:scroll-auto"
@@ -64,7 +60,6 @@ export function ProductCarousel({
   );
 }
 
-// RecentlyViewed => historial local (Redux Toolkit + localStorage); excluye el producto que se está viendo
 export function RecentlyViewed({ excludeId }: { excludeId?: string }) {
   const t = useTranslations("product.carousel");
   const { items } = useRecentlyViewed();

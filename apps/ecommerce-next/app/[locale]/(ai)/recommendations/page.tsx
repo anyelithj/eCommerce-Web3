@@ -1,7 +1,3 @@
-// page.tsx (/recommendations) => recomendaciones IA personalizadas (Express: candidatos SQL + ranking + explicación
-// en una frase con LangChain y Ollama). Server Component con Server Actions: generar y borrar el historial son
-// <form action> nativos (funcionan aun sin JavaScript); solo los carruseles de productos envían JS al navegador.
-// Ruta privada (middleware + JWT del usuario); sin indexar. Patrón: Server Action (Command) + Facade (apiRequest).
 import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
@@ -17,7 +13,6 @@ import { ProductCarousel } from "@/widgets/product/ProductCarousel";
 import type { ProductCard } from "@/entities/product/model/product.types";
 import type { PageProps } from "@/shared/types/next.types";
 
-// Recommendation => RecommendationDto de Express (tarjetas con el MISMO formato del catálogo)
 interface Recommendation {
   id: string;
   products: ProductCard[];
@@ -25,9 +20,8 @@ interface Recommendation {
   createdAt: string;
 }
 
-const HISTORY_SIZE = 5; // Últimas 5 sesiones: página liviana
+const HISTORY_SIZE = 5;
 
-// accessToken => token del backend guardado en la sesión de next-auth (se lee en cada acción: nunca viaja al cliente)
 async function accessToken(): Promise<string | undefined> {
   return ((await auth()) as { accessToken?: string } | null)?.accessToken;
 }
@@ -48,13 +42,10 @@ export default async function RecommendationsPage({ params }: PageProps) {
     cache: "no-store",
   })
     .then(({ data }) => data)
-    .catch(() => null); // null => backend caído: se muestra el aviso y la página sigue utilizable
+    .catch(() => null);
 
-  // "use server" => Server Action: corre en el servidor al enviar el formulario; revalidatePath vuelve a pintar la
-  // página con el resultado (sin estado en el cliente ni fetch manual)
   async function generate() {
     "use server";
-    // Contexto vacío => Express usa las últimas compras del usuario como semillas; "locale" => frase en su idioma
     await apiRequest("/recommendation/session", {
       method: "POST",
       token: await accessToken(),
@@ -94,7 +85,6 @@ export default async function RecommendationsPage({ params }: PageProps) {
           className="flex flex-col gap-3 rounded-lg border border-slate-200 p-4"
         >
           <p className="text-sm text-slate-700">{recommendation.reason}</p>
-          {/* Título con fecha: cada carrusel tiene un nombre accesible distinto */}
           <ProductCarousel
             title={t("forYou", { date: formatDate(recommendation.createdAt, intlLocale) })}
             products={recommendation.products}

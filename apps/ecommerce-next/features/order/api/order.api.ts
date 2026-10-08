@@ -1,4 +1,3 @@
-// order.api.ts => pedidos del usuario (lista/detalle), cancelación, devoluciones y descarga de factura.
 "use client";
 
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
@@ -30,13 +29,11 @@ export function useOrder(id: string) {
     queryKey: queryKeys.order(id),
     queryFn: () => apiGet<OrderDetail>(`/order/${id}`, { token: accessToken, cache: "no-store" }),
     enabled: Boolean(accessToken),
-    // Mientras el pedido está en tránsito se refresca cada minuto (el tracking cambia)
     refetchInterval: (query) =>
       query.state.data && ["SHIPPED", "PACKED"].includes(query.state.data.status) ? 60_000 : false,
   });
 }
 
-// useCancelOrder => DELETE /order/:id (solo antes del envío; el backend reembolsa automáticamente)
 export function useCancelOrder(id: string) {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
@@ -54,7 +51,6 @@ export function useCancelOrder(id: string) {
   });
 }
 
-// useRequestRefund => POST /refund (devolución de un pedido entregado)
 export function useRequestRefund(orderId: string) {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
@@ -65,7 +61,6 @@ export function useRequestRefund(orderId: string) {
   });
 }
 
-// downloadInvoice => el PDF requiere Authorization: se descarga con fetch y se abre como blob (no un <a href> directo)
 export async function downloadInvoice(
   invoiceId: string,
   number: string,
@@ -81,5 +76,5 @@ export async function downloadInvoice(
     download: `factura-${number}.pdf`,
   });
   link.click();
-  URL.revokeObjectURL(url); // Libera la memoria del blob
+  URL.revokeObjectURL(url);
 }

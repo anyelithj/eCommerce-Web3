@@ -1,4 +1,3 @@
-// OrderList.tsx => "Mis pedidos": filtros por estado (pestañas) + lista paginada.
 "use client";
 
 import { useOrders } from "../api/order.api";
@@ -27,7 +26,6 @@ export function OrderList() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Filtros como botones con aria-pressed (grupo de alternancia) */}
       <div role="group" aria-label={t("filterLabel")} className="flex flex-wrap gap-2">
         {FILTERS.map((filter) => (
           <button

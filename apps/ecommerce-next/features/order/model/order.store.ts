@@ -1,5 +1,3 @@
-// order.store.ts (Redux Toolkit) => filtro de estado del listado de pedidos, conservado al volver desde un detalle.
-// Client State: el filtro forma parte de la queryKey de TanStack Query; los pedidos no se copian aquí.
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { createSliceHook } from "@/shared/lib/store";
 import type { OrderStatus } from "@/entities/order/model/order.types";

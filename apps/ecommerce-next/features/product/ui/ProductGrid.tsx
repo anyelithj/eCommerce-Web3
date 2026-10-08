@@ -1,4 +1,3 @@
-// ProductGrid.tsx => grilla responsive de tarjetas (mobile-first: 2 columnas en móvil, 3 en tablet, 4 en escritorio).
 import type { ProductCard as ProductCardData } from "@/entities/product/model/product.types";
 import { ProductCard } from "./ProductCard";
 import { EmptyState } from "@/shared/ui/EmptyState";
@@ -6,7 +5,6 @@ import { useTranslations } from "next-intl";
 
 interface ProductGridProps {
   products: ProductCardData[];
-  // Las primeras imágenes (sobre el pliegue) se cargan con prioridad: mejoran el LCP de la página
   priorityCount?: number;
   emptyMessage?: string;
 }
@@ -24,7 +22,6 @@ export function ProductGrid({ products, priorityCount = 4, emptyMessage }: Produ
     );
   }
   return (
-    // <ul> semántico: el lector de pantalla anuncia "lista, N elementos"
     <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
       {products.map((product, index) => (
         <li key={product.id}>

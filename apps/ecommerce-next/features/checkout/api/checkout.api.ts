@@ -1,5 +1,3 @@
-// checkout.api.ts => saga de checkout desde el cliente: iniciar, consultar, fijar dirección/envío, abandonar,
-// cotizar envíos y confirmar el pedido (POST /order es idempotente: se puede reintentar sin duplicar).
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,7 +20,6 @@ export function useCheckout(id: string) {
   });
 }
 
-// useInitCheckout => POST /checkout (reserva stock); invalida el carrito (sus ítems quedan "congelados" en la sesión)
 export function useInitCheckout() {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
@@ -40,7 +37,6 @@ export function useInitCheckout() {
   });
 }
 
-// useUpdateCheckoutAddress => PATCH /checkout/:id/address (dirección + tarifa + cupón opcional)
 export function useUpdateCheckoutAddress(id: string) {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
@@ -69,7 +65,6 @@ export function useAbandonCheckout() {
   });
 }
 
-// useShippingRates => cotización en vivo para la dirección seleccionada (peso y subtotal del checkout)
 export function useShippingRates(
   addressId: string | null,
   weightGrams: number,
@@ -88,9 +83,6 @@ export function useShippingRates(
   });
 }
 
-// usePlaceOrder => POST /order: es una escritura, por eso useMutation (no useQuery).
-// 409 PAYMENT_NOT_CONFIRMED mientras el webhook de Stripe no llegue: se reintenta con backoff (el endpoint es
-// idempotente, reintentar no duplica el pedido). "ready" => ya hay token de sesión para poder enviarlo.
 export function usePlaceOrder() {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
@@ -101,10 +93,9 @@ export function usePlaceOrder() {
         token: accessToken,
         body: { checkoutSessionId },
       }).then((response) => response.data),
-    retry: 10, // Hasta ~10 intentos con backoff exponencial de TanStack (el webhook suele tardar segundos)
+    retry: 10,
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
     onSuccess: (order) => {
-      // Solo las queries relacionadas: el detalle del pedido nuevo y los listados de pedidos
       queryClient.setQueryData(queryKeys.order(order.id), order);
       void queryClient.invalidateQueries({ queryKey: ["orders"] });
     },

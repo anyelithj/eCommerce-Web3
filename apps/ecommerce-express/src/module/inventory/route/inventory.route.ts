@@ -1,5 +1,3 @@
-// inventory.route.ts => inventario (montado en /api/v1/inventory): solo administradores.
-// "/movement" se declara antes que "/:id" por claridad (métodos distintos, no colisionan).
 import { Router } from "express";
 import { inventoryController } from "../controller/inventory.controller";
 import { jwtAuthGuard, requireRoles } from "../../auth/guard/auth.guard";

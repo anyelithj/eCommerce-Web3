@@ -1,5 +1,3 @@
-// AdminIcon.tsx => íconos SVG en línea del panel (trazo 1.5, 24×24, estilo outline). Sin librería de íconos: 0 KB extra
-// y siempre nítidos. Patrón Flyweight: un mapa de trazos compartido; aria-hidden porque el texto ya nombra la opción.
 import type { ReactNode } from "react";
 
 const PATHS: Record<string, ReactNode> = {

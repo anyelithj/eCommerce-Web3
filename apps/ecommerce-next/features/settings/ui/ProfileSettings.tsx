@@ -1,4 +1,3 @@
-// ProfileSettings.tsx => edición del perfil (nombre, apellido, celular). El email no se edita aquí (identidad de login).
 "use client";
 
 import { useEffect } from "react";
@@ -27,9 +26,8 @@ export function ProfileSettings() {
         onError: (error) => toast.error(errorMessage(error)),
       }),
   });
-  const { resetForm } = form; // Referencia estable de Formik => dependencia segura del efecto
+  const { resetForm } = form;
 
-  // Cuando llega el perfil, se precarga el formulario (resetForm => nuevos valores iniciales y "dirty" en false)
   useEffect(() => {
     if (profile)
       resetForm({

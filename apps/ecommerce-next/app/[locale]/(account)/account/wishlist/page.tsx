@@ -1,4 +1,3 @@
-// page.tsx (/account/wishlist) => lista de deseos.
 import { getTranslations } from "next-intl/server";
 import { WishlistView } from "./WishlistView";
 import { AccountHeading, accountMetadata } from "../AccountSection";

@@ -1,4 +1,3 @@
-// OrderStatus.tsx => estado del pedido como Badge (texto + color: el color nunca es el único indicador).
 import { Badge } from "@/shared/ui/Badge";
 import { useTranslations } from "next-intl";
 import type { OrderStatus as Status } from "@/entities/order/model/order.types";

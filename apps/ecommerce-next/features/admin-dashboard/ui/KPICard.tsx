@@ -1,14 +1,11 @@
-// KPICard.tsx => tarjeta de indicador con valor, tendencia contra el período anterior y descripción accesible.
-// Patrón Factory (el formato del valor depende del tipo: dinero, número o porcentaje). Server-friendly: sin estado.
-// Accesibilidad: la tendencia no depende solo del color (flecha + texto "sube/baja" para lectores de pantalla).
 import { cn } from "@/shared/lib/cn";
 
 interface KPICardProps {
   label: string;
-  value: string; // Ya formateado por quien llama (moneda/idioma)
-  change?: number | undefined; // Variación relativa (0.12 = +12 %); undefined => sin comparación
-  trendLabel?: string | undefined; // "vs. período anterior"
-  invert?: boolean; // true => bajar es bueno (ej. devoluciones pendientes)
+  value: string;
+  change?: number | undefined;
+  trendLabel?: string | undefined;
+  invert?: boolean;
 }
 
 export function KPICard({ label, value, change, trendLabel, invert = false }: KPICardProps) {

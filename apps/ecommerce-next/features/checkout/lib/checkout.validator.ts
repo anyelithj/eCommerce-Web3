@@ -1,5 +1,3 @@
-// checkout.validator.ts => validación de la nueva dirección de envío (mismas reglas que el AddressSchema del backend).
-// Mensajes = claves de traducción (messages/*.json -> "validation.address").
 import { z } from "zod";
 
 export const addressSchema = z.object({

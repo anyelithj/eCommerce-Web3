@@ -1,8 +1,3 @@
-// MarketingAdmin.tsx (Client Component) => marketing y correo: campañas por segmento (email/push/WhatsApp) con
-// programación y métricas de apertura, bitácora de correos enviados (Nodemailer), plantillas con variables
-// "{{ nombre }}" y cupones de descuento.
-// Patrones: Composite (pestañas) + Command (enviar ahora / enviar correo). Ahorro: las campañas se envían por lotes
-// desde el backend; el panel solo consulta la pestaña abierta.
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -30,7 +25,7 @@ const AUDIENCES = ["ALL", "VIP", "REGULAR", "NEW", "INACTIVE"] as const;
 const CAMPAIGN_STATUSES = ["DRAFT", "SCHEDULED", "SENDING", "SENT", "FAILED", "ARCHIVED"] as const;
 const EMAIL_STATUSES = ["QUEUED", "SENT", "FAILED"] as const;
 const COUPON_TYPES = ["PERCENTAGE", "FIXED_AMOUNT", "FREE_SHIPPING"] as const;
-const couponEditSchema = couponSchema.omit({ code: true }); // El código no cambia al editar (los clientes ya lo tienen)
+const couponEditSchema = couponSchema.omit({ code: true });
 
 export function MarketingAdmin() {
   const t = useTranslations("admin.marketing");
@@ -48,7 +43,6 @@ export function MarketingAdmin() {
   );
 }
 
-// ---------- Campañas ----------
 function CampaignsTab() {
   const t = useTranslations("admin.marketing");
   const format = useFormat();
@@ -75,12 +69,11 @@ function CampaignsTab() {
       hint: t("scheduleHint"),
     },
   ];
-  // toBody => fecha local del formulario -> ISO UTC (el backend exige fecha futura)
   const toBody = (values: { scheduledAt?: string | undefined }) => ({
     ...values,
     scheduledAt: isoOrUndefined(values.scheduledAt),
   });
-  const editable = (row: Campaign) => row.status === "DRAFT" || row.status === "SCHEDULED"; // Lo enviado no se edita
+  const editable = (row: Campaign) => row.status === "DRAFT" || row.status === "SCHEDULED";
   return (
     <AdminResource<Campaign, typeof campaignSchema, typeof campaignSchema>
       resource="campaigns"
@@ -135,7 +128,6 @@ function CampaignsTab() {
               : "—",
         },
       ]}
-      // "Enviar ahora" => PATCH { sendNow: true } (Command); solo para borradores y programadas
       actions={(row, run) =>
         editable(row) && (
           <Button
@@ -185,11 +177,9 @@ function CampaignsTab() {
   );
 }
 
-// ---------- Correos enviados ----------
 function EmailsTab() {
   const t = useTranslations("admin.marketing");
   const format = useFormat();
-  // Plantillas para el selector del envío manual (misma clave de caché que la pestaña Plantillas: sin doble petición)
   const templates = useAdminList<EmailTemplate>("templates", "/email/template", {
     page: 1,
     limit: 100,
@@ -257,7 +247,6 @@ function EmailsTab() {
   );
 }
 
-// ---------- Plantillas ----------
 function TemplatesTab() {
   const t = useTranslations("admin.marketing");
   const fields = [
@@ -300,7 +289,6 @@ function TemplatesTab() {
   );
 }
 
-// ---------- Cupones ----------
 function CouponsTab() {
   const t = useTranslations("admin.marketing");
   const format = useFormat();
@@ -316,7 +304,6 @@ function CouponsTab() {
     { name: "usageLimit", label: t("usageLimit"), type: "number" as const },
     { name: "endsAt", label: t("endsAt"), type: "date" as const },
   ];
-  // toBody => "monto fijo" se escribe en pesos y viaja en centavos; porcentaje y envío gratis van tal cual
   const toBody = (values: { type: string; value: number; endsAt?: string | undefined }) => ({
     ...values,
     value: values.type === "FIXED_AMOUNT" ? values.value * 100 : values.value,

@@ -1,7 +1,3 @@
-// inventory.repository.ts => stock en PostgreSQL (Prisma) + historial de movimientos en MongoDB (Mongoose).
-// Patrón Repository: el service no ve SQL ni Mongoose. Las escrituras de stock son UNA sentencia SQL atómica con
-// guarda en el WHERE ("el stock nunca baja de lo reservado"): sin SELECT previo, sin carreras entre requests.
-// "$queryRaw" con plantilla etiquetada => Prisma parametriza cada ${valor} (sin inyección SQL).
 import { Prisma, type PrismaClient } from "@prisma/client";
 import { prisma } from "../../../config/database.config";
 import {
@@ -14,7 +10,6 @@ import {
 import type { MovementDto } from "../dto/inventory.dto";
 import type { PageParams, Paginated } from "../../../shared/types/pagination.types";
 
-// Fila cruda del listado; "total" llega con COUNT(*) OVER() (página y total en UNA consulta)
 type LevelRow = Omit<StockLevel, "stock" | "reserved" | "available"> & {
   stock: number;
   reserved: number;
@@ -44,14 +39,12 @@ export type NewMovement = Pick<
   | "actorId"
 >;
 
-// Columnas comunes de las consultas de nivel de stock (DRY entre listado y detalle)
 const LEVEL_COLUMNS = Prisma.sql`v.id AS "variantId", p.id AS "productId", p.name AS "productName", v.sku, v.name AS "variantName",
   v.stock, v."reservedStock" AS reserved, (v.stock - v."reservedStock") AS available`;
 
 export class InventoryRepository {
   constructor(private readonly db: PrismaClient = prisma) {}
 
-  // findLevels => listado paginado; los más críticos (menos disponibles) primero
   public async findLevels(filters: StockFilters, page: PageParams): Promise<Paginated<StockLevel>> {
     const conditions = [Prisma.sql`p."archivedAt" IS NULL`];
     if (filters.q)
@@ -75,7 +68,6 @@ export class InventoryRepository {
     return row ? toLevel(row) : null;
   }
 
-  // countLow => KPI "inventario crítico" del dashboard (una sola agregación)
   public async countLow(threshold: number): Promise<number> {
     const [row] = await this.db.$queryRaw<Array<{ n: bigint }>>`
       SELECT COUNT(*) AS n FROM product_variants v JOIN products p ON p.id = v."productId"
@@ -83,7 +75,6 @@ export class InventoryRepository {
     return Number(row?.n ?? 0);
   }
 
-  // applyDelta => suma/resta stock SOLO si el resultado no queda por debajo de lo reservado; null = no se aplicó
   public async applyDelta(variantId: string, delta: number): Promise<StockRow | null> {
     const [row] = await this.db.$queryRaw<StockRow[]>`
       UPDATE product_variants SET stock = stock + ${delta}, "updatedAt" = NOW()
@@ -92,12 +83,10 @@ export class InventoryRepository {
     return row ?? null;
   }
 
-  // setStock => conteo físico (valor absoluto); devuelve también el stock anterior para calcular el delta
   public async setStock(
     variantId: string,
     stock: number
   ): Promise<(StockRow & { previous: number }) | null> {
-    // CTE "old" con FOR UPDATE => bloquea la fila mientras se lee el valor previo y se escribe el nuevo (atómico)
     const [row] = await this.db.$queryRaw<Array<StockRow & { previous: number }>>`
       WITH old AS (SELECT id, stock FROM product_variants WHERE id = ${variantId} FOR UPDATE)
       UPDATE product_variants v SET stock = ${stock}, "updatedAt" = NOW() FROM old
@@ -106,7 +95,6 @@ export class InventoryRepository {
     return row ?? null;
   }
 
-  // reserve / release => apartado de unidades (lo usa la saga MCP); misma guarda atómica que el checkout
   public async reserve(variantId: string, quantity: number): Promise<StockRow | null> {
     const [row] = await this.db.$queryRaw<StockRow[]>`
       UPDATE product_variants SET "reservedStock" = "reservedStock" + ${quantity}, "updatedAt" = NOW()
@@ -116,12 +104,10 @@ export class InventoryRepository {
   }
 
   public async release(variantId: string, quantity: number): Promise<void> {
-    // "GREATEST(..., 0)" => la liberación nunca deja la reserva negativa (idempotencia ante reintentos)
     await this.db.$executeRaw`
       UPDATE product_variants SET "reservedStock" = GREATEST("reservedStock" - ${quantity}, 0), "updatedAt" = NOW() WHERE id = ${variantId}`;
   }
 
-  // unitsSoldSince => base del pronóstico: unidades vendidas (pedidos no cancelados) desde una fecha
   public async unitsSoldSince(variantId: string, since: Date): Promise<number> {
     const result = await this.db.orderItem.aggregate({
       _sum: { quantity: true },
@@ -129,8 +115,6 @@ export class InventoryRepository {
     });
     return result._sum.quantity ?? 0;
   }
-
-  // --- Historial (MongoDB) ---
 
   public async createMovement(movement: NewMovement): Promise<MovementDto> {
     return toMovement(await StockMovementModel.create(movement));
@@ -141,7 +125,6 @@ export class InventoryRepository {
     return doc ? toMovement(doc) : null;
   }
 
-  // markVoided => condición "voidedAt: null" en el filtro: dos anulaciones simultáneas no se aplican dos veces
   public async markVoided(id: string, actorId: string | null): Promise<boolean> {
     const result = await StockMovementModel.updateOne(
       { _id: id, voidedAt: null },
@@ -157,7 +140,6 @@ export class InventoryRepository {
   }
 }
 
-// toLevel => los enteros de SQL ya llegan como number (columnas INT); solo se descarta "total"
 function toLevel(row: LevelRow): StockLevel {
   return {
     variantId: row.variantId,

@@ -1,4 +1,3 @@
-// settings.api.ts => configuración de la cuenta: perfil, contraseña, 2FA, preferencias de notificación y baja (GDPR).
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -20,7 +19,6 @@ export interface NotificationPreferences {
   marketing: boolean;
 }
 
-// useSettingsActions => mutaciones de la cuenta; "ctx" evita repetir token/userId en cada una (DRY)
 export function useSettingsActions() {
   const { user, accessToken } = useAuth();
   const locale = useLocale();
@@ -29,7 +27,6 @@ export function useSettingsActions() {
 
   return {
     updateProfile: useMutation({
-      // Teléfono vacío => null: el backend borra el dato (exactOptionalPropertyTypes no admite undefined)
       mutationFn: (values: ProfileFormValues) =>
         userApi.updateProfile(ctx.token, ctx.userId, { ...values, phone: values.phone || null }),
       onSuccess: (profile: UserProfile) =>
@@ -45,7 +42,6 @@ export function useSettingsActions() {
       onSuccess: () =>
         void queryClient.invalidateQueries({ queryKey: queryKeys.profile(ctx.userId) }),
     }),
-    // Vincular wallet: la firma demuestra que el usuario controla la dirección (habilita login Web3 y NFT)
     linkWallet: useMutation({
       mutationFn: async () =>
         apiRequest("/auth/web3/link", {
@@ -56,10 +52,9 @@ export function useSettingsActions() {
       onSuccess: () =>
         void queryClient.invalidateQueries({ queryKey: queryKeys.profile(ctx.userId) }),
     }),
-    // Baja GDPR: el backend anonimiza los datos y revoca sesiones; aquí se cierra la sesión local
     deleteAccount: useMutation({
       mutationFn: () => userApi.deleteAccount(ctx.token, ctx.userId),
-      onSuccess: () => void signOut({ callbackUrl: getPathname({ href: "/", locale }) }), // Home en el idioma actual
+      onSuccess: () => void signOut({ callbackUrl: getPathname({ href: "/", locale }) }),
     }),
   };
 }

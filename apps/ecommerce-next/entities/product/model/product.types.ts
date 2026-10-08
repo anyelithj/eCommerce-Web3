@@ -1,5 +1,3 @@
-// product.types.ts (capa entities de FSD) => forma SERIALIZADA (JSON) de los productos que entrega la API.
-// Difiere de los DTO del backend en que las fechas llegan como string ISO (JSON no tiene tipo Date).
 import type { Ref } from "@/shared/types/common.types";
 
 export interface ProductCard {
@@ -35,7 +33,7 @@ export interface ProductVariant {
 export interface ProductImageData {
   id: string;
   url: string;
-  publicId: string; // ID de Cloudinary (el panel admin lo reenvía al editar las imágenes del producto)
+  publicId: string;
   alt: string;
   width: number | null;
   height: number | null;
@@ -43,7 +41,6 @@ export interface ProductImageData {
   variantId: string | null;
 }
 
-// "Omit" => el detalle reutiliza la tarjeta sin los campos de imagen única (DRY)
 export interface ProductDetail extends Omit<ProductCard, "imageUrl" | "imageAlt"> {
   description: string;
   vendorId: string | null;

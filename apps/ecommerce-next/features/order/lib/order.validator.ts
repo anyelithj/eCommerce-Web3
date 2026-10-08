@@ -1,7 +1,5 @@
-// order.validator.ts => formularios del detalle de pedido: cancelación y solicitud de devolución.
 import { z } from "zod";
 
-// Motivos de devolución (texto visible en messages/*.json -> order.refundReasons.<value>)
 export const REFUND_REASONS = [
   "DAMAGED",
   "WRONG_ITEM",

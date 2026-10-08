@@ -1,4 +1,3 @@
-// cart.exception.ts => errores de dominio del módulo Cart.
 import {
   NotFoundException,
   UnprocessableException,
@@ -10,7 +9,6 @@ export class CartItemNotFoundException extends NotFoundException {
   }
 }
 
-// Stock insuficiente: "details.available" permite a la UI ajustar la cantidad automáticamente
 export class InsufficientStockException extends UnprocessableException {
   constructor(sku: string, available: number) {
     super(`Stock insuficiente para ${sku}: disponibles ${available}`, "INSUFFICIENT_STOCK", {

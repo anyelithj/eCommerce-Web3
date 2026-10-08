@@ -1,8 +1,3 @@
-// SettingsAdmin.tsx (Client Component) => configuración e integraciones: roles y permisos (RBAC), webhooks salientes
-// (firmados con HMAC), flujos de automatización n8n, bitácora de auditoría (Winston + MongoDB) y transacciones MCP
-// con compensación Saga (rollback manual).
-// Patrones: Composite (pestañas) + Command (probar webhook, ejecutar flujo, rollback) + Guard (Express vuelve a
-// validar el rol ADMIN en cada petición: la UI nunca es la única barrera).
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -32,7 +27,6 @@ import { useFormat } from "@/shared/hook/useFormat";
 import { Badge } from "@/shared/ui/Badge";
 import { Button } from "@/shared/ui/Button";
 
-// Eventos de dominio que Express publica (mismos nombres que AUTOMATION_EVENTS / WEBHOOK_EVENTS del backend)
 const EVENTS = [
   "order.placed",
   "order.status-changed",
@@ -75,10 +69,8 @@ export function SettingsAdmin() {
   );
 }
 
-// ---------- Roles ----------
 function RolesTab() {
   const t = useTranslations("admin.settings");
-  // Catálogo de permisos para las casillas (misma clave que la pestaña Permisos: TanStack Query no repite la petición)
   const permissions = useAdminList<Permission>("permissions", "/permission", {
     page: 1,
     limit: 100,
@@ -92,7 +84,7 @@ function RolesTab() {
     { name: "description", label: t("description") },
     { name: "permissionIds", label: t("tabs.permissions"), type: "checkboxes" as const, options },
   ];
-  const system = (row: Role) => ["ADMIN", "CUSTOMER"].includes(row.name); // Roles base: no se borran desde la UI
+  const system = (row: Role) => ["ADMIN", "CUSTOMER"].includes(row.name);
   return (
     <AdminResource<Role, typeof roleSchema, typeof roleSchema>
       resource="roles"
@@ -133,7 +125,6 @@ function RolesTab() {
   );
 }
 
-// ---------- Permisos ----------
 function PermissionsTab() {
   const t = useTranslations("admin.settings");
   return (
@@ -166,7 +157,6 @@ function PermissionsTab() {
           { name: "description", label: t("description") },
         ],
       }}
-      // Acción y recurso son la identidad del permiso (los guards los usan): solo se edita la descripción
       edit={{
         schema: permissionUpdateSchema,
         toValues: (row) => ({ description: row.description ?? "" }),
@@ -177,7 +167,6 @@ function PermissionsTab() {
   );
 }
 
-// ---------- Webhooks ----------
 function WebhooksTab() {
   const t = useTranslations("admin.settings");
   const fields = [
@@ -224,7 +213,6 @@ function WebhooksTab() {
         },
         { key: "active", header: t("active"), cell: (row) => (row.active ? t("yes") : t("no")) },
       ]}
-      // "Probar" => entrega un evento webhook.test firmado (rate limit en Express: 10/min)
       actions={(row, run) => (
         <Button
           size="sm"
@@ -264,7 +252,6 @@ function WebhooksTab() {
   );
 }
 
-// ---------- Automatización n8n ----------
 function AutomationTab() {
   const t = useTranslations("admin.settings");
   const format = useFormat();
@@ -366,7 +353,6 @@ function AutomationTab() {
   );
 }
 
-// ---------- Auditoría ----------
 function AuditTab() {
   const t = useTranslations("admin.settings");
   const format = useFormat();
@@ -432,7 +418,6 @@ function AuditTab() {
   );
 }
 
-// ---------- Transacciones MCP (Saga) ----------
 function McpTab() {
   const t = useTranslations("admin.settings");
   const format = useFormat();

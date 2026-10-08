@@ -1,6 +1,3 @@
-// AdminSidebar.tsx (Client Component) => navegación del panel admin. Patrón Composite (lista declarativa de secciones:
-// agregar una sección = agregar una fila). Accesibilidad: <nav> con nombre, aria-current="page" en la sección activa
-// y foco visible; responsive: barra horizontal con scroll en móvil y columna fija en escritorio.
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
@@ -10,7 +7,6 @@ import { config } from "@/shared/constants/config";
 import { cn } from "@/shared/lib/cn";
 import { LinkPending } from "@/shared/ui/Spinner";
 
-// "as const" => tupla de solo lectura: las claves de traducción quedan tipadas
 const LINKS = [
   { href: routes.dashboard, key: "overview", icon: "📊" },
   { href: routes.adminAnalytics, key: "analytics", icon: "📈" },
@@ -26,9 +22,7 @@ export function AdminSidebar() {
   const t = useTranslations("admin.nav");
   const pathname = usePathname();
   const locale = useLocale();
-  // Panel de contenido (CMS, lookbooks, social, PWA...) vive en Nuxt: misma sesión por SSO, <a> normal entre apps
   const contentPanel = `${locale === "es" ? config.cmsUrl : `${config.cmsUrl}/${locale}`}/cms-page`;
-  // Activa: coincidencia exacta para /dashboard; prefijo para el resto (/dashboard/products/new => "Productos")
   const isActive = (href: string) =>
     href === routes.dashboard ? pathname === href : pathname.startsWith(href);
 

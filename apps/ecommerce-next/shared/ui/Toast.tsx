@@ -1,7 +1,3 @@
-// Toast.tsx (shadcn/ui Toast sobre Radix Toast + Redux Toolkit) => notificaciones efímeras ("Agregado al carrito").
-// Patrón Observer: cualquier componente llama toast.success(...) y el <Toaster/> (montado una vez) las pinta.
-// Radix aporta: región aria-live, pausa del temporizador al pasar el mouse o enfocar, cierre con swipe y con F8
-// para saltar a las notificaciones desde el teclado.
 "use client";
 
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
@@ -17,14 +13,12 @@ interface ToastItem {
   message: string;
 }
 
-let nextId = 0; // Contador de IDs (módulo-privado)
+let nextId = 0;
 
-// Client State de UI: la cola de avisos visibles
 export const toastSlice = createSlice({
   name: "toast",
   initialState: { items: [] as ToastItem[] },
   reducers: {
-    // "prepare" => el ID se genera al crear la acción, así el reducer queda puro
     push: {
       reducer: (state, action: PayloadAction<ToastItem>) => {
         state.items.push(action.payload);
@@ -39,7 +33,6 @@ export const toastSlice = createSlice({
 
 const useToastStore = createSliceHook(toastSlice);
 
-// API imperativa (Facade) utilizable desde handlers y mutaciones sin hooks (solo se llama en el navegador)
 const push = (tone: ToastTone, message: string) =>
   getBrowserStore()?.dispatch(toastSlice.actions.push(tone, message));
 export const toast = {
@@ -54,7 +47,6 @@ const TONES: Record<ToastTone, string> = {
   info: "border-l-primary",
 };
 
-// Toaster => proveedor + viewport de Radix; cada toast se autodescarta a los 4 s
 export function Toaster() {
   const t = useTranslations("common");
   const { items, dismiss } = useToastStore();
@@ -63,7 +55,6 @@ export function Toaster() {
       {items.map((item) => (
         <ToastPrimitive.Root
           key={item.id}
-          // "foreground" => los errores se anuncian de inmediato (assertive); el resto, sin interrumpir (polite)
           type={item.tone === "error" ? "foreground" : "background"}
           onOpenChange={(open) => !open && dismiss(item.id)}
           className={cn(

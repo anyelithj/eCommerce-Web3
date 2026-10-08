@@ -1,4 +1,3 @@
-// UpdatePasswordForm.tsx => define la nueva contraseña con el token recibido por email (flujo de recuperación).
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
@@ -13,7 +12,7 @@ import { useErrorMessage } from "@/shared/hook/useErrorMessage";
 import { useZodForm } from "@/shared/hook/useZodForm";
 
 interface UpdatePasswordFormProps {
-  resetToken: string; // Token del enlace del email, leído de la URL por la page.tsx padre
+  resetToken: string;
 }
 
 export default function UpdatePasswordForm({ resetToken }: UpdatePasswordFormProps) {

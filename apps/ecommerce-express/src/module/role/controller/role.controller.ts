@@ -1,10 +1,8 @@
-// role.controller.ts => capa HTTP del módulo Role
 import type { Request, Response, NextFunction } from "express";
 import { roleService } from "../service/role.service";
 import { CreateRoleSchema, UpdateRoleSchema } from "../schema/role.schema";
 
 export class RoleController {
-  // createRole => handler de POST /api/v1/role
   public async createRole(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const validatedInput = CreateRoleSchema.parse(req.body);
@@ -15,7 +13,6 @@ export class RoleController {
     }
   }
 
-  // listRoles => handler de GET /api/v1/role
   public async listRoles(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const roles = await roleService.listRoles();
@@ -25,7 +22,6 @@ export class RoleController {
     }
   }
 
-  // getRoleById => handler de GET /api/v1/role/:id
   public async getRoleById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = req.params["id"];
@@ -41,7 +37,6 @@ export class RoleController {
     }
   }
 
-  // updateRole => handler de PATCH /api/v1/role/:id
   public async updateRole(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = req.params["id"];
@@ -58,7 +53,6 @@ export class RoleController {
     }
   }
 
-  // deleteRoleById => handler de DELETE /api/v1/role/:id
   public async deleteRoleById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = req.params["id"];

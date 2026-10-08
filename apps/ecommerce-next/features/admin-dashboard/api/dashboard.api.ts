@@ -1,8 +1,3 @@
-// dashboard.api.ts => llamadas REST (Axios) a las APIs admin de Express + TanStack Query (Server State) del panel.
-// Patrones: Repository/Gateway (único acceso HTTP del panel), Factory de hooks genéricos (useAdminList, useAdminGet,
-// useAdminMutation: DRY para los ~15 recursos admin) y Observer (useLiveMetrics: Socket.io "analytics:tick").
-// Regla del proyecto: los datos del servidor viven en TanStack Query (nunca en Redux); cada mutación invalida SOLO
-// las consultas de su recurso => menos peticiones (ahorro de red y batería).
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -13,14 +8,11 @@ import { useAuth } from "@/shared/hook/useAuth";
 import { config } from "@/shared/constants/config";
 import type { PaginationMeta } from "@/shared/types/api.types";
 
-// Valores admitidos en la query string (mismo contrato que api-client)
 export type Query = Record<string, string | number | boolean | undefined | null | string[]>;
 export interface Page<T> {
   data: T[];
   meta?: PaginationMeta | undefined;
 }
-
-// ---------- Contratos (forma JSON de los DTO de Express: fechas como string ISO) ----------
 
 export interface Kpi {
   value: number;
@@ -255,15 +247,11 @@ export interface McpTransaction {
   createdAt: string;
 }
 
-// ---------- Hooks genéricos (Factory) ----------
-
-// useToken => token del backend + bandera "lista para consultar" (sin sesión no se dispara ninguna petición)
 function useToken() {
   const { accessToken } = useAuth();
   return { token: accessToken, enabled: Boolean(accessToken) };
 }
 
-// useAdminList => listado paginado de un recurso; "keepPreviousData" => sin parpadeo al cambiar de página/filtro
 export function useAdminList<T>(
   resource: string,
   path: string,
@@ -287,7 +275,6 @@ export function useAdminList<T>(
   });
 }
 
-// useAdminGet => un recurso (detalle, KPIs, reportes). "id" vacío => no consulta (detalle aún no elegido)
 export function useAdminGet<T>(
   resource: string,
   path: string | null,
@@ -311,14 +298,12 @@ export function useAdminGet<T>(
   });
 }
 
-// toMeta => Adapter: FastAPI responde "total_pages" (snake_case de Pydantic) y Express "totalPages"; la tabla usa uno solo
 function toMeta(
   meta: (PaginationMeta & { total_pages?: number }) | undefined
 ): PaginationMeta | undefined {
   return meta && { ...meta, totalPages: meta.totalPages ?? meta.total_pages ?? 1 };
 }
 
-// MutationRequest => cómo traducir la entrada del formulario a una petición HTTP
 export type MutationRequest = {
   path: string;
   method: "POST" | "PATCH" | "DELETE";
@@ -326,7 +311,6 @@ export type MutationRequest = {
   baseUrl?: string;
 };
 
-// useAdminMutation => escritura + invalidación SOLO de los recursos afectados (las demás consultas siguen en caché)
 export function useAdminMutation<Input, Output = unknown>(
   resources: string[],
   toRequest: (input: Input) => MutationRequest
@@ -354,9 +338,6 @@ export function useAdminMutation<Input, Output = unknown>(
   });
 }
 
-// ---------- Hooks específicos del panel principal ----------
-
-// useKpis => portada del panel en UNA petición (KPIs, operación, serie y top); "realtime" salta la caché del backend
 export function useKpis(range: { from: string; to?: string | undefined }, realtime: boolean) {
   return useAdminGet<KpiResponse>("kpi", "/dashboard/kpi", {
     from: range.from,
@@ -365,8 +346,6 @@ export function useKpis(range: { from: string; to?: string | undefined }, realti
   });
 }
 
-// useLiveMetrics => Observer de Socket.io: mientras el panel está abierto y "en vivo" activo, cada "analytics:tick"
-// invalida los KPIs. socket.io-client se descarga solo aquí (import dinámico) y usa WebSocket directo.
 export function useLiveMetrics(
   enabled: boolean,
   onTick?: (tick: { events: number; orders: number; revenueCents: number }) => void
@@ -374,7 +353,7 @@ export function useLiveMetrics(
   const { token } = useToken();
   const queryClient = useQueryClient();
   const tickRef = useRef(onTick);
-  tickRef.current = onTick; // Último callback sin reabrir el socket en cada render
+  tickRef.current = onTick;
 
   useEffect(() => {
     if (!enabled || !token) return;
@@ -387,7 +366,7 @@ export function useLiveMetrics(
         transports: ["websocket"],
         auth: { token },
       });
-      socket.on("connect", () => socket.emit("analytics:subscribe")); // También al reconectar
+      socket.on("connect", () => socket.emit("analytics:subscribe"));
       socket.on(
         "analytics:tick",
         (tick: { events: number; orders: number; revenueCents: number }) => {
@@ -400,7 +379,6 @@ export function useLiveMetrics(
         socket.disconnect();
       };
     });
-    // Limpieza: al salir del panel o apagar "en vivo" se cierra el socket (cero conexiones ociosas)
     return () => {
       cancelled = true;
       disconnect();
@@ -408,7 +386,6 @@ export function useLiveMetrics(
   }, [enabled, token, queryClient]);
 }
 
-// downloadAuthed => descarga un archivo protegido (PDF de factura / guía) con el token, como blob
 export async function downloadAuthed(path: string, filename: string, token: string): Promise<void> {
   const response = await fetch(`${config.apiUrl}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -417,5 +394,5 @@ export async function downloadAuthed(path: string, filename: string, token: stri
   const url = URL.createObjectURL(await response.blob());
   const link = Object.assign(document.createElement("a"), { href: url, download: filename });
   link.click();
-  URL.revokeObjectURL(url); // Libera la memoria del blob
+  URL.revokeObjectURL(url);
 }

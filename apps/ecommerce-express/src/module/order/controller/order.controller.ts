@@ -1,4 +1,3 @@
-// order.controller.ts => capa HTTP del módulo Order.
 import type { Request, Response } from "express";
 import { orderService } from "../service/order.service";
 import {
@@ -14,7 +13,6 @@ import { currentUser } from "../../../shared/decorator/auth.decorator";
 import { HttpStatus } from "../../../shared/constants/http.constants";
 
 export class OrderController {
-  // placeOrder => POST /api/v1/order (idempotente: devuelve el pedido existente si ya se creó por webhook)
   public readonly placeOrder = asyncHandler(async (req: Request, res: Response) => {
     const { checkoutSessionId } = PlaceOrderSchema.parse(req.body);
     sendSuccess(
@@ -24,7 +22,6 @@ export class OrderController {
     );
   });
 
-  // createManualOrder => POST /api/v1/order/manual (ADMIN); ".parse" (Zod) valida el body y responde 400 si no cumple
   public readonly createManualOrder = asyncHandler(async (req: Request, res: Response) => {
     sendSuccess(
       res,
@@ -45,7 +42,6 @@ export class OrderController {
     sendSuccess(res, await orderService.getOrderById(parseId(req), currentUser(req)));
   });
 
-  // updateOrderStatus => PATCH /api/v1/order/:id/status
   public readonly updateOrderStatus = asyncHandler(async (req: Request, res: Response) => {
     const { status, note } = UpdateOrderStatusSchema.parse(req.body);
     sendSuccess(
@@ -54,7 +50,6 @@ export class OrderController {
     );
   });
 
-  // cancelOrder => DELETE /api/v1/order/:id (devuelve el pedido cancelado: la UI muestra el nuevo estado)
   public readonly cancelOrder = asyncHandler(async (req: Request, res: Response) => {
     const { reason } = CancelOrderSchema.parse(req.body ?? {});
     sendSuccess(res, await orderService.cancelOrder(parseId(req), reason, currentUser(req)));

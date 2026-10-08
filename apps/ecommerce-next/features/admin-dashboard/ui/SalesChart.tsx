@@ -1,8 +1,3 @@
-// SalesChart.tsx (Client Component, Recharts) => gráfico de ventas por período: ingresos (área) y pedidos (línea).
-// Rendimiento/ahorro: este archivo se importa con next/dynamic SOLO en el panel admin => Recharts (~90 KB) nunca
-// llega al bundle de la tienda. Patrón Observer (Recharts re-renderiza al cambiar "data") + Adapter (tooltip con el
-// formato de moneda del idioma actual). Accesibilidad: figura con nombre y una tabla resumen oculta para lectores de
-// pantalla (los SVG de gráficos no son legibles por sí mismos).
 "use client";
 
 import {
@@ -27,7 +22,6 @@ interface SalesChartProps {
 export default function SalesChart({ data, title }: SalesChartProps) {
   const t = useTranslations("admin.chart");
   const format = useFormat();
-  // Ingresos en unidades (no centavos) para que el eje sea legible
   const points = data.map((point) => ({ ...point, revenue: point.revenueCents / 100 }));
 
   return (
@@ -54,7 +48,6 @@ export default function SalesChart({ data, title }: SalesChartProps) {
                   name === t("revenue") ? format.money(Number(value) * 100) : value
                 }
               />
-              {/* "isAnimationActive={false}" => sin animaciones: menos CPU/GPU en cada actualización en vivo */}
               <Area
                 yAxisId="revenue"
                 type="monotone"
@@ -77,7 +70,6 @@ export default function SalesChart({ data, title }: SalesChartProps) {
           </ResponsiveContainer>
         </div>
       )}
-      {/* Alternativa textual del gráfico (WCAG 1.1.1) */}
       <table className="sr-only">
         <caption>{title}</caption>
         <thead>

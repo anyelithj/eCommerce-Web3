@@ -1,10 +1,5 @@
-# pnpm-workspace.yaml => declara qué carpetas son "paquetes" del monorepo.
-# pnpm crea un solo node_modules raíz con symlinks (DRY: cero duplicación de dependencias entre apps)
-# FastAPI (Python/Poetry) y Rust (Cargo) NO se listan: tienen su propio gestor de dependencias.
 packages:
-  # Apps Node desplegables (listadas explícitamente para excluir ecommerce-fastapi y ecommerce-rust)
   - "apps/ecommerce-express"
   - "apps/ecommerce-next"
   - "apps/ecommerce-nuxt"
-  # Paquetes internos compartidos (eslint-config, tsconfig, shared-types) => principio DRY
   - "packages/*"

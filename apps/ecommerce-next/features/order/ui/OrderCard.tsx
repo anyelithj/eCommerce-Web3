@@ -1,4 +1,3 @@
-// OrderCard.tsx => resumen de un pedido en el listado (enlace al detalle).
 import { Link } from "@/shared/lib/i18n/navigation";
 import type { OrderSummary } from "@/entities/order/model/order.types";
 import { OrderStatus } from "./OrderStatus";

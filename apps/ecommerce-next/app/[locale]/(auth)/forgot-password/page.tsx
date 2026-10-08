@@ -1,6 +1,3 @@
-// page.tsx (/forgot-password) => dos modos en una ruta:
-//  - sin token: pedir el enlace de recuperación
-//  - con ?token=...: el usuario llegó desde el email y define la nueva contraseña
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import ForgotPasswordForm from "@/features/auth/ui/ForgotPasswordForm";
@@ -14,7 +11,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return { title: t("metaTitle"), description: t("metaDescription"), robots: { index: false } };
 }
 
-// "async" => Server Component asíncrono: en Next 15 params y searchParams son Promesas
 export default async function ForgotPasswordPage({ params, searchParams }: PageProps) {
   await initPage(params);
   const t = await getTranslations("auth.forgot");

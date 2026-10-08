@@ -1,5 +1,3 @@
-// routes.ts => rutas de la app en UN solo lugar (DRY): cambiar una URL no obliga a buscar strings por todo el código.
-// Funciones para rutas con parámetros => el compilador exige los argumentos (tipado seguro de enlaces).
 export const routes = {
   home: "/",
   login: "/login",
@@ -25,7 +23,6 @@ export const routes = {
   settings: "/account/settings",
   notifications: "/account/notifications",
   recommendations: "/recommendations",
-  // Panel de administración (Fase 7, solo rol ADMIN: middleware.ts + layout del grupo (admin))
   dashboard: "/dashboard",
   adminAnalytics: "/dashboard/analytics",
   adminProducts: "/dashboard/products",

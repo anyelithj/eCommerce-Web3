@@ -1,7 +1,3 @@
-// OrdersAdmin.tsx (Client Component) => operación de ventas en una sola sección con pestañas: pedidos (cambio de
-// estado), envíos (guía y rastreo), facturas (PDF y nota crédito) y devoluciones (aprobar/rechazar).
-// Patrones: Composite (cada pestaña es una configuración de AdminResource) + Strategy (badge por estado).
-// Ahorro: AdminTabs monta solo la pestaña activa => las otras tres no consultan la API hasta abrirse.
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -26,7 +22,6 @@ import { Badge } from "@/shared/ui/Badge";
 import { Button } from "@/shared/ui/Button";
 import { toast } from "@/shared/ui/Toast";
 
-// TONE => Strategy de color por estado (el texto acompaña siempre al color: no depende solo de él, WCAG 1.4.1)
 const TONE: Record<string, "neutral" | "success" | "warning" | "danger" | "info"> = {
   DELIVERED: "success",
   APPROVED: "success",
@@ -71,10 +66,9 @@ export function OrdersAdmin() {
   );
 }
 
-// ---------- Pedidos ----------
 function OrdersTab() {
   const t = useTranslations("admin.orders");
-  const tOrder = useTranslations("order"); // Reutiliza las traducciones de estado de la tienda (DRY)
+  const tOrder = useTranslations("order");
   const format = useFormat();
   const statusOptions = toOptions(ORDER_STATUSES, (value) => tOrder(`status.${value}`));
   return (
@@ -82,7 +76,7 @@ function OrdersTab() {
       resource="orders"
       path="/order"
       title={t("tabs.orders")}
-      invalidate={["kpi"]} // Cambiar estados mueve los contadores operativos de la portada
+      invalidate={["kpi"]}
       rowLabel={(row) => row.orderNumber}
       filters={[{ name: "status", label: t("status"), options: statusOptions }]}
       columns={[
@@ -107,7 +101,7 @@ function OrdersTab() {
       ]}
       edit={{
         schema: orderStatusSchema,
-        path: (row) => `/order/${row.id}/status`, // El backend valida la transición (máquina de estados)
+        path: (row) => `/order/${row.id}/status`,
         toValues: (row) => ({ status: row.status, note: "" }),
         fields: [
           { name: "status", label: t("status"), type: "select", options: statusOptions },
@@ -118,7 +112,6 @@ function OrdersTab() {
   );
 }
 
-// ---------- Envíos ----------
 function ShipmentsTab() {
   const t = useTranslations("admin.orders");
   const tOrder = useTranslations("order");
@@ -150,7 +143,6 @@ function ShipmentsTab() {
           cell: (row) => (row.estimatedDelivery ? format.date(row.estimatedDelivery) : "—"),
         },
       ]}
-      // Acciones propias: generar guía (si aún no hay) o descargarla
       actions={(row, run) =>
         row.trackingNumber ? (
           <Button
@@ -199,7 +191,6 @@ function ShipmentsTab() {
   );
 }
 
-// ---------- Facturas ----------
 function InvoicesTab() {
   const t = useTranslations("admin.orders");
   const format = useFormat();
@@ -249,7 +240,6 @@ function InvoicesTab() {
           PDF<span className="sr-only"> {row.number}</span>
         </Button>
       )}
-      // Crear = emitir la factura de un pedido; "editar" = emitir nota crédito sobre la factura (POST, no PATCH)
       create={{
         schema: invoiceSchema,
         initialValues: { orderId: "" },
@@ -269,7 +259,6 @@ function InvoicesTab() {
   );
 }
 
-// ---------- Devoluciones ----------
 function RefundsTab() {
   const t = useTranslations("admin.orders");
   const tOrder = useTranslations("order");
@@ -315,7 +304,7 @@ function RefundsTab() {
       edit={{
         schema: refundReviewSchema,
         path: (row) => `/refund/${row.id}/approve`,
-        when: (row) => row.status === "REQUESTED", // Solo las solicitudes pendientes se pueden decidir
+        when: (row) => row.status === "REQUESTED",
         toValues: () => ({ approve: "true", note: "" }),
         fields: [
           {

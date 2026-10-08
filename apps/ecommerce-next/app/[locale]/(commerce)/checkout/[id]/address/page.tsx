@@ -1,4 +1,3 @@
-// page.tsx (/checkout/[id]/address) => paso "Envío"; la lógica vive en CheckoutStepView (DRY entre pasos).
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { initPage } from "@/shared/lib/i18n/server";

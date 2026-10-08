@@ -1,7 +1,3 @@
-// AdminTabs.tsx (Client Component) => pestañas accesibles de las secciones del panel (pedidos/envíos/facturas...).
-// Patrón WAI-ARIA Tabs: role="tablist"/"tab"/"tabpanel", flechas izquierda/derecha para moverse (roving tabindex).
-// La pestaña activa vive en Redux (Client State) => se conserva al navegar entre secciones del panel.
-// Rendimiento: solo se monta el panel activo (las demás pestañas no consultan la API hasta abrirse).
 "use client";
 
 import { useId, useRef, type KeyboardEvent, type ReactNode } from "react";
@@ -11,7 +7,7 @@ import { cn } from "@/shared/lib/cn";
 export interface TabItem {
   id: string;
   label: string;
-  render: () => ReactNode; // Función (no nodo): el contenido se crea solo para la pestaña activa (lazy)
+  render: () => ReactNode;
 }
 
 export function AdminTabs({
@@ -28,7 +24,6 @@ export function AdminTabs({
   const baseId = useId();
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  // onKeyDown => flechas cambian de pestaña y mueven el foco (patrón de teclado WAI-ARIA)
   const onKeyDown = (event: KeyboardEvent, index: number) => {
     const delta = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
     if (!delta) return;
@@ -59,7 +54,7 @@ export function AdminTabs({
               type="button"
               aria-selected={selected}
               aria-controls={`${baseId}-panel`}
-              tabIndex={selected ? 0 : -1} // Roving tabindex: Tab entra a la pestaña activa; las flechas recorren
+              tabIndex={selected ? 0 : -1}
               onClick={() => setTab({ section, tab: tab.id })}
               onKeyDown={(event) => onKeyDown(event, index)}
               className={cn(

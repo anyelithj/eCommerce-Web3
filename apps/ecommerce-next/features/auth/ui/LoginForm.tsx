@@ -1,12 +1,9 @@
-// LoginForm.tsx => login en DOS pasos: (1) credenciales, (2) código OTP si la cuenta tiene 2FA.
-// El resultado final (tokens del backend) se entrega a next-auth con signIn("credentials"), que los verifica
-// y crea la sesión en cookie httpOnly. Paradigma: componentes funcionales + hooks; máquina de estados en Redux Toolkit (Client State); llamadas al backend con TanStack Query.
-"use client"; // Directiva de Next.js 15 App Router: usa hooks => Client Component
+"use client";
 
-import { useMutation } from "@tanstack/react-query"; // Operaciones de escritura con estados loading/error
+import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/shared/lib/i18n/navigation"; // Router con idioma: /en se conserva al redirigir
+import { useRouter } from "@/shared/lib/i18n/navigation";
 import { signIn } from "next-auth/react";
 import {
   loginSchema,
@@ -24,9 +21,8 @@ import { useAuthStore } from "../model/auth.store";
 import { Input } from "@/shared/ui/Input";
 import { Button } from "@/shared/ui/Button";
 import { useErrorMessage } from "@/shared/hook/useErrorMessage";
-import { useZodForm } from "@/shared/hook/useZodForm"; // Formik + Zod: estado del formulario y validación (misma fuente de reglas)
+import { useZodForm } from "@/shared/hook/useZodForm";
 
-// useCompleteLogin => hook compartido por ambos pasos y por el login con wallet: crea la sesión de next-auth y redirige (DRY)
 export function useCompleteLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,21 +30,18 @@ export function useCompleteLogin() {
   const t = useTranslations("auth.login");
 
   return async (tokens: AuthTokenResponse) => {
-    // "redirect: false" => manejamos la navegación nosotros (permite mostrar errores sin recargar)
     const result = await signIn("credentials", {
       payload: JSON.stringify(tokens),
       redirect: false,
     });
     if (result?.error) throw new Error(t("sessionFailed"));
     reset();
-    // Solo se aceptan rutas internas en callbackUrl (evita "open redirect" hacia sitios externos)
     const callbackUrl = searchParams.get("callbackUrl");
     router.replace(callbackUrl?.startsWith("/") ? callbackUrl : "/");
-    router.refresh(); // Re-renderiza los Server Components con la nueva sesión
+    router.refresh();
   };
 }
 
-// --- Paso 1: credenciales ---
 function CredentialsStep() {
   const t = useTranslations("auth.login");
   const errorMessage = useErrorMessage();
@@ -57,7 +50,6 @@ function CredentialsStep() {
   const loginMutation = useMutation({
     mutationFn: loginRequest,
     onSuccess: async (result, values) => {
-      // Unión discriminada: o desafío 2FA, o tokens
       if (isTwoFactorChallenge(result))
         return requireTwoFactor(result.challengeId, values.email, result.expiresIn);
       await completeLogin(result);
@@ -70,9 +62,7 @@ function CredentialsStep() {
   });
 
   return (
-    // "noValidate" => desactiva la validación nativa del navegador; solo Zod (mensajes consistentes)
     <form onSubmit={form.handleSubmit} noValidate className="flex w-full max-w-sm flex-col gap-4">
-      {/* "getFieldProps" => name, value, onChange y onBlur del campo, conectados al estado de Formik */}
       <Input
         label={t("email")}
         type="email"
@@ -87,7 +77,6 @@ function CredentialsStep() {
         error={form.error("password")}
         {...form.getFieldProps("password")}
       />
-      {/* Error del servidor (credenciales, cuenta no verificada) — distinto de errores de validación local */}
       {loginMutation.isError && (
         <p role="alert" className="text-sm text-red-600">
           {errorMessage(loginMutation.error, t("failed"))}
@@ -100,7 +89,6 @@ function CredentialsStep() {
   );
 }
 
-// --- Paso 2: código de verificación (2FA por email) ---
 function TwoFactorStep({ challengeId, email }: { challengeId: string; email: string }) {
   const t = useTranslations("auth.twoFactor");
   const errorMessage = useErrorMessage();
@@ -123,8 +111,8 @@ function TwoFactorStep({ challengeId, email }: { challengeId: string; email: str
       </p>
       <Input
         label={t("code")}
-        inputMode="numeric" // Teclado numérico en móviles
-        autoComplete="one-time-code" // iOS/Android ofrecen autocompletar el código recibido
+        inputMode="numeric"
+        autoComplete="one-time-code"
         maxLength={6}
         autoFocus
         error={form.error("code")}
@@ -145,7 +133,6 @@ function TwoFactorStep({ challengeId, email }: { challengeId: string; email: str
   );
 }
 
-// "export default function LoginForm()" => orquesta los pasos según el estado del store (render condicional)
 export default function LoginForm() {
   const { step } = useAuthStore();
   return step.name === "two-factor" ? (

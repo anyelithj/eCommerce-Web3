@@ -1,4 +1,3 @@
-// page.tsx (/account/addresses) => libreta de direcciones de envío.
 import { getTranslations } from "next-intl/server";
 import { AddressBook } from "./AddressBook";
 import { AccountHeading, accountMetadata } from "../AccountSection";

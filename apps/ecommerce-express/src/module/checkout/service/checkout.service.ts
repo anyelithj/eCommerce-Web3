@@ -1,5 +1,3 @@
-// checkout.service.ts => Saga de checkout (sprint 3.2): iniciar (reserva stock) → dirección/envío (PATCH)
-// → pago (módulo Payment) → pedido (módulo Order). También cancela y expira sesiones liberando el stock.
 import {
   checkoutRepository,
   type CheckoutRepository,
@@ -28,12 +26,10 @@ import { appConfig } from "../../../config/app.config";
 import { addMinutes } from "../../../shared/util/date.util";
 import { logger } from "../../../shared/middleware/logger.middleware";
 
-// ponytail: tarifa única gratis (no hay módulo de envíos); cotizar por peso/destino cuando exista shipping
 const SHIPPING_RATES: readonly ShippingRateDto[] = [
   { code: "STANDARD", label: "Envío estándar", costCents: 0 },
 ];
 
-// Sin módulo de cupones: un código recibido se rechaza explícitamente (no se ignora en silencio)
 function rejectCoupon(code: string): never {
   throw new UnprocessableException("Los cupones no están disponibles", "COUPON_UNAVAILABLE", {
     code,
@@ -43,7 +39,6 @@ function rejectCoupon(code: string): never {
 export class CheckoutService {
   constructor(private readonly repository: CheckoutRepository) {}
 
-  // initCheckout => "iniciar sesión checkout con ítems del carrito"
   public async initCheckout(userId: string, couponCode?: string): Promise<CheckoutSessionDto> {
     const cart = await cartService.getActiveCart(userId);
     if (cart.items.length === 0) throw new EmptyCartException();
@@ -55,7 +50,6 @@ export class CheckoutService {
         { itemId: blocked.id }
       );
 
-    // Una sesión abierta a la vez: las anteriores se abandonan y liberan su stock
     for (const open of await this.repository.findOpenByUser(userId)) {
       await this.repository.releaseAndClose(
         open.id,
@@ -64,7 +58,6 @@ export class CheckoutService {
       );
     }
 
-    // Snapshot inmutable de los ítems con el precio VIGENTE (el total ya no cambia aunque cambie el catálogo)
     const weights = await prisma.productVariant.findMany({
       where: { id: { in: cart.items.map((item) => item.variantId) } },
       select: { id: true, weightGrams: true },
@@ -101,7 +94,6 @@ export class CheckoutService {
     return this.toDto(session);
   }
 
-  // getCheckoutSessionById => "obtener estado completo de sesión checkout" (+ tarifas si ya hay dirección)
   public async getCheckoutSessionById(id: string, userId: string): Promise<CheckoutSessionDto> {
     const session = await this.findOwned(id, userId);
     const dto = this.toDto(session);
@@ -111,14 +103,12 @@ export class CheckoutService {
     return dto;
   }
 
-  // updateCheckoutStep => "seleccionar dirección de envío — PATCH parcial" (+ tarifa y cupón)
   public async updateCheckoutStep(
     id: string,
     userId: string,
     input: { addressId: string; shippingRateCode: string; couponCode?: string | null | undefined }
   ): Promise<CheckoutSessionDto> {
     const session = await this.findOwned(id, userId);
-    // Solo se edita antes de pagar (PAYMENT_PENDING ya tiene un PaymentIntent por un monto fijo)
     if (session.status !== "OPEN" && session.status !== "ADDRESS_SET")
       throw new CheckoutClosedException(session.status);
 
@@ -131,7 +121,7 @@ export class CheckoutService {
 
     const { couponId, discountCents, freeShipping } = this.resolveCoupon(session, input.couponCode);
 
-    const shippingAddress = ShippingAddressSnapshotSchema.parse(address); // Proyección: solo campos de envío
+    const shippingAddress = ShippingAddressSnapshotSchema.parse(address);
     const updated = await this.repository.update(id, {
       status: "ADDRESS_SET",
       addressId: address.id,
@@ -150,7 +140,6 @@ export class CheckoutService {
     return dto;
   }
 
-  // abandonCheckout => "cancelar/expirar sesión de checkout y liberar stock reservado"
   public async abandonCheckout(id: string, userId: string): Promise<void> {
     const session = await this.findOwned(id, userId);
     if (!isOpen(session.status)) throw new CheckoutClosedException(session.status);
@@ -161,7 +150,6 @@ export class CheckoutService {
     );
   }
 
-  // markPaymentPending => lo invoca el módulo Payment al crear el PaymentIntent (extiende la reserva 15 min)
   public async markPaymentPending(id: string): Promise<void> {
     await this.repository.update(id, {
       status: "PAYMENT_PENDING",
@@ -169,7 +157,6 @@ export class CheckoutService {
     });
   }
 
-  // requireForPayment => sesión propia y lista para pagar (dirección y envío definidos)
   public async requireForPayment(id: string, userId: string): Promise<CheckoutRow> {
     const session = await this.findOwned(id, userId);
     if (session.status !== "ADDRESS_SET" && session.status !== "PAYMENT_PENDING") {
@@ -181,7 +168,6 @@ export class CheckoutService {
     return session;
   }
 
-  // expireStaleSessions => job periódico: libera el stock de sesiones vencidas (lo agenda server.ts)
   public async expireStaleSessions(batchSize = 100): Promise<number> {
     let expired = 0;
     for (const session of await this.repository.findExpired(batchSize)) {
@@ -196,7 +182,6 @@ export class CheckoutService {
     return expired;
   }
 
-  // resolveCoupon => undefined: se conserva (y se revalida) | null: se quita | string: se aplica el nuevo código
   private resolveCoupon(
     session: CheckoutRow,
     couponCode: string | null | undefined
@@ -209,7 +194,6 @@ export class CheckoutService {
 
   private async findOwned(id: string, userId: string): Promise<CheckoutRow> {
     const session = await this.repository.findById(id);
-    // Sesión ajena => 404 (no se revela que existe)
     if (!session || session.userId !== userId) throw new CheckoutNotFoundException(id);
     return session;
   }

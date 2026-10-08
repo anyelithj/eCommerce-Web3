@@ -1,4 +1,3 @@
-// checkout.controller.ts => capa HTTP de la saga de checkout.
 import type { Request, Response } from "express";
 import { checkoutService } from "../service/checkout.service";
 import { InitCheckoutSchema, UpdateCheckoutAddressSchema } from "../schema/checkout.schema";
@@ -12,7 +11,6 @@ import { currentUser } from "../../../shared/decorator/auth.decorator";
 import { HttpStatus } from "../../../shared/constants/http.constants";
 
 export class CheckoutController {
-  // initCheckout => POST /api/v1/checkout
   public readonly initCheckout = asyncHandler(async (req: Request, res: Response) => {
     const { couponCode } = InitCheckoutSchema.parse(req.body ?? {});
     sendSuccess(
@@ -22,7 +20,6 @@ export class CheckoutController {
     );
   });
 
-  // getCheckoutSessionById => GET /api/v1/checkout/:id
   public readonly getCheckoutSessionById = asyncHandler(async (req: Request, res: Response) => {
     res.setHeader("Cache-Control", "private, no-store");
     sendSuccess(
@@ -31,7 +28,6 @@ export class CheckoutController {
     );
   });
 
-  // updateCheckoutStep => PATCH /api/v1/checkout/:id/address
   public readonly updateCheckoutStep = asyncHandler(async (req: Request, res: Response) => {
     const input = UpdateCheckoutAddressSchema.parse(req.body);
     sendSuccess(
@@ -40,7 +36,6 @@ export class CheckoutController {
     );
   });
 
-  // abandonCheckout => DELETE /api/v1/checkout/:id
   public readonly abandonCheckout = asyncHandler(async (req: Request, res: Response) => {
     await checkoutService.abandonCheckout(parseId(req), currentUser(req).id);
     sendNoContent(res);

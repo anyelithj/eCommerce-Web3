@@ -1,60 +1,41 @@
-# ci.yml (GitHub Actions) => pipeline CI/CD (tarea 0.1 de la matriz). ÚNICA herramienta de CI/CD del proyecto
-# (Jenkins descartado: haría lo mismo y exige un servidor propio encendido).
-#   CI  (push y PR a main): lint, typecheck y test de las apps Node (Turborepo), Rust (fmt + build), Python (ruff)
-#       y validación del gateway Nginx.
-#   CD  (solo push a main, con la CI en verde): construye las imágenes Docker de producción y las publica en
-#       GitHub Container Registry (ghcr.io, gratis). El servidor de despliegue solo hace "docker compose pull && up -d".
-# Patrón Pipeline + Fail Fast: si una etapa falla, el PR no se puede mezclar y no se publica ninguna imagen.
+name: CI/CD
 
-name: CI/CD # Nombre visible en la pestaña "Actions" de GitHub
-
-# "on" => eventos que disparan el workflow
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
 
-# "concurrency" => cancela ejecuciones anteriores del mismo branch/PR (ahorra minutos de CI)
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# "permissions" => mínimo privilegio: el token de GITHUB solo puede leer el repo
 permissions:
   contents: read
 
 jobs:
   node:
     name: Lint · Typecheck · Test (Turborepo)
-    runs-on: ubuntu-latest # Runner Linux hospedado por GitHub
+    runs-on: ubuntu-latest
     steps:
-      # "uses" => ejecuta una Action publicada | checkout => descarga el código del commit
       - uses: actions/checkout@v4
 
-      # Instala pnpm; sin "version" toma la de "packageManager" del package.json raíz (misma versión que local y Docker)
       - uses: pnpm/action-setup@v4
 
-      # Instala Node 20 y cachea el store de pnpm entre ejecuciones (key = hash de pnpm-lock.yaml)
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
 
-      # "--frozen-lockfile" => falla si pnpm-lock.yaml no coincide con los package.json (builds reproducibles)
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
-      # "turbo run a b c" => ejecuta las tres tareas respetando el DAG de turbo.json y en paralelo entre paquetes
-      # "--continue" => reporta todos los fallos en una sola corrida en vez de detenerse en el primero
       - name: Lint, typecheck y test
         run: pnpm turbo run lint typecheck test --continue
 
-      # Diccionarios i18n (es/en): mismas claves en ambos idiomas y sintaxis ICU válida (plurales, variables)
       - name: Validar traducciones
         run: pnpm --filter ecommerce-next i18n:check
 
-  # Rust: formato y compilación (el pre-commit omite cargo fmt si no está instalado; aquí es obligatorio)
   rust:
     name: Rust (fmt · build)
     runs-on: ubuntu-latest
@@ -66,14 +47,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      # Caché de dependencias compiladas (~10x más rápido desde la segunda ejecución)
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: apps/ecommerce-rust
       - run: cargo fmt --check
-      - run: cargo build --locked # "--locked" => falla si Cargo.lock no coincide con Cargo.toml
+      - run: cargo build --locked
 
-  # Python (FastAPI): lint y formato con Ruff (pipx ya viene en los runners de GitHub)
   python:
     name: Python (ruff)
     runs-on: ubuntu-latest
@@ -82,7 +61,6 @@ jobs:
       - run: pipx run ruff check apps/ecommerce-fastapi
       - run: pipx run ruff format --check apps/ecommerce-fastapi
 
-  # Valida la sintaxis del gateway (nginx -t) con la MISMA imagen que usa docker-compose
   gateway:
     name: Gateway Nginx (nginx -t)
     runs-on: ubuntu-latest
@@ -91,45 +69,37 @@ jobs:
       - name: Validar nginx.conf
         run: docker run --rm -v "$PWD/infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro" nginx:1.27-alpine nginx -t
 
-  # CD => imágenes de producción (stage "production" de cada Dockerfile) publicadas en ghcr.io
   images:
     name: Imagen ${{ matrix.app }}
-    needs: [node, rust, python, gateway] # "needs" => solo corre si la CI pasó (Fail Fast)
-    # Solo en push a main: los PR se validan pero no publican nada
+    needs: [node, rust, python, gateway]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write # Mínimo privilegio: este job es el único que puede escribir en el registro
+      packages: write
     strategy:
-      fail-fast: false # Una imagen que falle no cancela las demás
+      fail-fast: false
       matrix:
-        # Apps con Dockerfile en apps/<app>; FastAPI, Rust y Nuxt se agregan cuando entren en su fase
         app: [ecommerce-express, ecommerce-next]
     steps:
       - uses: actions/checkout@v4
-      # Buildx => builder con caché de capas; "type=gha" guarda la caché en GitHub Actions (builds más rápidos, menos CPU)
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }} # Token automático de cada ejecución: no hay secretos que administrar
-      # ghcr.io exige nombres en minúsculas; "${VAR,,}" (bash) convierte el dueño del repo a minúsculas
+          password: ${{ secrets.GITHUB_TOKEN }}
       - id: owner
         run: echo "name=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
-          context: . # Raíz del monorepo (los Dockerfiles necesitan pnpm-lock.yaml y packages/*)
+          context: .
           file: apps/${{ matrix.app }}/Dockerfile
           target: production
           push: true
-          # Dos etiquetas: "latest" (despliegue) y el SHA del commit (rollback exacto a una versión anterior)
           tags: |
             ghcr.io/${{ steps.owner.outputs.name }}/${{ matrix.app }}:latest
             ghcr.io/${{ steps.owner.outputs.name }}/${{ matrix.app }}:${{ github.sha }}
-          # URLs públicas de Next.js (se incrustan al construir). Se definen en GitHub: Settings > Secrets and variables >
-          # Actions > Variables. Express las ignora (no declara esos ARG)
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}

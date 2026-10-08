@@ -1,28 +1,25 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    // "target: ES2022" => exige Node 20+/navegadores modernos; habilita top-level await, class fields, etc.
     "target": "ES2022",
     "lib": ["ES2022"],
-    "module": "NodeNext", // Resolución de módulos moderna (ESM + CJS interop)
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
-    // --- Tipado seguro (regla obligatoria del proyecto) ---
-    "strict": true, // Activa TODAS las banderas strict de golpe (strictNullChecks, noImplicitAny, etc.)
-    "noUncheckedIndexedAccess": true, // arr[i] devuelve "T | undefined", no "T" — evita bugs de índice fuera de rango
-    "exactOptionalPropertyTypes": true, // { a?: string } no acepta explícitamente "undefined" como valor asignado
-    "noImplicitOverride": true, // Obliga a escribir "override" al sobreescribir un método (OCP explícito)
-    "noFallthroughCasesInSwitch": true, // Prohíbe "case" que caen al siguiente sin "break" (bug clásico)
-    "forceConsistentCasingInFileNames": true, // Evita bugs en sistemas de archivos case-sensitive (Linux/CI)
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
 
-    // --- Interop y output ---
-    "esModuleInterop": true, // Permite "import x from 'cjs-package'" sin fricción
-    "skipLibCheck": true, // No re-chequea los .d.ts de node_modules (build más rápido)
-    "declaration": true, // Genera .d.ts => necesario para "packages/*" compartidos entre apps
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "resolveJsonModule": true, // Permite "import data from './x.json'"
-    "isolatedModules": true, // Garantiza que cada archivo se pueda transpilar de forma aislada (requerido por swc/esbuild)
-    "removeComments": true // El JavaScript compilado (dist/) sale sin comentarios; el código fuente los conserva
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "removeComments": true
   }
 }

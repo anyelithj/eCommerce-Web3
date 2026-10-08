@@ -1,5 +1,3 @@
-// order.types.ts (entities) => forma JSON de checkout, pedidos, envíos y pagos.
-
 export type OrderStatus =
   "CONFIRMED" | "PREPARING" | "PACKED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 export type ShipmentStatus =
@@ -129,5 +127,3 @@ export interface OrderDetail extends OrderSummary {
   refunds: Array<{ id: string; status: string; amountCents: number }>;
   cancelledAt: string | null;
 }
-
-// Los textos de cada estado viven en messages/*.json -> order.status.<ESTADO> (i18n)

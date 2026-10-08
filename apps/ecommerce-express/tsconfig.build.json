@@ -1,11 +1,9 @@
 {
-  // tsconfig.build.json (TypeScript) => SOLO para "pnpm build": compila src/ -> dist/ sin tests ni scripts
-  // SRP de configuración: tsconfig.json valida TODO el proyecto; este archivo solo produce el artefacto de producción
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src", // Mantiene dist/server.js (no dist/src/server.js) => "start" y el Dockerfile no cambian
-    "types": ["node"] // En producción no hacen falta los tipos de Jest
+    "rootDir": "./src",
+    "types": ["node"]
   },
-  "include": ["src/**/*.ts"], // Solo compila el código fuente propio
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"] // Los tests se ejecutan aparte vía ts-jest
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
 }

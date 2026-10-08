@@ -1,6 +1,3 @@
-// ConfirmButton.tsx => acciones de confirmación del checkout:
-//  - StartCheckoutButton: inicia la saga desde el carrito (reserva stock) y lleva al paso de envío
-//  - ConfirmOrder: tras pagar, espera a que el webhook confirme y muestra el pedido creado
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -61,17 +58,14 @@ export function ConfirmOrder({ checkoutSessionId }: { checkoutSessionId: string 
   const errorMessage = useErrorMessage();
   const { money } = useFormat();
   const { data: order, isError, error, ready, mutate: placeOrder } = usePlaceOrder();
-  // "useRef" => la confirmación se envía UNA vez (React StrictMode ejecuta los efectos dos veces en desarrollo)
   const started = useRef(false);
 
-  // Al llegar desde el pago (y con sesión lista) se confirma el pedido
   useEffect(() => {
     if (!ready || started.current) return;
     started.current = true;
     placeOrder(checkoutSessionId);
   }, [ready, placeOrder, checkoutSessionId]);
 
-  // Evento de conversión "purchase" una sola vez al obtener el pedido
   useEffect(() => {
     if (order)
       trackEvent("purchase", {

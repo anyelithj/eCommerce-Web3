@@ -1,4 +1,3 @@
-// page.tsx (/register) => Server Component con metadatos y los formularios de registro.
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";

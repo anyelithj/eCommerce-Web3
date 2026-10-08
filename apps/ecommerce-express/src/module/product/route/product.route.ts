@@ -1,4 +1,3 @@
-// product.route.ts => lecturas públicas (con vista de staff vía optionalAuth), escrituras con permiso RBAC.
 import { Router } from "express";
 import { productController } from "../controller/product.controller";
 import { jwtAuthGuard } from "../../auth/guard/auth.guard";

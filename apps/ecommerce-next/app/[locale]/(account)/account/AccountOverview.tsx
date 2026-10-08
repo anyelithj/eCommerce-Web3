@@ -1,5 +1,3 @@
-// AccountOverview.tsx (Client Component) => resumen del hub: saludo y últimos pedidos.
-// Compone features (order) en la capa app: las features no se conocen entre sí.
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -22,7 +20,6 @@ export function AccountOverview() {
           {t("greeting", { name: profile?.firstName ?? "" })}
         </h1>
       )}
-      {/* Aviso de cuenta sin verificar: afecta la entrega de emails de pedidos */}
       {profile && !profile.isVerified && (
         <p
           role="status"

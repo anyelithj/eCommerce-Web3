@@ -1,8 +1,3 @@
-// DataTable.tsx (Client Component) => tabla de datos genérica del panel: columnas declarativas, estados de carga y
-// vacío, paginación y acciones por fila. Patrones: Composite (columnas como datos) + Template Method (la tabla fija la
-// estructura; cada sección aporta columnas). Tipado seguro con genéricos "<T>".
-// Accesibilidad: <table> semántica con <caption>, <th scope="col">, aria-busy durante la carga; responsive: scroll
-// horizontal propio (la página nunca se desborda en móvil).
 "use client";
 
 import type { ReactNode } from "react";
@@ -15,12 +10,12 @@ import { cn } from "@/shared/lib/cn";
 export interface Column<T> {
   key: string;
   header: string;
-  cell: (row: T) => ReactNode; // Render de la celda (Strategy por columna)
+  cell: (row: T) => ReactNode;
   className?: string;
 }
 
 interface DataTableProps<T> {
-  caption: string; // Título accesible de la tabla (visible solo para lectores de pantalla)
+  caption: string;
   columns: Column<T>[];
   rows: T[] | undefined;
   rowKey: (row: T) => string;
@@ -74,7 +69,6 @@ export function DataTable<T>({
               <tr
                 key={rowKey(row)}
                 className={cn("hover:bg-muted/40", onRowClick && "cursor-pointer")}
-                // El clic en la fila es un atajo; cada fila también ofrece un botón/enlace accesible por teclado
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
               >
                 {columns.map((column) => (

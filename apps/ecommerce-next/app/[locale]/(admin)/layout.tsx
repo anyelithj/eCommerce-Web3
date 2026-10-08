@@ -1,7 +1,3 @@
-// layout.tsx (admin) => chrome del panel de administración (Fase 7): cabecera propia + menú lateral + contenido.
-// RBAC en dos capas (defensa en profundidad, patrón Guard): middleware.ts redirige antes de renderizar y este layout
-// (Server Component) vuelve a comprobar la sesión; si no es ADMIN responde 404 real (no revela que el panel existe).
-// SEO: noindex (área privada). Rendimiento: sin el header/footer de la tienda (menos HTML y JS por página).
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
@@ -16,7 +12,6 @@ import UserMenu from "@/widgets/auth/UserMenu";
 
 type Props = { children: ReactNode; params: Promise<{ locale: string }> };
 
-// "template" => cada página aporta su título y el layout agrega el sufijo del panel
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale: (await params).locale, namespace: "admin" });
   return {
@@ -28,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function AdminLayout({ children, params }: Props) {
   await initPage(params);
   const session = await auth();
-  if (!session?.user.roles.includes("ADMIN")) notFound(); // Guard RBAC del lado del servidor
+  if (!session?.user.roles.includes("ADMIN")) notFound();
   const t = await getTranslations("admin");
 
   return (
@@ -56,7 +51,6 @@ export default async function AdminLayout({ children, params }: Props) {
           <UserMenu />
         </div>
       </header>
-      {/* id="main-content" => destino del enlace "Saltar al contenido" del layout raíz (WCAG 2.4.1) */}
       <main
         id="main-content"
         className="mx-auto grid max-w-[1400px] grid-cols-1 gap-6 px-4 py-6 lg:grid-cols-[220px_1fr]"

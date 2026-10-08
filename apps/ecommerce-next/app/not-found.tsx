@@ -1,6 +1,3 @@
-// app/not-found.tsx => 404 para URLs que ni siquiera coinciden con un idioma (fuera de [locale]).
-// Al no pasar por app/[locale]/layout.tsx debe renderizar su propio <html>; se muestra bilingüe.
-// Aquí se usa "next/link" directo (única excepción): no hay idioma resuelto al que ajustar la URL.
 import Link from "next/link";
 import "./globals.css";
 

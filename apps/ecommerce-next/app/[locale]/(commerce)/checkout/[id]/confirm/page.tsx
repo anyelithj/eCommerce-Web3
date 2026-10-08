@@ -1,4 +1,3 @@
-// page.tsx (/checkout/[id]/confirm) => paso "Confirmación": returnUrl de Stripe; espera el webhook y muestra el pedido.
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { initPage } from "@/shared/lib/i18n/server";

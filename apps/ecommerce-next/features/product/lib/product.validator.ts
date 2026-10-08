@@ -1,9 +1,6 @@
-// product.validator.ts => los filtros del catálogo viven en la URL (compartible, indexable, botón "atrás" funciona).
-// Este schema Zod convierte searchParams (strings) en una consulta tipada y la vuelve a serializar (ida y vuelta).
 import { z } from "zod";
 
 export const PRODUCT_SORTS = [
-  // "label" => clave de traducción (messages/*.json -> product.sort.*)
   { value: "newest", label: "newest" },
   { value: "price_asc", label: "price_asc" },
   { value: "price_desc", label: "price_desc" },
@@ -11,7 +8,6 @@ export const PRODUCT_SORTS = [
   { value: "name", label: "name" },
 ] as const;
 
-// "z.coerce" => "2" (string de la URL) -> 2 (number); ".catch" => valor inválido en la URL => se ignora (no rompe la página)
 export const productListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).catch(1),
   limit: z.coerce.number().int().min(1).max(48).catch(24),
@@ -27,11 +23,9 @@ export const productListQuerySchema = z.object({
 
 export type ProductListQuery = z.infer<typeof productListQuerySchema>;
 
-// parseProductQuery => Record de searchParams (Next 15) -> consulta tipada
 export function parseProductQuery(
   searchParams: Record<string, string | string[] | undefined>
 ): ProductListQuery {
-  // Normaliza parámetros repetidos a su primer valor
   const flat = Object.fromEntries(
     Object.entries(searchParams).map(([key, value]) => [
       key,
@@ -41,7 +35,6 @@ export function parseProductQuery(
   return productListQuerySchema.parse(flat);
 }
 
-// toSearchParams => consulta -> query string, omitiendo valores por defecto (URLs limpias y canónicas para SEO)
 export function toSearchParams(query: Partial<ProductListQuery>): string {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {

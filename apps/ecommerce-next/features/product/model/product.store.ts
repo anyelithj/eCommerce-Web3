@@ -1,6 +1,3 @@
-// product.store.ts (Redux Toolkit + localStorage) => productos vistos recientemente.
-// Client State: es el HISTORIAL del visitante en este navegador (no existe en el backend), por eso no lo gestiona
-// TanStack Query. Alimenta el carrusel "Vistos recientemente" (dato de UX, no de negocio).
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { createSliceHook } from "@/shared/lib/store";
 import type { ProductCard } from "@/entities/product/model/product.types";
@@ -17,7 +14,6 @@ export const recentlyViewedSlice = createSlice({
   name: "recentlyViewed",
   initialState,
   reducers: {
-    // El producto visto pasa al inicio; se eliminan duplicados y se limita el tamaño (lista acotada)
     track: (state, action: PayloadAction<ProductCard>) => {
       state.items = [
         action.payload,

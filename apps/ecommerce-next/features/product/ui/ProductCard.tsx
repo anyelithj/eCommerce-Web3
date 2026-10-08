@@ -1,6 +1,3 @@
-// ProductCard.tsx => tarjeta de producto (Server Component compatible: sin hooks => también renderiza en el servidor).
-// Semántica: <article> con enlace en el título; la tarjeta completa es clicable con un pseudo-elemento (patrón
-// "card link" accesible: un solo destino de foco por tarjeta, no N enlaces redundantes para el lector de pantalla).
 import { useTranslations } from "next-intl";
 import { Link } from "@/shared/lib/i18n/navigation";
 import { useFormat } from "@/shared/hook/useFormat";
@@ -10,7 +7,6 @@ import { discountPercent } from "@/shared/lib/format";
 import { routes } from "@/shared/constants/routes";
 import { Badge } from "@/shared/ui/Badge";
 
-// Estrellas de solo lectura: texto accesible "4,5 de 5" + glifos decorativos (aria-hidden)
 function RatingStars({ value, count }: { value: number; count: number }) {
   const t = useTranslations("product");
   if (count === 0) return null;
@@ -51,7 +47,6 @@ export function ProductCard({
           priority={priority}
           className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
         />
-        {/* Badges de estado sobre la imagen */}
         <div className="absolute left-2 top-2 flex flex-col gap-1">
           {discount && <Badge tone="danger">-{discount}%</Badge>}
           {!product.inStock && <Badge tone="neutral">{t("soldOut")}</Badge>}
@@ -62,7 +57,6 @@ export function ProductCard({
           <p className="text-xs uppercase tracking-wide text-slate-500">{product.brand.name}</p>
         )}
         <h3 className="line-clamp-2 text-sm font-medium text-slate-900">
-          {/* "after:absolute after:inset-0" => el enlace cubre toda la tarjeta (área de clic grande: WCAG 2.5.5) */}
           <Link
             href={routes.product(product.slug)}
             className="after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-slate-900"

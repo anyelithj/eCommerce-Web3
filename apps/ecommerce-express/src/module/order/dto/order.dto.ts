@@ -1,7 +1,5 @@
-// order.dto.ts => contratos de salida del módulo Order.
 import type { OrderStatus, PaymentStatus, RefundStatus, ShipmentStatus } from "@prisma/client";
 
-// Envío de la orden (lo arma order.repository desde Shipment + ShipmentEvent)
 export interface ShipmentDto {
   id: string;
   orderId: string;
@@ -37,7 +35,6 @@ export interface OrderItemDto {
   totalCents: number;
 }
 
-// Dirección copiada al momento de comprar (snapshot inmutable)
 export interface ShippingAddressDto {
   recipientName: string;
   phone: string;
@@ -59,7 +56,6 @@ export interface OrderSummaryDto {
   placedAt: Date;
 }
 
-// OrderDetailDto => "orden completa con ítems, pagos y envío"
 export interface OrderDetailDto extends OrderSummaryDto {
   userId: string;
   subtotalCents: number;

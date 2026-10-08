@@ -1,5 +1,3 @@
-// OrderDetail.tsx => detalle completo del pedido: ítems, totales, dirección, seguimiento, factura y acciones
-// (cancelar antes del envío / solicitar devolución si fue entregado).
 "use client";
 
 import { useState } from "react";

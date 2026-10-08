@@ -1,13 +1,9 @@
-// Spinner.tsx (shadcn/ui) => indicador de carga giratorio (SVG + animate-spin, sin dependencias).
-// LinkPending => spinner que aparece DENTRO de un <Link> mientras Next navega a esa ruta ("useLinkStatus", Next 15.3+):
-// el usuario ve al instante que su clic se registró aunque la página tarde en compilar o en traer datos.
 "use client";
 
 import { useLinkStatus } from "next/link";
 import { cn } from "../lib/cn";
 
 export function Spinner({ className }: { className?: string }) {
-  // aria-hidden => decorativo; el estado de carga lo anuncia el contenedor (role="status" / aria-busy)
   return (
     <svg
       viewBox="0 0 24 24"
@@ -27,6 +23,6 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 export function LinkPending({ className }: { className?: string }) {
-  const { pending } = useLinkStatus(); // Solo funciona como descendiente de un <Link> de Next
+  const { pending } = useLinkStatus();
   return pending ? <Spinner className={cn("ml-auto", className)} /> : null;
 }

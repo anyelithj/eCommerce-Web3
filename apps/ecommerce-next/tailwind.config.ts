@@ -1,10 +1,7 @@
 import type { Config } from "tailwindcss";
-import animate from "tailwindcss-animate"; // Plugin de shadcn/ui: animaciones de entrada/salida según data-state de Radix
+import animate from "tailwindcss-animate";
 
-// tailwind.config.ts => define DÓNDE busca Tailwind las clases usadas (content) y el tema visual (theme)
 const config: Config = {
-  // "content" => Tailwind escanea estos paths para saber QUÉ clases generar (evita CSS muerto en el bundle final)
-  // Incluye todas las capas FSD: app > widgets > features > entities > shared
   content: [
     "./app/**/*.{ts,tsx}",
     "./widgets/**/*.{ts,tsx}",
@@ -14,8 +11,6 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      // Tokens de diseño de shadcn/ui: cada color lee una variable CSS de app/globals.css (una sola fuente de verdad,
-      // DRY). "hsl(var(--x) / <alpha-value>)" => permite opacidades como bg-primary/80.
       colors: {
         border: "hsl(var(--border) / <alpha-value>)",
         input: "hsl(var(--input) / <alpha-value>)",
@@ -46,7 +41,6 @@ const config: Config = {
           DEFAULT: "hsl(var(--popover) / <alpha-value>)",
           foreground: "hsl(var(--popover-foreground) / <alpha-value>)",
         },
-        // "brand" (v1) = alias del color primario: las pantallas existentes siguen funcionando sin cambios
         brand: { DEFAULT: "hsl(var(--primary) / <alpha-value>)" },
       },
       borderRadius: {
@@ -54,7 +48,6 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      // Fuente autoalojada por next/font (variable CSS definida en app/layout.tsx)
       fontFamily: { sans: ["var(--font-inter)", "system-ui", "sans-serif"] },
     },
   },

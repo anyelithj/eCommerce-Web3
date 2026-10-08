@@ -1,5 +1,3 @@
-// AddressForm.tsx => paso de envío: elegir una dirección guardada (o crear una nueva) y una tarifa cotizada en vivo.
-// Radios nativos agrupados en <fieldset> (navegables con teclado); la tarifa se recotiza al cambiar la dirección.
 "use client";
 
 import { useEffect, useState } from "react";
@@ -22,8 +20,6 @@ import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Input";
 import { Skeleton } from "@/shared/ui/Skeleton";
 
-// NewAddressForm => alta de dirección inline (se guarda en la libreta del usuario); "export" => también la usa
-// la libreta de direcciones de la cuenta (capa app), evitando duplicar el formulario (DRY)
 export function NewAddressForm({ onCreated }: { onCreated: (id: string) => void }) {
   const t = useTranslations("address");
   const errorMessage = useErrorMessage();
@@ -33,7 +29,6 @@ export function NewAddressForm({ onCreated }: { onCreated: (id: string) => void 
     mutationFn: (values: AddressFormValues) =>
       userApi.createAddress(accessToken as string, (user as { id: string }).id, values),
     onSuccess: (address) => {
-      // Refresca el perfil (lista de direcciones) y selecciona la nueva dirección
       void queryClient.invalidateQueries({
         queryKey: queryKeys.profile((user as { id: string }).id),
       });
@@ -135,7 +130,6 @@ export function AddressForm({ session }: { session: CheckoutSession }) {
   const weight = session.items.reduce((sum, item) => sum + item.weightGrams * item.quantity, 0);
   const rates = useShippingRates(addressId, weight, session.subtotalCents);
 
-  // Preselección: la dirección ya guardada en la sesión o la predeterminada del usuario
   useEffect(() => {
     if (addressId || !profile) return;
     const preferred =

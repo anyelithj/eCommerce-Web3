@@ -1,12 +1,9 @@
-// product.dto.ts => contratos de salida del módulo Product (lo que consume el storefront Next.js).
-
 export interface ProductRefDto {
   id: string;
   name: string;
   slug: string;
 }
 
-// ProductListItemDto => tarjeta de producto en listados/grillas (datos mínimos: menos bytes = mejor performance)
 export interface ProductListItemDto {
   id: string;
   name: string;
@@ -15,7 +12,7 @@ export interface ProductListItemDto {
   currency: string;
   minPriceCents: number;
   maxPriceCents: number;
-  compareAtPriceCents: number | null; // Precio "antes" de la variante más barata (badge de descuento)
+  compareAtPriceCents: number | null;
   ratingAvg: number;
   ratingCount: number;
   imageUrl: string | null;
@@ -32,7 +29,7 @@ export interface VariantDto {
   attributes: Record<string, string>;
   priceCents: number;
   compareAtPriceCents: number | null;
-  available: number; // stock - reservedStock (lo que realmente se puede vender)
+  available: number;
   weightGrams: number;
   isActive: boolean;
 }
@@ -40,7 +37,7 @@ export interface VariantDto {
 export interface ProductImageDto {
   id: string;
   url: string;
-  publicId: string; // ID de Cloudinary: el panel admin lo reenvía al editar las imágenes (ImageSchema lo exige)
+  publicId: string;
   alt: string;
   width: number | null;
   height: number | null;
@@ -48,8 +45,6 @@ export interface ProductImageDto {
   variantId: string | null;
 }
 
-// ProductDetailDto => "producto con variantes e imágenes por ID"
-// "Omit<..., 'imageUrl' | 'imageAlt'>" => reutiliza el ítem de listado sin los campos de imagen única
 export interface ProductDetailDto extends Omit<ProductListItemDto, "imageUrl" | "imageAlt"> {
   description: string;
   vendorId: string | null;

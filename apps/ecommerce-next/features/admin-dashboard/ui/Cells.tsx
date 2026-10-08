@@ -1,6 +1,3 @@
-// Cells.tsx (Client Components) => cómo se DIBUJA cada tipo de dato del panel (patrón Strategy: CellType -> render).
-// Lo usan el listado, el detalle y las sub-tablas (DRY): dinero en la moneda del idioma, fechas con <time>, estados
-// como Badge con texto traducido (nunca solo color: WCAG 1.4.1), booleanos con texto para lectores de pantalla.
 "use client";
 
 import type { ReactNode } from "react";
@@ -9,7 +6,6 @@ import { get, type ColumnDef, type Row } from "../lib/resources";
 import { useFormat } from "@/shared/hook/useFormat";
 import { Badge } from "@/shared/ui/Badge";
 
-// TONE => color por estado (los textos los traduce admin.values.<campo>.<valor>)
 const TONE: Record<string, "neutral" | "success" | "warning" | "danger" | "info"> = {
   ACTIVE: "success",
   APPROVED: "success",
@@ -45,19 +41,16 @@ const TONE: Record<string, "neutral" | "success" | "warning" | "danger" | "info"
   NEW: "info",
 };
 
-// StatusBadge => estado con color + texto (reutilizado por las vistas especiales: IA, productos)
 export function StatusBadge({ status, label }: { status: string; label: string }) {
   return <Badge tone={TONE[status] ?? "neutral"}>{label}</Badge>;
 }
 
-// useValueLabel => texto traducido de un valor de enumeración (admin.values.<campo>.<valor>) o el valor tal cual
 export function useValueLabel() {
   const t = useTranslations("admin.values");
   return (field: string, value: string) =>
     t.has(`${field}.${value}`) ? t(`${field}.${value}`) : value;
 }
 
-// fieldOf => clave de traducción del campo: "label" o el último segmento de la ruta ("author.name" -> "name")
 export const fieldOf = (column: ColumnDef) =>
   column.label ?? column.key.split(".").pop() ?? column.key;
 
@@ -69,7 +62,6 @@ export function CellValue({ column, row }: { column: ColumnDef; row: Row }): Rea
   if (value === null || value === undefined || value === "")
     return <span className="text-slate-400">—</span>;
 
-  // Strategy: un caso por tipo de celda ("switch" exhaustivo sobre la unión CellType)
   switch (column.type) {
     case "money":
       return (

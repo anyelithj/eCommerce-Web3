@@ -1,8 +1,6 @@
-// OAuthButtons.tsx => inicio de sesión con proveedores externos: OAuth2 (next-auth completa el flujo y el
-// backend verifica el token) y wallet Web3 (Sign-In With Ethereum: firma de un nonce, sin contraseña).
 "use client";
 
-import { signIn } from "next-auth/react"; // Dispara el flujo OAuth2 redirect completo
+import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { getPathname } from "@/shared/lib/i18n/navigation";
@@ -12,10 +10,9 @@ import { useCompleteLogin } from "./LoginForm";
 import { signWalletChallenge } from "@/shared/lib/wallet";
 import { useErrorMessage } from "@/shared/hook/useErrorMessage";
 
-// PATRÓN "Strategy" a nivel de UI: cada proveedor comparte el MISMO botón; solo cambia la configuración (DRY)
 interface OAuthProviderConfig {
-  providerId: "google" | "github" | "discord"; // Debe coincidir con el "id" del provider en auth-config.ts
-  label: "google" | "github" | "discord"; // Clave de traducción del texto del botón
+  providerId: "google" | "github" | "discord";
+  label: "google" | "github" | "discord";
 }
 
 const providers: OAuthProviderConfig[] = [
@@ -33,12 +30,9 @@ export default function OAuthButtons() {
   const errorMessage = useErrorMessage();
   const searchParams = useSearchParams();
   const completeLogin = useCompleteLogin();
-  // Conserva el destino original (ej. el checkout) tras volver del proveedor; solo rutas internas
   const next = searchParams.get("callbackUrl");
-  // next-auth redirige con una URL "cruda": se le agrega el prefijo del idioma (/en) con getPathname
   const callbackUrl = getPathname({ href: next?.startsWith("/") ? next : "/", locale });
 
-  // Login con wallet: firmar desafío -> canjear firma por tokens -> sesión next-auth (mismo cierre que email/password)
   const walletLogin = useMutation({
     mutationFn: async () => completeLogin(await web3LoginRequest(await signWalletChallenge())),
   });
@@ -47,7 +41,7 @@ export default function OAuthButtons() {
     <div className="flex w-full max-w-sm flex-col gap-2" role="group" aria-label={t("label")}>
       {providers.map((provider) => (
         <button
-          key={provider.providerId} // "key" obligatorio en listas de React
+          key={provider.providerId}
           type="button"
           onClick={() => void signIn(provider.providerId, { callbackUrl })}
           className={BUTTON_CLASS}
@@ -64,7 +58,6 @@ export default function OAuthButtons() {
       >
         {walletLogin.isPending ? t("walletPending") : t("wallet")}
       </button>
-      {/* role="alert" => el lector de pantalla anuncia el error de inmediato */}
       {walletLogin.isError && (
         <p role="alert" className="text-sm text-red-600">
           {errorMessage(walletLogin.error, t("walletFailed"))}

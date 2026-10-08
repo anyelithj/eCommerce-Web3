@@ -1,4 +1,3 @@
-// page.tsx (/account/settings) => ajustes: perfil, seguridad (contraseña/2FA/wallet/baja), notificaciones, visualización e idioma.
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { ProfileSettings } from "@/features/settings/ui/ProfileSettings";

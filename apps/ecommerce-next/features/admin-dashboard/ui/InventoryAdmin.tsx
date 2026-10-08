@@ -1,8 +1,3 @@
-// InventoryAdmin.tsx (Client Component) => inventario y proveedores: stock por variante con alerta de bajo stock,
-// ajuste absoluto, movimientos (entrada/salida/devolución/daño), historial con pronóstico de reposición y CRUD de
-// proveedores con alerta de vencimiento de contrato.
-// Patrones: Composite (pestañas como datos) + Command (FormAction por fila) + Observer (TanStack Query re-renderiza
-// al invalidar "inventory"). Los eventos de stock (Observer en Express) también disparan los webhooks "inventory.low".
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -37,7 +32,6 @@ export function InventoryAdmin() {
   );
 }
 
-// ---------- Stock ----------
 function StockTab() {
   const t = useTranslations("admin.inventory");
   return (
@@ -46,7 +40,7 @@ function StockTab() {
       path="/inventory"
       title={t("tabs.stock")}
       search="q"
-      invalidate={["kpi"]} // El contador "bajo stock" de la portada depende de estos datos
+      invalidate={["kpi"]}
       rowKey={(row) => row.variantId}
       rowLabel={(row) => row.sku}
       filters={[
@@ -125,7 +119,6 @@ function StockTab() {
   );
 }
 
-// StockDetail => historial de movimientos + pronóstico (promedio diario, días de cobertura, cantidad a reponer)
 function StockDetail({ variantId }: { variantId: string }) {
   const t = useTranslations("admin.inventory");
   const format = useFormat();
@@ -176,7 +169,6 @@ function StockDetail({ variantId }: { variantId: string }) {
   );
 }
 
-// ---------- Proveedores ----------
 function SuppliersTab() {
   const t = useTranslations("admin.inventory");
   const fields = [
@@ -190,7 +182,6 @@ function SuppliersTab() {
     { name: "rating", label: t("rating"), type: "number" as const },
     { name: "contractEndsAt", label: t("contractEnds"), type: "date" as const },
   ];
-  // toValues => fila del backend -> valores del formulario (los nulos pasan a "" porque los inputs no aceptan null)
   const toValues = (row: Supplier) => ({
     name: row.name,
     taxId: row.taxId,
@@ -199,7 +190,7 @@ function SuppliersTab() {
     contactName: row.contactName ?? "",
     paymentTermsDays: row.paymentTermsDays,
     leadTimeDays: row.leadTimeDays,
-    rating: row.rating ?? ("" as const), // "as const" => literal "" (lo que acepta el schema para "sin calificación")
+    rating: row.rating ?? ("" as const),
     contractEndsAt: row.contractEndsAt?.slice(0, 10) ?? "",
   });
   return (

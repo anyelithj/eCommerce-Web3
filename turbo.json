@@ -1,35 +1,23 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  // "agentGuidance: false" => evita que turbo cree/actualice AGENTS.md en la raíz cuando lo ejecuta un asistente IA
   "agentGuidance": false,
-  // "globalDependencies" => archivos que si cambian invalidan la cache de TODOS los pipelines
-  // (presets compartidos de TS y reglas de ESLint afectan a todas las apps)
   "globalDependencies": ["packages/tsconfig/*.json", "packages/eslint-config/index.mjs"],
   "tasks": {
-    // Pipeline "build": compilar cada app/paquete
     "build": {
-      // "dependsOn": ["^build"] => Patrón DAG (Directed Acyclic Graph):
-      // el "^" significa "primero construye las dependencias de este paquete"
-      // Principio SOLID DIP aplicado a nivel de build: cada paquete depende de contratos, no de implementaciones
       "dependsOn": ["^build"],
-      // "outputs" => carpetas que Turborepo cachea; si nada cambió, reutiliza el resultado (DRY a nivel de CI)
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", ".output/**"]
     },
-    // Pipeline "dev": modo desarrollo, nunca se cachea (persistent: true)
     "dev": {
       "cache": false,
       "persistent": true
     },
-    // Pipeline "lint": ESLint por paquete; "^lint" => primero valida los paquetes internos de los que depende
     "lint": {
       "dependsOn": ["^lint"]
     },
-    // Pipeline "test": Jest por paquete; espera a que las dependencias internas estén construidas
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
-    // Pipeline "typecheck": valida TypeScript en modo --noEmit (strict mode obligatorio, ver packages/tsconfig)
     "typecheck": {
       "dependsOn": ["^typecheck"]
     }

@@ -1,13 +1,8 @@
-// ProductsAdmin.tsx (Client Components) => catálogo admin: listado con búsqueda y estado (borrador/activo/archivado)
-// y formulario de producto (crear/editar) con variantes, categoría, marca e imágenes subidas a Cloudinary.
-// Patrones: Composite (variantes como lista dinámica), Adapter (toBody: valores del formulario -> contrato de Express),
-// Observer (al guardar se invalidan solo ["admin","products"]; Express revalida el ISR de la tienda por su cuenta).
-// Rendimiento: el formulario solo existe en /dashboard/products/new y /[id]/edit (code splitting por ruta).
 "use client";
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { FieldArray, FormikProvider } from "formik"; // FieldArray (Formik): agregar/quitar filas de variantes
+import { FieldArray, FormikProvider } from "formik";
 import { useAdminGet } from "../api/dashboard.api";
 import { AdminResource, toOptions, useAdminCommand } from "./AdminResource";
 import { SelectField, TextAreaField } from "./AdminFields";
@@ -33,7 +28,6 @@ import { Skeleton } from "@/shared/ui/Skeleton";
 
 const STATUSES = ["DRAFT", "ACTIVE", "ARCHIVED"] as const;
 
-// ---------- Listado ----------
 export function ProductsAdmin() {
   const t = useTranslations("admin.products");
   const format = useFormat();
@@ -112,9 +106,6 @@ export function ProductsAdmin() {
   );
 }
 
-// ---------- Formulario (crear / editar) ----------
-
-// ProductForm => sin "productId" crea; con "productId" carga el producto y edita
 export function ProductForm({ productId }: { productId?: string }) {
   const product = useAdminGet<ProductDetail>(
     "products",
@@ -124,7 +115,6 @@ export function ProductForm({ productId }: { productId?: string }) {
   return <ProductFormBody product={product.data} />;
 }
 
-// toFormValues => producto del backend -> valores del formulario (precios en pesos, nulos -> "")
 const toFormValues = (product?: ProductDetail): ProductFormValues => ({
   name: product?.name ?? "",
   description: product?.description ?? "",
@@ -147,7 +137,6 @@ const toFormValues = (product?: ProductDetail): ProductFormValues => ({
     })) ?? [],
 });
 
-// flatten => árbol de categorías -> opciones con sangría visual ("— Hijo") para el <select>
 const flatten = (nodes: CategoryNode[], depth = 0): Array<{ value: string; label: string }> =>
   nodes.flatMap((node) => [
     { value: node.id, label: `${"— ".repeat(depth)}${node.name}` },
@@ -160,17 +149,14 @@ function ProductFormBody({ product }: { product?: ProductDetail | undefined }) {
   const command = useAdminCommand(["products", "inventory"]);
   const categories = useAdminGet<CategoryNode[]>("categories", "/category");
   const brands = useAdminGet<Brand[]>("brands", "/brand");
-  const originalSkus = new Set(product?.variants.map((variant) => variant.sku) ?? []); // SKUs que ya existen
+  const originalSkus = new Set(product?.variants.map((variant) => variant.sku) ?? []);
 
-  // toBody => Adapter al contrato de Express (CreateProductSchema / UpdateProductSchema)
   const toBody = (values: ProductPayload) => ({
     name: values.name,
     description: values.description,
-    // Un producto nuevo no nace archivado (Express solo acepta DRAFT/ACTIVE al crear)
     status: !product && values.status === "ARCHIVED" ? "DRAFT" : values.status,
-    categoryId: values.categoryId ?? null, // null => quitar la categoría al editar
+    categoryId: values.categoryId ?? null,
     brandId: values.brandId ?? null,
-    // El stock de variantes existentes se ajusta en Inventario (con historial); aquí solo el de variantes nuevas
     variants: values.variants.map((variant) => ({
       sku: variant.sku,
       name: variant.name,
@@ -201,7 +187,6 @@ function ProductFormBody({ product }: { product?: ProductDetail | undefined }) {
   });
 
   return (
-    // FormikProvider => contexto para FieldArray (mismo objeto "form" de useZodForm)
     <FormikProvider value={form}>
       <form noValidate onSubmit={form.handleSubmit} className="flex max-w-3xl flex-col gap-6">
         <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -237,7 +222,6 @@ function ProductFormBody({ product }: { product?: ProductDetail | undefined }) {
           />
         </fieldset>
 
-        {/* Variantes: lista dinámica (FieldArray). Cada fila en su <fieldset> con leyenda para lectores de pantalla */}
         <FieldArray name="variants">
           {(helpers) => (
             <section aria-labelledby="variants-title" className="flex flex-col gap-3">
@@ -272,7 +256,7 @@ function ProductFormBody({ product }: { product?: ProductDetail | undefined }) {
                     label={t("stock")}
                     type="number"
                     min={0}
-                    disabled={originalSkus.has(variant.sku)} // Stock existente => módulo Inventario (historial de movimientos)
+                    disabled={originalSkus.has(variant.sku)}
                     hint={originalSkus.has(variant.sku) ? t("stockHint") : undefined}
                     error={form.error(`variants.${index}.stock`)}
                     {...form.getFieldProps(`variants.${index}.stock`)}
@@ -299,7 +283,6 @@ function ProductFormBody({ product }: { product?: ProductDetail | undefined }) {
           )}
         </FieldArray>
 
-        {/* Imágenes: se suben a Cloudinary (carpeta products) y cada una exige texto alternativo */}
         <FieldArray name="images">
           {(helpers) => (
             <section aria-labelledby="images-title" className="flex flex-col gap-3">

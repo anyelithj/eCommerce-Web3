@@ -1,5 +1,3 @@
-// notification.api.ts => bandeja de notificaciones, conteo de no leídas y preferencias por canal (REST con Axios)
-// + notificaciones en tiempo real (GraphQL Subscription "notificationReceived" por WebSocket).
 "use client";
 
 import { gql, type TypedDocumentNode } from "@apollo/client";
@@ -28,7 +26,6 @@ export interface AppNotification {
   createdAt: string;
 }
 
-// NOTIFICATION_RECEIVED => el servidor empuja cada notificación nueva del usuario autenticado (Observer)
 export const NOTIFICATION_RECEIVED: TypedDocumentNode<
   { notificationReceived: AppNotification },
   Record<string, never>
@@ -69,11 +66,10 @@ export function useUnreadCount() {
         cache: "no-store",
       }).then((data) => data.unreadCount),
     enabled: Boolean(accessToken),
-    refetchInterval: 120_000, // Respaldo por si el WebSocket se desconecta
+    refetchInterval: 120_000,
   });
 }
 
-// useNotificationActions => marcar leída(s) y borrar; invalidan bandeja y conteo (["notifications"] cubre ambos)
 export function useNotificationActions() {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
@@ -100,5 +96,3 @@ export function useNotificationActions() {
     }),
   };
 }
-
-// (Las preferencias por canal viven en features/settings: son configuración de la cuenta)

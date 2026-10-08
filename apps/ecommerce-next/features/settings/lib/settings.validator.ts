@@ -1,11 +1,8 @@
-// settings.validator.ts => formularios de configuración (reglas espejo del backend).
-// Mensajes = claves de traducción (messages/*.json -> "validation").
 import { z } from "zod";
 
 export const profileSchema = z.object({
   firstName: z.string().trim().min(1, "validation.firstNameRequired").max(80),
   lastName: z.string().trim().min(1, "validation.lastNameRequired").max(80),
-  // Celular colombiano opcional; "" (campo vacío) se convierte a undefined para no enviarlo
   phone: z
     .string()
     .trim()

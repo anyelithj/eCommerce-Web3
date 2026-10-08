@@ -1,4 +1,3 @@
-// publicar-sin-comentarios.test.mjs => casos donde un borrado ingenuo rompería el código. Ejecutar: pnpm test:scripts
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { stripText } from "./publicar-sin-comentarios.mjs";

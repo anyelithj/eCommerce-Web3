@@ -1,7 +1,3 @@
-# .dockerignore => archivos que NO se envían al "build context" de Docker.
-# El contexto es la RAÍZ del monorepo (necesita pnpm-lock.yaml y packages/), así que este archivo
-# evita subir GBs de node_modules/.venv/target al daemon => builds más rápidos y sin secretos filtrados
-
 **/node_modules
 **/.next
 **/.nuxt

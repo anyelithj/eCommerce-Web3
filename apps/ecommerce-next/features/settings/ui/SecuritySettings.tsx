@@ -1,4 +1,3 @@
-// SecuritySettings.tsx => cambio de contraseña, verificación en dos pasos, wallet Web3 y eliminación de la cuenta (GDPR).
 "use client";
 
 import { useState } from "react";
@@ -13,7 +12,6 @@ import { toast } from "@/shared/ui/Toast";
 import { useErrorMessage } from "@/shared/hook/useErrorMessage";
 import { useZodForm } from "@/shared/hook/useZodForm";
 
-// WalletSection => vincular/cambiar la wallet Web3 (subcomponente: SRP y menor complejidad del contenedor)
 function WalletSection() {
   const t = useTranslations("settings.wallet");
   const errorMessage = useErrorMessage();
@@ -25,7 +23,6 @@ function WalletSection() {
         {t("title")}
       </h2>
       {profile?.walletAddress ? (
-        // "break-all" => la dirección (42 caracteres sin espacios) no desborda en móviles
         <p className="break-all text-sm text-slate-700">
           {t.rich("linked", {
             address: profile.walletAddress,
@@ -62,7 +59,6 @@ export function SecuritySettings() {
   const form = useZodForm({
     schema: passwordSchema,
     initialValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
-    // "helpers.resetForm" => tras guardar, limpia los campos y los "touched" (no quedan contraseñas en memoria del form)
     onSubmit: ({ currentPassword, newPassword }: PasswordFormInput, helpers) =>
       changePassword.mutate(
         { currentPassword, newPassword },

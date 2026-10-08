@@ -1,5 +1,3 @@
-// user.types.ts (entities) => perfil, direcciones y fidelidad del usuario (forma JSON de la API).
-
 export interface Address {
   id: string;
   label: string | null;
@@ -25,7 +23,7 @@ export interface UserProfile {
   isVerified: boolean;
   twoFactorEnabled: boolean;
   walletAddress: string | null;
-  locale: "es" | "en"; // Idioma preferido: emails y notificaciones del backend
+  locale: "es" | "en";
   roles: string[];
   addresses: Address[];
   createdAt: string;

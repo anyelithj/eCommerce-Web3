@@ -1,14 +1,12 @@
-// page.tsx (/login) => Server Component: metadatos SEO + composición de los Client Components del login.
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import LoginForm from "@/features/auth/ui/LoginForm";
 import OAuthButtons from "@/features/auth/ui/OAuthButtons";
-import { Link } from "@/shared/lib/i18n/navigation"; // Navegación client-side con prefetch e idioma
+import { Link } from "@/shared/lib/i18n/navigation";
 import { initPage } from "@/shared/lib/i18n/server";
 import type { PageProps } from "@/shared/types/next.types";
 
-// "generateMetadata" => <title>/<meta> en el idioma de la URL; el login no se indexa
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const t = await getTranslations({ locale: (await params).locale, namespace: "auth.login" });
   return { title: t("metaTitle"), description: t("metaDescription"), robots: { index: false } };
@@ -24,12 +22,10 @@ export default async function LoginPage({ params }: PageProps) {
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      {/* "Suspense" => requerido por Next 15 para Client Components que leen useSearchParams (pre-render estático) */}
       <Suspense>
         <LoginForm />
       </Suspense>
 
-      {/* Separador visual "o continúa con" (líneas decorativas con aria-hidden) */}
       <div className="flex w-full max-w-sm items-center gap-3">
         <span className="h-px flex-1 bg-border" aria-hidden="true" />
         <span className="text-xs text-muted-foreground">{t("orContinue")}</span>

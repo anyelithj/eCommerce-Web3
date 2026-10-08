@@ -1,5 +1,3 @@
-// product.repository.ts => acceso a datos de productos (patrón Repository sobre Prisma).
-// Toda escritura que toca producto + variantes + imágenes ocurre en UNA transacción (Unit of Work).
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "../../../config/database.config";
 import { availableStock, computePriceRange } from "../model/product.model";
@@ -8,7 +6,6 @@ import type { ProductFilter } from "../types/product.types";
 import type { ImageInput, UpdateVariantInput, VariantInput } from "../schema/product.schema";
 import type { PageParams, Paginated } from "../../../shared/types/pagination.types";
 
-// Select de la tarjeta de listado: solo lo que se muestra (proyección => menos datos transferidos)
 const LIST_SELECT = {
   id: true,
   name: true,
@@ -29,7 +26,7 @@ const LIST_SELECT = {
 } satisfies Prisma.ProductSelect;
 
 const DETAIL_SELECT = {
-  ...LIST_SELECT, // Spread: el detalle es un superconjunto del listado (DRY)
+  ...LIST_SELECT,
   description: true,
   vendorId: true,
   createdAt: true,
@@ -70,7 +67,6 @@ const DETAIL_SELECT = {
 type ListRow = Prisma.ProductGetPayload<{ select: typeof LIST_SELECT }>;
 type DetailRow = Prisma.ProductGetPayload<{ select: typeof DETAIL_SELECT }>;
 
-// ORDER BY por tipo de orden (Strategy declarativa: mapa en vez de if/else)
 const ORDER_BY: Record<ProductFilter["sort"], Prisma.ProductOrderByWithRelationInput[]> = {
   newest: [{ createdAt: "desc" }],
   price_asc: [{ minPriceCents: "asc" }, { createdAt: "desc" }],
@@ -82,7 +78,6 @@ const ORDER_BY: Record<ProductFilter["sort"], Prisma.ProductOrderByWithRelationI
 export class ProductRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  // findMany => "listar productos con filtros y paginación"
   public async findMany(
     filter: ProductFilter,
     page: PageParams
@@ -101,7 +96,6 @@ export class ProductRepository {
     return { items: rows.map(toListItem), total };
   }
 
-  // findCardsByIds => tarjetas de productos en el MISMO orden de los IDs recibidos (ranking de la búsqueda)
   public async findCardsByIds(ids: string[]): Promise<ProductListItemDto[]> {
     if (ids.length === 0) return [];
     const rows = await this.prisma.product.findMany({
@@ -109,14 +103,12 @@ export class ProductRepository {
       select: LIST_SELECT,
     });
     const byId = new Map(rows.map((row) => [row.id, toListItem(row)]));
-    // "flatMap" => reordena según "ids" y descarta los que ya no estén activos
     return ids.flatMap((id) => {
       const card = byId.get(id);
       return card ? [card] : [];
     });
   }
 
-  // findDetail => "producto con variantes e imágenes por ID" (o por slug, para URLs SEO)
   public async findDetail(idOrSlug: string, isUuid: boolean): Promise<ProductDetailDto | null> {
     const row = await this.prisma.product.findUnique({
       where: isUuid ? { id: idOrSlug } : { slug: idOrSlug },
@@ -137,7 +129,6 @@ export class ProductRepository {
     );
   }
 
-  // findSkusOwnedByOthers => SKUs del payload que ya pertenecen a OTRO producto (conflicto de inventario)
   public async findSkusOwnedByOthers(skus: string[], productId?: string): Promise<string[]> {
     const rows = await this.prisma.productVariant.findMany({
       where: { sku: { in: skus }, ...(productId ? { NOT: { productId } } : {}) },
@@ -146,7 +137,6 @@ export class ProductRepository {
     return rows.map((row) => row.sku);
   }
 
-  // create => producto + variantes + imágenes en una transacción
   public async create(
     data: Omit<
       Prisma.ProductUncheckedCreateInput,
@@ -159,7 +149,7 @@ export class ProductRepository {
       const product = await tx.product.create({
         data: {
           ...data,
-          ...computePriceRange(variants), // min/max desnormalizados desde las variantes
+          ...computePriceRange(variants),
           variants: { create: variants.map(toVariantData) },
         },
         select: { id: true },
@@ -169,7 +159,6 @@ export class ProductRepository {
     });
   }
 
-  // update => campos + UPSERT de variantes por SKU + desactivación + reemplazo de imágenes + recálculo de precios
   public async update(
     id: string,
     fields: Prisma.ProductUncheckedUpdateInput,
@@ -179,10 +168,8 @@ export class ProductRepository {
   ): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       if (variants) {
-        // "for...of" secuencial dentro de la transacción: cada upsert usa la misma conexión
         for (const variant of variants) {
           const data = toVariantData(variant);
-          // Variante nueva sin stock => 0; existente sin stock => conserva el actual (lo gestiona Inventory)
           await tx.productVariant.upsert({
             where: { sku: variant.sku },
             update: data,
@@ -198,7 +185,6 @@ export class ProductRepository {
       }
       if (images) await this.replaceImages(tx, id, images);
 
-      // Recalcula el rango de precios con el estado FINAL de las variantes
       const current = await tx.productVariant.findMany({
         where: { productId: id },
         select: { priceCents: true, isActive: true },
@@ -214,7 +200,6 @@ export class ProductRepository {
     return this.prisma.productVariant.count({ where: { productId: id, isActive: true } });
   }
 
-  // archive => "archivar producto del catálogo" (soft delete; vendorId restringe a los productos propios)
   public async archive(ids: string[], vendorId?: string): Promise<number> {
     const result = await this.prisma.product.updateMany({
       where: { id: { in: ids }, status: { not: "ARCHIVED" }, ...(vendorId ? { vendorId } : {}) },
@@ -223,7 +208,6 @@ export class ProductRepository {
     return result.count;
   }
 
-  // updateRating => recalcula el promedio desde las reseñas APROBADAS (lo invoca el módulo Review)
   public async updateRating(productId: string): Promise<void> {
     const aggregate = await this.prisma.review.aggregate({
       where: { productId, status: "APPROVED" },
@@ -239,7 +223,6 @@ export class ProductRepository {
     });
   }
 
-  // replaceImages => borra la galería y la recrea en el orden recibido (la posición = índice)
   private async replaceImages(
     tx: Prisma.TransactionClient,
     productId: string,
@@ -250,7 +233,6 @@ export class ProductRepository {
     const skus = images
       .map((image) => image.variantSku)
       .filter((sku): sku is string => Boolean(sku));
-    // Resuelve SKU -> variantId para las imágenes asociadas a una variante
     const variantIdBySku = new Map(
       (
         await tx.productVariant.findMany({
@@ -273,7 +255,6 @@ export class ProductRepository {
     });
   }
 
-  // buildWhere => traduce el filtro de dominio a un WHERE de Prisma (cada filtro ausente no agrega condición)
   private buildWhere(filter: ProductFilter): Prisma.ProductWhereInput {
     return {
       status: { in: filter.statuses },
@@ -284,33 +265,28 @@ export class ProductRepository {
         ? { collections: { some: { collection: { slug: filter.collectionSlug } } } }
         : {}),
       ...(filter.q ? { name: { contains: filter.q, mode: "insensitive" } } : {}),
-      AND: priceRangeWhere(filter), // Rango de precio (helper aparte: SRP + menor complejidad ciclomática)
+      AND: priceRangeWhere(filter),
       ...(filter.inStock ? { variants: { some: { isActive: true, stock: { gt: 0 } } } } : {}),
     };
   }
 }
 
-// priceRangeWhere => condiciones de precio sobre los valores desnormalizados (usa el índice de minPriceCents).
-// Un producto entra si su rango [min, max] se solapa con el rango pedido.
 function priceRangeWhere(
   filter: Pick<ProductFilter, "minPrice" | "maxPrice">
 ): Prisma.ProductWhereInput[] {
   const conditions: Prisma.ProductWhereInput[] = [];
   if (filter.minPrice !== undefined) conditions.push({ maxPriceCents: { gte: filter.minPrice } });
   if (filter.maxPrice !== undefined) conditions.push({ minPriceCents: { lte: filter.maxPrice } });
-  return conditions; // Arreglo vacío => "AND: []" no restringe nada
+  return conditions;
 }
-
-// --- Mapeos fila -> DTO (funciones puras) ---
 
 function toVariantData(variant: VariantInput | UpdateVariantInput) {
   return {
     sku: variant.sku,
     name: variant.name,
-    attributes: variant.attributes as Prisma.InputJsonValue, // Json de Prisma
+    attributes: variant.attributes as Prisma.InputJsonValue,
     priceCents: variant.priceCents,
     compareAtPriceCents: variant.compareAtPriceCents ?? null,
-    // Spread condicional: sin stock en el PATCH no se toca la columna (las reservas siguen coherentes)
     ...(variant.stock !== undefined ? { stock: variant.stock } : {}),
     weightGrams: variant.weightGrams,
     isActive: variant.isActive,
@@ -318,7 +294,6 @@ function toVariantData(variant: VariantInput | UpdateVariantInput) {
 }
 
 function toListItem(row: ListRow): ProductListItemDto {
-  // Variante más barata => su precio "antes" alimenta el badge de descuento
   const cheapest = [...row.variants].sort((a, b) => a.priceCents - b.priceCents)[0];
   return {
     id: row.id,
@@ -351,7 +326,6 @@ function toDetail(row: DetailRow): ProductDetailDto {
     vendorId: row.vendorId,
     variants: row.variants.map(({ stock, reservedStock, attributes, ...variant }) => ({
       ...variant,
-      // "as Record<string,string>" => el Json se valida al escribir (VariantSchema), aquí solo se tipa
       attributes: (attributes ?? {}) as Record<string, string>,
       available: availableStock({ stock, reservedStock }),
     })),

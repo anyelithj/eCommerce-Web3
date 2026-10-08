@@ -1,5 +1,3 @@
-// settings.store.ts (Redux Toolkit + localStorage) => preferencias de visualización del usuario (accesibilidad):
-// tamaño de texto y reducción de animaciones. Se aplican con atributos en <html> (CSS en globals.css).
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { createSliceHook } from "@/shared/lib/store";
 
@@ -12,8 +10,6 @@ export interface DisplayPreferencesState {
 
 const initialState: DisplayPreferencesState = { textSize: "normal", reduceMotion: false };
 
-// applyToDocument => efecto sobre el DOM separado del estado (los reducers de Redux deben ser puros).
-// Lo ejecuta providers.tsx cada vez que cambian las preferencias, en cualquier página.
 export function applyToDocument(state: DisplayPreferencesState): void {
   if (typeof document === "undefined") return;
   document.documentElement.dataset["textSize"] = state.textSize;

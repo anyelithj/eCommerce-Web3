@@ -1,5 +1,3 @@
-// AddressBook.tsx (Client Component) => libreta de direcciones: listar, marcar predeterminada, eliminar y agregar.
-// Reutiliza NewAddressForm del checkout (DRY) y las operaciones de userApi (entities/user).
 "use client";
 
 import { useState } from "react";
@@ -25,7 +23,6 @@ export function AddressBook() {
   const [adding, setAdding] = useState(false);
   const userId = user?.id ?? "";
 
-  // Invalida el perfil (fuente de las direcciones) tras cualquier cambio => lista siempre consistente
   const refresh = () => void queryClient.invalidateQueries({ queryKey: queryKeys.profile(userId) });
   const onError = (error: unknown) => toast.error(errorMessage(error));
   const setDefault = useMutation({
@@ -60,7 +57,6 @@ export function AddressBook() {
               </span>
               {address.isDefault && <Badge tone="success">{t("default")}</Badge>}
             </div>
-            {/* <address> => semántica HTML para datos de contacto */}
             <address className="not-italic text-slate-600">
               {address.recipientName} · {address.phone}
               <br />
@@ -84,7 +80,6 @@ export function AddressBook() {
                 size="sm"
                 variant="ghost"
                 loading={remove.isPending && remove.variables === address.id}
-                // "confirm" nativo => evita borrados accidentales sin dependencia extra
                 onClick={() => window.confirm(t("confirmDelete")) && remove.mutate(address.id)}
                 aria-label={t("deleteLabel", { line: address.line1 })}
               >

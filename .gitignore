@@ -1,12 +1,7 @@
-# .gitignore => ÚNICO archivo de exclusiones de git para TODO el monorepo (DRY: sin .gitignore por app)
-# Prettier 3 y ESLint 9 también lo leen => evita repetir las mismas rutas en .prettierignore
-
-# --- Node.js / pnpm (Express, Next, Nuxt) ---
 node_modules/
 .pnpm-store/
 *.tsbuildinfo
 
-# --- Salidas de build por framework ---
 dist/
 coverage/
 .next/
@@ -17,7 +12,6 @@ coverage/
 .cache/
 .turbo/
 
-# --- Python (FastAPI) ---
 .venv/
 __pycache__/
 *.py[cod]
@@ -27,15 +21,12 @@ mlruns/
 mlflow.db
 apps/ecommerce-fastapi/models/
 
-# --- Rust (Axum) ---
 target/
 
-# --- Variables de entorno: el .env real NUNCA se versiona (seguridad: secretos) ---
 .env
 .env.*
 !.env.example
 
-# --- Sistema operativo / IDE ---
 .DS_Store
 Thumbs.db
 .idea/

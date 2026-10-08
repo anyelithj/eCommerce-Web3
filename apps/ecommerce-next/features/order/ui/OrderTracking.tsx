@@ -1,4 +1,3 @@
-// OrderTracking.tsx => timeline del envío (lista ordenada cronológica con marcadores) + guía y fecha estimada.
 import type { Shipment, ShipmentStatus } from "@/entities/order/model/order.types";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/shared/hook/useFormat";
@@ -24,7 +23,6 @@ export function OrderTracking({ shipment }: { shipment: Shipment | null }) {
           <> · {t("eta", { date: date(shipment.estimatedDelivery) })}</>
         )}
       </p>
-      {/* <ol> => el orden de los eventos es significativo (cronológico) */}
       <ol className="relative flex flex-col gap-4 border-l-2 border-slate-200 pl-6">
         {shipment.events.map((event, index) => (
           <li key={`${event.status}-${index}`} className="relative">

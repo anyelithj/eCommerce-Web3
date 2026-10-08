@@ -1,6 +1,4 @@
-// page.tsx (/checkout/success?session=) => URL estable para enlaces externos (emails, retorno de pasarelas):
-// redirige a la confirmación de la sesión, donde se espera el webhook y se muestra el pedido.
-import { redirect } from "@/shared/lib/i18n/navigation"; // redirect con idioma
+import { redirect } from "@/shared/lib/i18n/navigation";
 import { firstParam, type PageProps } from "@/shared/types/next.types";
 import { routes } from "@/shared/constants/routes";
 

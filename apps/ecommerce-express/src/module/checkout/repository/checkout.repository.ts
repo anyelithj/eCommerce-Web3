@@ -1,6 +1,3 @@
-// checkout.repository.ts => persistencia de la sesión de checkout + RESERVA ATÓMICA de stock.
-// La reserva usa SQL condicional ("UPDATE ... WHERE stock - reserved >= q"): si dos clientes compiten por la
-// última unidad, solo uno obtiene filas afectadas = 1 (control de concurrencia optimista a nivel de fila).
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "../../../config/database.config";
 import { StockReservationException } from "../exception/checkout.exception";
@@ -21,7 +18,6 @@ export class CheckoutRepository {
     return this.prisma.checkoutSession.findUnique({ where: { id }, include: SESSION_INCLUDE });
   }
 
-  // findOpenByUser => sesiones abiertas del usuario (se abandonan al iniciar una nueva: una a la vez)
   public async findOpenByUser(
     userId: string
   ): Promise<Array<{ id: string; items: Prisma.JsonValue }>> {
@@ -31,7 +27,6 @@ export class CheckoutRepository {
     });
   }
 
-  // createWithReservation => crea la sesión y reserva el stock de cada ítem en UNA transacción
   public async createWithReservation(data: {
     userId: string;
     cartId: string;
@@ -43,18 +38,16 @@ export class CheckoutRepository {
   }): Promise<CheckoutRow> {
     return this.prisma.$transaction(async (tx) => {
       for (const item of data.items) {
-        // "$executeRaw`...`" => tagged template: los valores se envían como parámetros (sin inyección SQL)
         const affected = await tx.$executeRaw`
           UPDATE "product_variants" SET "reservedStock" = "reservedStock" + ${item.quantity}
           WHERE "id" = ${item.variantId} AND "isActive" = true AND "stock" - "reservedStock" >= ${item.quantity}`;
-        // 0 filas => no alcanzó el stock: el "throw" revierte TODAS las reservas previas de la transacción
         if (affected === 0) throw new StockReservationException(item.sku);
       }
       return tx.checkoutSession.create({
         data: {
           userId: data.userId,
           cartId: data.cartId,
-          items: data.items as unknown as Prisma.InputJsonValue, // Snapshot validado por Zod al leerlo
+          items: data.items as unknown as Prisma.InputJsonValue,
           couponId: data.couponId,
           currency: data.currency,
           ...data.totals,
@@ -72,8 +65,6 @@ export class CheckoutRepository {
     return this.prisma.checkoutSession.update({ where: { id }, data, include: SESSION_INCLUDE });
   }
 
-  // releaseAndClose => libera las reservas y cierra la sesión (ABANDONED por el usuario o EXPIRED por el job)
-  // "status: { in: OPEN_STATUSES }" en el WHERE => idempotente y sin doble liberación si dos procesos coinciden
   public async releaseAndClose(
     id: string,
     items: CheckoutItemSnapshot[],
@@ -84,16 +75,14 @@ export class CheckoutRepository {
         where: { id, status: { in: OPEN_STATUSES } },
         data: { status },
       });
-      if (closed.count === 0) return false; // Otro proceso ya la cerró o se completó el pago
+      if (closed.count === 0) return false;
       for (const item of items) {
-        // GREATEST(0, ...) => nunca deja reservas negativas aunque haya datos inconsistentes
         await tx.$executeRaw`UPDATE "product_variants" SET "reservedStock" = GREATEST(0, "reservedStock" - ${item.quantity}) WHERE "id" = ${item.variantId}`;
       }
       return true;
     });
   }
 
-  // findExpired => sesiones abiertas cuyo plazo venció (las procesa el job de expiración)
   public async findExpired(
     limit: number
   ): Promise<Array<{ id: string; items: Prisma.JsonValue; status: string }>> {

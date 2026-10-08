@@ -1,4 +1,3 @@
-// page.tsx (/checkout/[id]/payment) => paso "Pago" (Stripe Elements dentro del slot de PaymentForm).
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { initPage } from "@/shared/lib/i18n/server";

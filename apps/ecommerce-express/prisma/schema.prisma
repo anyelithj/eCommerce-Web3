@@ -1,64 +1,36 @@
-// schema.prisma => única fuente de verdad del modelo relacional (PostgreSQL).
-// SRP: cada "model" de Prisma = una tabla = una responsabilidad de datos.
-// DIP: el resto de la app (services/repositories) depende de PrismaClient (abstracción),
-//      nunca escribe SQL crudo directamente (excepto queries muy puntuales con $queryRaw:
-//      búsqueda full-text y similitud vectorial pgvector, que Prisma no expresa de forma nativa).
-//
-// Alcance (Plan de Trabajo, sprint 0.4 "Schema Prisma completo"): entidades de las FASES 1 a 4
-// (Identity · Catálogo · Commerce Flow · Finanzas/Fidelidad/Engagement), según la matriz de trazabilidad v34,
-// hoja "⚙️ Express TS". Las Notificaciones in-app y el Historial de Búsqueda viven en MongoDB (ver
-// src/module/notification/model y src/module/search/model): son documentos de alta escritura y sin relaciones.
-//
-// Convención de dinero: TODOS los importes son enteros en la unidad mínima de la moneda ("...Cents"),
-// igual que Stripe. Evita errores de redondeo de coma flotante (0.1 + 0.2 !== 0.3) en cálculos financieros.
-
-// "generator client" => le dice a Prisma que genere el cliente TypeScript tipado (@prisma/client)
 generator client {
   provider        = "prisma-client-js"
-  // "postgresqlExtensions" => habilita declarar extensiones nativas de Postgres (pgvector) en el datasource.
-  // Antes había un segundo "generator" solo para esto, que generaba el MISMO cliente dos veces (duplicado).
   previewFeatures = ["postgresqlExtensions"]
 }
 
-// "datasource db" => conexión física a la base de datos, leída desde variable de entorno (12-factor app)
 datasource db {
   provider   = "postgresql"
-  url        = env("DATABASE_URL") // Nunca hardcodear credenciales: siempre vía .env
-  extensions = [pgvector(map: "vector")] // Extensión pgvector: embeddings para búsqueda visual (sprint 2.3 / 3.1)
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
 }
 
-// =====================================================================
-// ████ FASE 1 — IDENTITY DOMAIN ████
-// =====================================================================
-
-// =====================================================================
-// ENTIDAD: User (Usuario) — Núcleo del dominio Identity
-// =====================================================================
 model User {
-  // "@id" => clave primaria. "@default(uuid())" => UUID generado en la base, no autoincremental
-  // (autoincremental filtra el conteo real de usuarios si se expone el ID; UUID lo evita)
   id String @id @default(uuid())
 
-  email            String    @unique // "@unique" => constraint UNIQUE a nivel de base de datos
-  passwordHash     String? // Nullable: un usuario que solo usa OAuth2/Web3 no tiene password propio
+  email            String    @unique
+  passwordHash     String?
   phone            String?   @unique
   firstName        String
   lastName         String
-  avatarUrl        String? // Foto de perfil (Cloudinary o la del proveedor OAuth)
-  isVerified       Boolean   @default(false) // Verificación de email/teléfono (flujo de AccountVerification)
-  isActive         Boolean   @default(true) // Soft-disable: false = cuenta desactivada (no se borra por auditoría)
-  twoFactorEnabled Boolean   @default(false) // 2FA por código OTP al email (sprint 1.1)
-  walletAddress    String?   @unique // Dirección Web3 (wagmi/ethers.js) si el usuario conectó una wallet
-  locale           String    @default("es") @db.VarChar(5) // Idioma preferido (es/en): emails, push y textos generados por el backend
-  deletedAt        DateTime? // GDPR "derecho al olvido": se anonimizan los datos personales y se marca la fecha
+  avatarUrl        String?
+  isVerified       Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  twoFactorEnabled Boolean   @default(false)
+  walletAddress    String?   @unique
+  locale           String    @default("es") @db.VarChar(5)
+  deletedAt        DateTime?
 
-  // "@relation" define claves foráneas 1-N y N-N explícitas
-  roles              UserRole[] // Relación N-N vía tabla intermedia UserRole (ver abajo)
-  sessions           Session[] // 1 usuario -> N sesiones activas/históricas
-  oauthLinks         OAuthAccount[] // 1 usuario -> N proveedores OAuth vinculados (Google/GitHub/Discord)
-  verificationTokens VerificationToken[] // Tokens de verificación de email, reset de password y 2FA
-  addresses          Address[] // Libreta de direcciones de envío/facturación
-  products           Product[]               @relation("VendorProducts") // Productos publicados (rol VENDOR)
+  roles              UserRole[]
+  sessions           Session[]
+  oauthLinks         OAuthAccount[]
+  verificationTokens VerificationToken[]
+  addresses          Address[]
+  products           Product[]               @relation("VendorProducts")
   wishlist           WishlistItem[]
   carts              Cart[]
   checkoutSessions   CheckoutSession[]
@@ -68,86 +40,71 @@ model User {
   reviewedRefunds    Refund[]                @relation("RefundReviewer")
   invoices           Invoice[]
   couponRedemptions  CouponRedemption[]
-  loyaltyAccount     LoyaltyAccount? // 1-1: cada usuario tiene a lo sumo una cuenta de fidelidad
+  loyaltyAccount     LoyaltyAccount?
   reviews            Review[]
   notificationPrefs  NotificationPreference?
   pushTokens         PushToken[]
   statusChanges      OrderStatusHistory[]
 
-  createdAt DateTime @default(now()) // Timestamp de auditoría: se setea solo una vez
-  updatedAt DateTime @updatedAt // Prisma la actualiza automáticamente en cada UPDATE
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // "@@map" => nombre real de la tabla en Postgres (convención snake_case en DB, camelCase en TS)
   @@map("users")
 }
 
-// =====================================================================
-// ENTIDAD: Session (Sesión Autenticada) — Refresh tokens activos/revocados
-// =====================================================================
 model Session {
   id String @id @default(uuid())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // onDelete: Cascade => si se borra el User, sus sesiones se borran automáticamente (integridad referencial)
 
-  // Hash SHA-256 del refresh token (nunca el token en claro): si la base se filtra, los tokens no sirven.
-  // Se rota en cada refresh (Refresh Token Rotation): un token reutilizado = posible robo => sesión revocada.
   refreshTokenHash String   @unique
-  userAgent        String? // Metadata de dispositivo/navegador (para mostrar "sesiones activas" al usuario)
+  userAgent        String?
   ipAddress        String?
-  isRevoked        Boolean  @default(false) // true = sesión cerrada manualmente (logout) o por rotación de token
-  expiresAt        DateTime // Fecha de expiración del refresh token
+  isRevoked        Boolean  @default(false)
+  expiresAt        DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId]) // Índice explícito: acelera "obtener todas las sesiones de un usuario"
+  @@index([userId])
   @@map("sessions")
 }
 
-// =====================================================================
-// ENTIDAD: OAuthAccount (Sesión OAuth) — Vínculo con proveedores externos
-// =====================================================================
 model OAuthAccount {
   id String @id @default(uuid())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  provider          OAuthProvider // Enum tipado: Google | GitHub | Discord (ver enum abajo)
-  providerAccountId String // ID único que el proveedor externo asigna a la cuenta (sub de OIDC). Antes: typo "providerAccantId"
+  provider          OAuthProvider
+  providerAccountId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // "@@unique" compuesto => un mismo proveedor no puede vincular 2 veces la misma cuenta externa
   @@unique([provider, providerAccountId])
   @@index([userId])
   @@map("oauth_accounts")
 }
 
-// "enum" de Prisma => se traduce a un tipo ENUM nativo en Postgres
 enum OAuthProvider {
   GOOGLE
   GITHUB
   DISCORD
 }
 
-// =====================================================================
-// ENTIDAD: VerificationToken (Verificación de Cuenta) — email, reset de password y OTP 2FA
-// =====================================================================
 model VerificationToken {
   id String @id @default(uuid())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  purpose    VerificationPurpose // Para qué sirve el token (un token de reset NO sirve para verificar email)
-  tokenHash  String              @unique // SHA-256 del token/OTP: el valor en claro solo viaja por email
-  attempts   Int                 @default(0) // Intentos fallidos (el OTP de 2FA se bloquea tras 5)
+  purpose    VerificationPurpose
+  tokenHash  String              @unique
+  attempts   Int                 @default(0)
   expiresAt  DateTime
-  consumedAt DateTime? // Un solo uso: al consumirse queda inválido (previene replay)
+  consumedAt DateTime?
 
   createdAt DateTime @default(now())
 
@@ -161,16 +118,13 @@ enum VerificationPurpose {
   TWO_FACTOR
 }
 
-// =====================================================================
-// ENTIDAD: Role (Rol) — RBAC (Role-Based Access Control)
-// =====================================================================
 model Role {
   id          String  @id @default(uuid())
-  name        String  @unique // Ej: "ADMIN", "VENDOR", "CUSTOMER" — nombre único, case-sensitive
+  name        String  @unique
   description String?
 
-  users       UserRole[] // N-N con User
-  permissions RolePermission[] // N-N con Permission
+  users       UserRole[]
+  permissions RolePermission[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -178,29 +132,20 @@ model Role {
   @@map("roles")
 }
 
-// =====================================================================
-// ENTIDAD: Permission (Permiso) — Acción + Recurso granular
-// =====================================================================
 model Permission {
   id          String  @id @default(uuid())
-  action      String // Ej: "CREATE", "READ", "UPDATE", "DELETE" (alineado a taxonomía CRUD de la matriz)
-  resource    String // Ej: "product", "order", "user" — sobre qué entidad aplica la acción
+  action      String
+  resource    String
   description String?
 
-  roles RolePermission[] // N-N con Role
+  roles RolePermission[]
 
   createdAt DateTime @default(now())
 
-  // Un mismo par (action, resource) no puede repetirse => evita permisos duplicados
   @@unique([action, resource])
   @@map("permissions")
 }
 
-// =====================================================================
-// TABLAS INTERMEDIAS N-N (patrón estándar de Prisma para relaciones muchos-a-muchos con metadata)
-// =====================================================================
-
-// UserRole => un usuario puede tener varios roles, y un rol pertenece a varios usuarios
 model UserRole {
   userId String
   roleId String
@@ -208,14 +153,12 @@ model UserRole {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  assignedAt DateTime @default(now()) // Metadata extra que una tabla N-N "pura" no podría guardar
+  assignedAt DateTime @default(now())
 
-  // "@@id" compuesta => la combinación (userId, roleId) ES la clave primaria (no se repite el par)
   @@id([userId, roleId])
   @@map("user_roles")
 }
 
-// RolePermission => un rol puede tener varios permisos, y un permiso puede estar en varios roles
 model RolePermission {
   roleId       String
   permissionId String
@@ -227,16 +170,13 @@ model RolePermission {
   @@map("role_permissions")
 }
 
-// =====================================================================
-// ENTIDAD: Address (Dirección) — perfil completo del usuario (GET /user/:id "con direcciones")
-// =====================================================================
 model Address {
   id String @id @default(uuid())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  label         String? // "Casa", "Oficina"
+  label         String?
   recipientName String
   phone         String
   line1         String
@@ -244,7 +184,7 @@ model Address {
   city          String
   state         String
   postalCode    String
-  country       String  @db.Char(2) // ISO 3166-1 alpha-2 ("CO", "US"); @db.Char(2) => CHAR(2) nativo
+  country       String  @db.Char(2)
   isDefault     Boolean @default(false)
 
   checkoutSessions CheckoutSession[]
@@ -256,27 +196,25 @@ model Address {
   @@map("addresses")
 }
 
-// Preferencias de notificación por canal (Account hub > Settings, sprint 4.3)
 model NotificationPreference {
   userId    String  @id
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   email     Boolean @default(true)
   push      Boolean @default(true)
   inApp     Boolean @default(true)
-  marketing Boolean @default(false) // Opt-in explícito (GDPR): el marketing nunca viene activado por defecto
+  marketing Boolean @default(false)
 
   updatedAt DateTime @updatedAt
 
   @@map("notification_preferences")
 }
 
-// Token de dispositivo para push FCM (un usuario puede tener varios dispositivos)
 model PushToken {
   id       String @id @default(uuid())
   userId   String
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   token    String @unique
-  platform String // "web" | "android" | "ios"
+  platform String
 
   createdAt DateTime @default(now())
 
@@ -284,20 +222,14 @@ model PushToken {
   @@map("push_tokens")
 }
 
-// =====================================================================
-// ████ FASE 2 — PRODUCT CATALOG DOMAIN ████
-// =====================================================================
-
-// Category (Categoría) — árbol auto-referenciado (patrón Composite: una categoría contiene subcategorías)
 model Category {
   id          String  @id @default(uuid())
   name        String
-  slug        String  @unique // URL amigable para SEO: /categories/ropa-hombre
+  slug        String  @unique
   description String?
   imageUrl    String?
-  position    Int     @default(0) // Orden manual dentro del mismo nivel del árbol
+  position    Int     @default(0)
 
-  // Relación auto-referenciada 1-N: "parent" y "children" usan el MISMO nombre de relación
   parentId String?
   parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
   children Category[] @relation("CategoryTree")
@@ -305,7 +237,7 @@ model Category {
   products Product[]
 
   isActive  Boolean   @default(true)
-  deletedAt DateTime? // Soft delete: la fila se conserva para no romper órdenes/reportes históricos
+  deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -313,14 +245,13 @@ model Category {
   @@map("categories")
 }
 
-// Brand (Marca)
 model Brand {
   id           String  @id @default(uuid())
   name         String  @unique
   slug         String  @unique
   description  String?
   logoUrl      String?
-  logoPublicId String? // public_id de Cloudinary: necesario para borrar/transformar el asset
+  logoPublicId String?
   website      String?
 
   products Product[]
@@ -333,14 +264,13 @@ model Brand {
   @@map("brands")
 }
 
-// Collection (Colección) — agrupación temática/curada de productos ("Verano 2026", "Black Friday")
 model Collection {
   id          String    @id @default(uuid())
   name        String
   slug        String    @unique
   description String?
   imageUrl    String?
-  startsAt    DateTime? // Vigencia opcional: colecciones de temporada
+  startsAt    DateTime?
   endsAt      DateTime?
 
   products CollectionProduct[]
@@ -353,7 +283,6 @@ model Collection {
   @@map("collections")
 }
 
-// N-N Collection <-> Product con orden manual dentro de la colección
 model CollectionProduct {
   collectionId String
   productId    String
@@ -367,37 +296,32 @@ model CollectionProduct {
 }
 
 enum ProductStatus {
-  DRAFT // Borrador: no visible en la tienda
-  ACTIVE // Publicado
-  ARCHIVED // Archivado (DELETE de la matriz = archivar, nunca borrado físico)
+  DRAFT
+  ACTIVE
+  ARCHIVED
 }
 
-// Product (Producto) — el precio y el stock viven en las VARIANTES (talla/color); el producto es la ficha común
 model Product {
   id          String        @id @default(uuid())
   name        String
   slug        String        @unique
   description String
   status      ProductStatus @default(DRAFT)
-  currency    String        @default("COP") @db.Char(3) // ISO 4217
+  currency    String        @default("COP") @db.Char(3)
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   brandId    String?
   brand      Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
-  vendorId   String? // Usuario VENDOR dueño del producto (marketplace)
+  vendorId   String?
   vendor     User?     @relation("VendorProducts", fields: [vendorId], references: [id], onDelete: SetNull)
 
-  // Rango de precio desnormalizado desde las variantes: permite filtrar/ordenar por precio sin JOIN
   minPriceCents Int @default(0)
   maxPriceCents Int @default(0)
 
-  // Agregados desnormalizados de reseñas (se recalculan al aprobar/editar reseñas): listados sin AVG() en vivo
   ratingAvg   Float @default(0)
   ratingCount Int   @default(0)
 
-  // Embedding visual CLIP (512 dimensiones) calculado por FastAPI; "Unsupported" => tipo nativo que Prisma
-  // no mapea: se lee/escribe con $queryRaw/$executeRaw (búsqueda por imagen con el operador <=> de pgvector)
   embedding Unsupported("vector(512)")?
 
   variants     ProductVariant[]
@@ -407,7 +331,7 @@ model Product {
   reviews      Review[]
   orderItems   OrderItem[]
 
-  archivedAt DateTime? // Soft delete (status ARCHIVED + fecha)
+  archivedAt DateTime?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
@@ -418,19 +342,18 @@ model Product {
   @@map("products")
 }
 
-// ProductVariant (Variante) — unidad vendible con SKU, precio y stock propios
 model ProductVariant {
   id                  String  @id @default(uuid())
   productId           String
   product             Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  sku                 String  @unique // Stock Keeping Unit: identificador de inventario
-  name                String // "Rojo / M"
-  attributes          Json    @default("{}") // { "color": "Rojo", "size": "M" } — facetas de filtrado
+  sku                 String  @unique
+  name                String
+  attributes          Json    @default("{}")
   priceCents          Int
-  compareAtPriceCents Int? // Precio "antes" para mostrar descuento tachado
-  stock               Int     @default(0) // Unidades físicas
-  reservedStock       Int     @default(0) // Unidades apartadas por checkouts abiertos (disponible = stock - reservedStock)
-  weightGrams         Int     @default(0) // Base para cotizar el envío
+  compareAtPriceCents Int?
+  stock               Int     @default(0)
+  reservedStock       Int     @default(0)
+  weightGrams         Int     @default(0)
   isActive            Boolean @default(true)
 
   images     ProductImage[]
@@ -444,19 +367,18 @@ model ProductVariant {
   @@map("product_variants")
 }
 
-// ProductImage — imágenes en Cloudinary (URL + public_id para transformaciones f_auto/q_auto)
 model ProductImage {
   id        String          @id @default(uuid())
   productId String
   product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variantId String? // Imagen específica de una variante (ej. el color rojo)
+  variantId String?
   variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
   url       String
   publicId  String
-  alt       String // Texto alternativo OBLIGATORIO: WCAG 1.1.1 y SEO de imágenes
+  alt       String
   position  Int             @default(0)
   width     Int?
-  height    Int? // Dimensiones reales: next/image las usa para evitar CLS (Cumulative Layout Shift)
+  height    Int?
 
   createdAt DateTime @default(now())
 
@@ -464,7 +386,6 @@ model ProductImage {
   @@map("product_images")
 }
 
-// Lista de deseos (Account hub > Wishlist, sprint 4.3)
 model WishlistItem {
   userId    String
   productId String
@@ -476,23 +397,18 @@ model WishlistItem {
   @@map("wishlist_items")
 }
 
-// =====================================================================
-// ████ FASE 3 — COMMERCE FLOW ████
-// =====================================================================
-
 enum CartStatus {
-  ACTIVE // Carrito en uso (máximo uno por usuario, regla del CartService)
-  CONVERTED // Se convirtió en checkout/orden
-  ABANDONED // Expiró sin compra (insumo para campañas de carrito abandonado)
+  ACTIVE
+  CONVERTED
+  ABANDONED
 }
 
-// Cart (Carrito) — PostgreSQL es la fuente de verdad; Redis cachea la lectura con TTL (patrón Cache-Aside)
 model Cart {
   id        String     @id @default(uuid())
   userId    String
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   status    CartStatus @default(ACTIVE)
-  expiresAt DateTime // Se extiende en cada modificación; vencido => ABANDONED
+  expiresAt DateTime
 
   items            CartItem[]
   checkoutSessions CheckoutSession[]
@@ -504,7 +420,6 @@ model Cart {
   @@map("carts")
 }
 
-// CartItem (Ítem del Carrito)
 model CartItem {
   id             String         @id @default(uuid())
   cartId         String
@@ -512,26 +427,24 @@ model CartItem {
   variantId      String
   variant        ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   quantity       Int
-  unitPriceCents Int // Snapshot del precio al agregar (se re-valida al iniciar checkout)
+  unitPriceCents Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Una variante aparece una sola vez por carrito: agregarla de nuevo suma cantidad
   @@unique([cartId, variantId])
   @@map("cart_items")
 }
 
 enum CheckoutStatus {
-  OPEN // Creado con los ítems del carrito y stock reservado
-  ADDRESS_SET // Dirección y tarifa de envío elegidas
-  PAYMENT_PENDING // PaymentIntent de Stripe creado, esperando confirmación
-  COMPLETED // Pago confirmado y orden creada
-  ABANDONED // Cancelado por el usuario (stock liberado)
-  EXPIRED // Venció sin pagar (stock liberado por el job de expiración)
+  OPEN
+  ADDRESS_SET
+  PAYMENT_PENDING
+  COMPLETED
+  ABANDONED
+  EXPIRED
 }
 
-// CheckoutSession (Sesión de Compra) — Saga: cada paso ACTUALIZA la misma sesión (UPDATE, no CREATE)
 model CheckoutSession {
   id     String         @id @default(uuid())
   userId String
@@ -540,13 +453,12 @@ model CheckoutSession {
   cart   Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
   status CheckoutStatus @default(OPEN)
 
-  // Snapshot inmutable de los ítems (precio/cantidad) al abrir el checkout: el total no cambia si el catálogo cambia
   items Json
 
   addressId        String?
   address          Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
-  shippingAddress  Json? // Copia de la dirección (la orden no debe cambiar si el usuario edita su libreta)
-  shippingRateCode String? // Tarifa elegida (ej. "SERVIENTREGA_STANDARD")
+  shippingAddress  Json?
+  shippingRateCode String?
 
   couponId String?
   coupon   Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
@@ -558,7 +470,7 @@ model CheckoutSession {
   taxCents      Int    @default(0)
   totalCents    Int
 
-  expiresAt DateTime // La reserva de stock caduca (por defecto 30 min)
+  expiresAt DateTime
   order     Order?
   payments  Payment[]
 
@@ -570,7 +482,6 @@ model CheckoutSession {
   @@map("checkout_sessions")
 }
 
-// Máquina de estados de la orden (patrón State en order.model.ts define las transiciones válidas)
 enum OrderStatus {
   CONFIRMED
   PREPARING
@@ -580,15 +491,14 @@ enum OrderStatus {
   CANCELLED
 }
 
-// Order (Pedido)
 model Order {
   id          String      @id @default(uuid())
-  orderNumber String      @unique // Número legible para el cliente/soporte: "ORD-20260929-4F2A"
+  orderNumber String      @unique
   userId      String
   user        User        @relation(fields: [userId], references: [id], onDelete: Restrict)
   status      OrderStatus @default(CONFIRMED)
 
-  checkoutSessionId String          @unique // 1-1: una sesión de checkout genera como máximo una orden (idempotencia)
+  checkoutSessionId String          @unique
   checkoutSession   CheckoutSession @relation(fields: [checkoutSessionId], references: [id], onDelete: Restrict)
 
   currency        String @db.Char(3)
@@ -620,7 +530,6 @@ model Order {
   @@map("orders")
 }
 
-// OrderItem — copia desnormalizada del producto (la orden es un documento histórico: no cambia si el producto cambia)
 model OrderItem {
   id             String          @id @default(uuid())
   orderId        String
@@ -641,7 +550,6 @@ model OrderItem {
   @@map("order_items")
 }
 
-// Bitácora de cambios de estado (Event Sourcing ligero: auditoría completa del ciclo de vida)
 model OrderStatusHistory {
   id          String       @id @default(uuid())
   orderId     String
@@ -659,26 +567,25 @@ model OrderStatusHistory {
 
 enum PaymentStatus {
   PENDING
-  REQUIRES_ACTION // 3-D Secure u otra acción del cliente
+  REQUIRES_ACTION
   SUCCEEDED
   FAILED
-  CANCELLED // Anulado (voidPayment) antes de capturarse
+  CANCELLED
   REFUNDED
   PARTIALLY_REFUNDED
 }
 
-// Payment (Pago) — Stripe es el PSP exclusivo del proyecto (matriz: "PSP exclusivo")
 model Payment {
   id                String          @id @default(uuid())
   userId            String
   user              User            @relation(fields: [userId], references: [id], onDelete: Restrict)
   checkoutSessionId String
   checkoutSession   CheckoutSession @relation(fields: [checkoutSessionId], references: [id], onDelete: Restrict)
-  orderId           String? // Se completa cuando el webhook confirma el pago y se crea la orden
+  orderId           String?
   order             Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   provider          String        @default("STRIPE")
-  providerPaymentId String        @unique // "pi_..." (PaymentIntent de Stripe)
+  providerPaymentId String        @unique
   amountCents       Int
   refundedCents     Int           @default(0)
   currency          String        @db.Char(3)
@@ -695,9 +602,8 @@ model Payment {
   @@map("payments")
 }
 
-// PaymentWebhook (Webhook de Pago) — idempotencia: Stripe puede reenviar el mismo evento varias veces
 model PaymentWebhookEvent {
-  id          String   @id // ID del evento de Stripe ("evt_..."): la PK impide procesarlo dos veces
+  id          String   @id
   type        String
   payload     Json
   processedAt DateTime @default(now())
@@ -715,13 +621,12 @@ enum ShipmentStatus {
   RETURNED
 }
 
-// Shipping (Envío) + ShippingLabel (Guía): la guía son los campos carrier/trackingNumber/labelUrl
 model Shipment {
   id                String         @id @default(uuid())
-  orderId           String         @unique // 1-1 con la orden
+  orderId           String         @unique
   order             Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   status            ShipmentStatus @default(PENDING)
-  rateCode          String // Tarifa cotizada (ShippingRate)
+  rateCode          String
   carrier           String?
   service           String?
   trackingNumber    String?        @unique
@@ -740,7 +645,6 @@ model Shipment {
   @@map("shipments")
 }
 
-// Eventos de rastreo del envío (timeline de "OrderTracking" en el frontend)
 model ShipmentEvent {
   id          String         @id @default(uuid())
   shipmentId  String
@@ -754,35 +658,30 @@ model ShipmentEvent {
   @@map("shipment_events")
 }
 
-// =====================================================================
-// ████ FASE 4 — FINANCE, LOYALTY & ENGAGEMENT ████
-// =====================================================================
-
 enum InvoiceStatus {
   DRAFT
-  ISSUED // Generada y firmada (CUFE calculado)
-  ACCEPTED // Validada por la DIAN
+  ISSUED
+  ACCEPTED
   REJECTED
 }
 
-// Invoice (Factura electrónica DIAN — Colombia)
 model Invoice {
   id       String        @id @default(uuid())
-  number   String        @unique // Prefijo + consecutivo autorizado por la DIAN: "SETP990000001"
+  number   String        @unique
   orderId  String        @unique
   order    Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
   userId   String
   user     User          @relation(fields: [userId], references: [id], onDelete: Restrict)
   status   InvoiceStatus @default(DRAFT)
-  cufe     String?       @unique // Código Único de Factura Electrónica (SHA-384, anexo técnico DIAN)
-  buyer    Json // Datos fiscales del comprador (tipo y número de documento, nombre, email)
+  cufe     String?       @unique
+  buyer    Json
   currency String        @db.Char(3)
 
   subtotalCents Int
   taxCents      Int
   totalCents    Int
 
-  xml          String? @db.Text // Documento UBL 2.1
+  xml          String? @db.Text
   pdfUrl       String?
   dianResponse Json?
 
@@ -795,7 +694,6 @@ model Invoice {
   @@map("invoices")
 }
 
-// CreditNote (Nota de Crédito) — documento INMUTABLE vinculado a una factura (no se edita ni borra)
 model CreditNote {
   id          String        @id @default(uuid())
   number      String        @unique
@@ -805,7 +703,7 @@ model CreditNote {
   refund      Refund?       @relation(fields: [refundId], references: [id], onDelete: SetNull)
   reason      String
   amountCents Int
-  cude        String?       @unique // Código Único de Documento Electrónico
+  cude        String?       @unique
   status      InvoiceStatus @default(ISSUED)
   xml         String?       @db.Text
 
@@ -816,11 +714,11 @@ model CreditNote {
 }
 
 enum RefundStatus {
-  REQUESTED // Solicitud del cliente con motivo y evidencia
-  APPROVED // Aprobada por soporte/admin
+  REQUESTED
+  APPROVED
   REJECTED
-  PROCESSED // Dinero devuelto en Stripe
-  CANCELLED // Cancelada por el cliente mientras estaba pendiente
+  PROCESSED
+  CANCELLED
 }
 
 enum RefundReason {
@@ -832,7 +730,6 @@ enum RefundReason {
   OTHER
 }
 
-// Refund (Devolución / Reembolso)
 model Refund {
   id               String       @id @default(uuid())
   orderId          String
@@ -843,10 +740,10 @@ model Refund {
   payment          Payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)
   reason           RefundReason
   description      String
-  evidenceUrls     String[] // Fotos de evidencia (Cloudinary)
+  evidenceUrls     String[]
   amountCents      Int
   status           RefundStatus @default(REQUESTED)
-  providerRefundId String?      @unique // "re_..." de Stripe
+  providerRefundId String?      @unique
   reviewedById     String?
   reviewedBy       User?        @relation("RefundReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
   reviewNote       String?
@@ -862,21 +759,20 @@ model Refund {
 }
 
 enum DiscountType {
-  PERCENTAGE // value = porcentaje entero (10 = 10%)
-  FIXED_AMOUNT // value = monto en centavos
-  FREE_SHIPPING // value se ignora: el envío queda en 0
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SHIPPING
 }
 
-// Coupon (Cupón)
 model Coupon {
   id               String       @id @default(uuid())
-  code             String       @unique // Siempre en MAYÚSCULAS (normalizado por el service)
+  code             String       @unique
   description      String?
   type             DiscountType
   value            Int
   minOrderCents    Int          @default(0)
-  maxDiscountCents Int? // Tope del descuento para cupones porcentuales
-  usageLimit       Int? // null = ilimitado
+  maxDiscountCents Int?
+  usageLimit       Int?
   usagePerUser     Int          @default(1)
   usedCount        Int          @default(0)
   startsAt         DateTime
@@ -893,7 +789,6 @@ model Coupon {
   @@map("coupons")
 }
 
-// Uso efectivo de un cupón en una orden pagada (métricas + límite por usuario)
 model CouponRedemption {
   id            String   @id @default(uuid())
   couponId      String
@@ -916,13 +811,12 @@ enum LoyaltyTier {
   PLATINUM
 }
 
-// LoyaltyAccount (Cuenta de Fidelidad)
 model LoyaltyAccount {
   id             String      @id @default(uuid())
   userId         String      @unique
   user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pointsBalance  Int         @default(0) // Puntos canjeables hoy
-  lifetimePoints Int         @default(0) // Puntos históricos: definen el nivel (no bajan al canjear)
+  pointsBalance  Int         @default(0)
+  lifetimePoints Int         @default(0)
   tier           LoyaltyTier @default(BRONZE)
 
   transactions LoyaltyTransaction[]
@@ -939,19 +833,18 @@ enum LoyaltyOperation {
   SUBTRACT
 }
 
-// Libro mayor de puntos (ledger append-only: el saldo es la suma de movimientos, auditable)
 model LoyaltyTransaction {
   id           String           @id @default(uuid())
   accountId    String
   account      LoyaltyAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
   operation    LoyaltyOperation
-  points       Int // Siempre positivo; el signo lo da "operation"
-  remaining    Int              @default(0) // Puntos de este lote aún sin canjear/vencer (consumo FIFO)
-  reason       String // Texto legible (auditoría); para mostrar se usa reasonCode traducido al idioma del usuario
-  reasonCode   String?          @db.VarChar(40) // Código estable del concepto (PURCHASE, REFUND_ADJUSTMENT, EXPIRATION); null = texto libre de un admin
-  reasonParams Json? // Parámetros del concepto (ej. { orderNumber })
+  points       Int
+  remaining    Int              @default(0)
+  reason       String
+  reasonCode   String?          @db.VarChar(40)
+  reasonParams Json?
   orderId      String?
-  expiresAt    DateTime? // Solo los ADD vencen (12 meses por defecto)
+  expiresAt    DateTime?
   createdAt    DateTime         @default(now())
 
   @@index([accountId, createdAt])
@@ -965,7 +858,6 @@ enum BadgeStatus {
   FAILED
 }
 
-// NFTBadge (Insignia NFT) — ERC-721 minteado con ethers.js; metadata JSON en IPFS
 model NftBadge {
   id              String         @id @default(uuid())
   accountId       String
@@ -973,27 +865,25 @@ model NftBadge {
   tier            LoyaltyTier
   name            String
   imageUrl        String
-  metadataUri     String? // ipfs://<CID>
+  metadataUri     String?
   contractAddress String?
-  tokenId         String? // uint256 como string (puede exceder Number.MAX_SAFE_INTEGER)
+  tokenId         String?
   txHash          String?        @unique
   status          BadgeStatus    @default(PENDING)
   failureReason   String?
   mintedAt        DateTime?
   createdAt       DateTime       @default(now())
 
-  // Un nivel se certifica una sola vez por cuenta
   @@unique([accountId, tier])
   @@map("nft_badges")
 }
 
 enum ReviewStatus {
-  PENDING // En cola de moderación
+  PENDING
   APPROVED
   REJECTED
 }
 
-// Review (Reseña)
 model Review {
   id                 String       @id @default(uuid())
   productId          String
@@ -1002,21 +892,20 @@ model Review {
   user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderId            String?
   order              Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  rating             Int // 1..5 (validado por Zod y por CHECK en la migración)
+  rating             Int
   title              String
   body               String
   status             ReviewStatus @default(PENDING)
-  sentimentScore     Float        @default(0) // -1 (negativo) .. 1 (positivo)
+  sentimentScore     Float        @default(0)
   isVerifiedPurchase Boolean      @default(false)
   moderationNote     String?
   vendorReply        String?
   vendorRepliedAt    DateTime?
-  editableUntil      DateTime // Ventana de edición (30 días)
+  editableUntil      DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Una reseña por producto y usuario
   @@unique([productId, userId])
   @@index([productId, status])
   @@map("reviews")

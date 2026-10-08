@@ -1,20 +1,3 @@
-// publicar-sin-comentarios.mjs => copia el monorepo a un repositorio "espejo" SIN comentarios y lo commitea.
-// Este repo (con comentarios) es el de estudio; el espejo es el que se sube a GitHub.
-//   pnpm publicar                         # sincroniza y commitea en ../<repo>-publico
-//   pnpm publicar --push                  # además hace git push del espejo
-//   pnpm publicar --dest ../otra/ruta     # espejo en otra carpeta
-// Nunca modifica los archivos de ESTE repositorio: solo lee y escribe en la carpeta destino.
-//
-// Por lenguaje (cada uno con su analizador, para no confundir "//" o "#" dentro de strings, URLs o JSX):
-//   .ts .tsx .js .mjs .cjs .json => AST de TypeScript (ya instalado en la raíz)
-//   .vue => <!-- --> del template + TS en <script> + CSS en <style>
-//   .py  => módulo "tokenize" de Python (los docstrings se conservan: FastAPI los usa en OpenAPI)
-//   .rs  => escáner propio (strings, raw strings, char vs lifetime, comentarios anidados)
-//   .css => escáner propio
-//   YAML, TOML, Dockerfile, nginx, .env.example, .gitignore, hooks... => comentarios "#"; .prisma => "//"
-// Se conservan las directivas que cambian el comportamiento de herramientas: eslint-disable, @ts-expect-error,
-// /// <reference>, # noqa, # type: ignore, shebang (#!), "# syntax=" de Dockerfile...
-// Sin tocar: .md (documentación), .sql (Prisma y sqlx guardan checksum de cada migración) e ipynb.
 import { spawnSync } from "node:child_process";
 import {
   copyFileSync,
@@ -29,18 +12,16 @@ import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import ts from "typescript";
 
-// Directivas: solo cuentan si el comentario EMPIEZA con ellas ("// la config de eslint-config..." es prosa y se borra)
 const KEEP =
   /^(\/\/\/\s*<reference|\/\*!)|^(\/\/|\/\*+|#)\s*(eslint-|eslint\s|global\s|@ts-|prettier-ignore|istanbul\s|[#@]__PURE__|webpackChunkName|@vite-ignore)/;
-const MARK = "\u0000"; // Marca temporal donde había un comentario (para saber qué líneas quedaron vacías)
+const MARK = "\u0000";
 
-// cleanup => aplica los rangos [inicio, fin) a borrar y limpia lo que dejan: líneas vacías, espacios sobrantes
 export function cleanup(text, ranges, maxBlank = 1) {
   const sorted = ranges.filter(([s, e]) => e > s).sort((a, b) => a[0] - b[0]);
   let out = "";
   let last = 0;
   for (const [s, e] of sorted) {
-    if (s < last) continue; // Rango contenido en otro ya borrado
+    if (s < last) continue;
     out += text.slice(last, s) + MARK;
     last = e;
   }
@@ -51,15 +32,13 @@ export function cleanup(text, ranges, maxBlank = 1) {
       lines.push(line);
       continue;
     }
-    // Conserva la sangría original; quita el espacio que separaba el comentario del código
     const indent = /^[ \t]*/.exec(line)[0];
     const cr = line.endsWith("\r") ? "\r" : "";
     let rest = line.slice(indent.length);
     while (rest.startsWith(MARK)) rest = rest.slice(1).replace(/^[ \t]*/, "");
     const clean = (indent + rest).replaceAll(MARK, "").trimEnd();
-    if (clean.trim() !== "") lines.push(clean + cr); // Línea que solo tenía comentario => se elimina
+    if (clean.trim() !== "") lines.push(clean + cr);
   }
-  // Colapsa las líneas en blanco que quedan donde había bloques de comentarios
   const result = [];
   let blanks = 0;
   for (const line of lines) {
@@ -69,7 +48,6 @@ export function cleanup(text, ranges, maxBlank = 1) {
   return result.join("\n");
 }
 
-// --- TypeScript / JavaScript / JSON ---
 function scriptKind(file) {
   const ext = extname(file);
   if (ext === ".tsx") return ts.ScriptKind.TSX;
@@ -81,7 +59,7 @@ function scriptKind(file) {
 export function tsRanges(text, file = "x.ts") {
   const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, scriptKind(file));
   const found = new Map();
-  const jsxText = []; // Texto visible de JSX: "//" ahí es texto, no comentario
+  const jsxText = [];
   const add = (r) => {
     if (!KEEP.test(text.slice(r.pos, r.end))) found.set(r.pos, r.end);
   };
@@ -90,7 +68,6 @@ export function tsRanges(text, file = "x.ts") {
       return;
     if (node.kind === ts.SyntaxKind.JsxText) jsxText.push([node.pos, node.end]);
     if (ts.isJsxExpression(node) && !node.expression) {
-      // {/* comentario */} en JSX => se borra la expresión completa (llaves incluidas)
       found.set(node.getStart(sf), node.end);
       return;
     }
@@ -102,7 +79,6 @@ export function tsRanges(text, file = "x.ts") {
   return [...found].filter(([s]) => !jsxText.some(([a, b]) => s >= a && s < b));
 }
 
-// --- CSS ---
 export function cssRanges(text) {
   const ranges = [];
   for (let i = 0; i < text.length; i++) {
@@ -119,7 +95,6 @@ export function cssRanges(text) {
   return ranges;
 }
 
-// --- Rust ---
 export function rustRanges(text) {
   const ranges = [];
   let i = 0;
@@ -127,7 +102,6 @@ export function rustRanges(text) {
     const c = text[i];
     const raw = /^b?r(#*)"/.exec(text.slice(i, i + 260));
     if (raw && !/\w/.test(text[i - 1] ?? "")) {
-      // Raw string r#"..."# : termina en comilla + el mismo número de "#"
       const close = '"' + raw[1];
       const end = text.indexOf(close, i + raw[0].length);
       i = end === -1 ? text.length : end + close.length;
@@ -135,7 +109,6 @@ export function rustRanges(text) {
       for (i++; i < text.length && text[i] !== '"'; i++) if (text[i] === "\\") i++;
       i++;
     } else if (c === "'") {
-      // Char literal ('a', '\n', '"') o lifetime ('a, 'static)
       const ch = String.fromCodePoint(text.codePointAt(i + 1) ?? 32);
       if (text[i + 1] === "\\") i = text.indexOf("'", i + 3) + 1;
       else if (text[i + 1 + ch.length] === "'") i += 2 + ch.length;
@@ -160,7 +133,6 @@ export function rustRanges(text) {
   return ranges;
 }
 
-// --- Formatos de línea: "#" (YAML, TOML, Dockerfile, nginx, .env, shell, ignore) o "//" (Prisma) ---
 export function lineRanges(text, marker = "#", file = "") {
   const ranges = [];
   let offset = 0;
@@ -187,7 +159,6 @@ export function lineRanges(text, marker = "#", file = "") {
   return ranges;
 }
 
-// --- Vue (SFC): template HTML + <script> TS + <style> CSS ---
 export function vueRanges(text) {
   const ranges = [];
   const blocks = [];
@@ -207,7 +178,6 @@ export function vueRanges(text) {
   return ranges;
 }
 
-// --- Python: lo resuelve el propio tokenizador de Python (un solo proceso para todos los archivos) ---
 const PY_SCRIPT = `
 import io, json, sys, tokenize
 out = {}
@@ -238,10 +208,9 @@ export function stripPython(paths) {
   for (const [path, comments] of Object.entries(JSON.parse(res.stdout))) {
     const text = readFileSync(path, "utf8");
     if (comments === null) {
-      result[path] = text; // Archivo con error de sintaxis: se copia tal cual
+      result[path] = text;
       continue;
     }
-    // tokenize da (línea, columna en caracteres): se traduce a posición en el string de JS
     const starts = [0];
     for (let i = 0; i < text.length; i++) if (text[i] === "\n") starts.push(i + 1);
     const ranges = comments
@@ -251,7 +220,7 @@ export function stripPython(paths) {
         const s = lineStart + [...text.slice(lineStart)].slice(0, col).join("").length;
         return [s, s + body.length];
       });
-    result[path] = cleanup(text, ranges, 2); // PEP 8: hasta 2 líneas en blanco entre definiciones
+    result[path] = cleanup(text, ranges, 2);
   }
   return result;
 }
@@ -271,7 +240,6 @@ const HASH_FILES = new Set([
 const HASH_NAMES = new Set(["Dockerfile", "pre-commit", "commit-msg", ".env.example"]);
 const TS_EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json"]);
 
-// stripText => texto sin comentarios, o null si el tipo de archivo se copia sin cambios
 export function stripText(file, text) {
   const ext = extname(file) || basename(file);
   if (TS_EXT.has(ext)) return cleanup(text, tsRanges(text, file));
@@ -305,14 +273,13 @@ function main() {
   if (!existsSync(join(dest, ".git"))) {
     mkdirSync(dest, { recursive: true });
     git(dest, "init", "-b", "main");
-    git(dest, "config", "core.longpaths", "true"); // Windows: rutas de más de 260 caracteres
+    git(dest, "config", "core.longpaths", "true");
     console.log(
       `Repositorio espejo creado en ${dest}. Conéctalo a GitHub:\n  git -C "${dest}" remote add origin <url-del-repo>`
     );
   }
-  emptyExceptGit(dest); // Archivos borrados en este repo también desaparecen del espejo
+  emptyExceptGit(dest);
 
-  // Archivos versionados + nuevos no ignorados (respeta .gitignore: nunca copia .env, node_modules, builds)
   const files = git(root, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
     .split("\0")
     .filter(Boolean);
@@ -320,7 +287,7 @@ function main() {
   let stripped = 0;
   for (const file of files) {
     const src = join(root, file);
-    if (!existsSync(src)) continue; // Borrado en disco pero aún en el índice
+    if (!existsSync(src)) continue;
     const out = join(dest, file);
     mkdirSync(dirname(out), { recursive: true });
     if (file.endsWith(".py")) {
@@ -340,7 +307,6 @@ function main() {
 
   console.log(`${files.length} archivos copiados, ${stripped} sin comentarios => ${dest}`);
 
-  // La CI exige "cargo fmt --check" y "ruff format --check": quitar comentarios puede cambiar cómo se parte una línea
   for (const [cmd, cmdArgs, cwd] of [
     ["cargo", ["fmt"], join(dest, "apps/ecommerce-rust")],
     ["ruff", ["format", "."], join(dest, "apps/ecommerce-fastapi")],
@@ -359,10 +325,13 @@ function main() {
   git(dest, "add", "-A");
   if (git(dest, "status", "--porcelain").trim() === "")
     return console.log("Sin cambios que commitear.");
-  const lastSubject = spawnSync("git", ["log", "-1", "--format=%s"], { cwd: root, encoding: "utf8" });
+  const lastSubject = spawnSync("git", ["log", "-1", "--format=%s"], {
+    cwd: root,
+    encoding: "utf8",
+  });
   const message = args.includes("-m")
     ? args[args.indexOf("-m") + 1]
-    : (lastSubject.status === 0 && lastSubject.stdout.trim()) || "chore: sync"; // Repo sin commits => mensaje por defecto
+    : (lastSubject.status === 0 && lastSubject.stdout.trim()) || "chore: sync";
   git(dest, "commit", "-m", message);
   console.log(`Commit en el espejo: "${message}"`);
   if (args.includes("--push"))

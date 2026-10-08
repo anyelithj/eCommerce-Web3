@@ -1,9 +1,3 @@
-// resources.ts => REGISTRO de los módulos administrables del panel (Configuration as Data / patrón Registry).
-// Cada módulo de la matriz (productos, pedidos, usuarios, proveedores...) se declara UNA vez: su API en Express,
-// columnas del listado, campos del detalle, formulario de crear/editar (schema Zod), acciones propias y QUÉ ROLES lo
-// usan. Las 4 pantallas CRUD (listar, crear, ver detalle, editar) son genéricas y leen este registro => DRY, OCP
-// (un módulo nuevo = una entrada) y RBAC declarativo (el menú y las rutas se filtran por rol con la misma fuente).
-// Express vuelve a validar permisos en cada petición: este registro solo decide qué se MUESTRA.
 import type { useZodForm } from "@/shared/hook/useZodForm";
 import type { FieldDef } from "../ui/AdminResource";
 import type { MutationRequest, Query } from "../api/dashboard.api";
@@ -42,12 +36,10 @@ import {
   workflowSchema,
 } from "./dashboard.validator";
 
-// ---------- Tipos ----------
 export type Role = "ADMIN" | "VENDOR";
-export type Row = Record<string, unknown>; // Fila tal como llega del backend (JSON)
-type Schema = Parameters<typeof useZodForm>[0]["schema"]; // Mismo tipo de schema que acepta el formulario
+export type Row = Record<string, unknown>;
+type Schema = Parameters<typeof useZodForm>[0]["schema"];
 export type GroupKey = "catalog" | "sales" | "customers" | "operations" | "marketing" | "system";
-// Tipos de celda (Strategy de presentación en ui/Cells.tsx)
 export type CellType =
   | "title"
   | "text"
@@ -65,14 +57,13 @@ export type CellType =
   | "long";
 
 export interface ColumnDef {
-  key: string; // Ruta del dato ("author.name") y clave de traducción admin.fields.<último segmento>
+  key: string;
   type?: CellType;
-  label?: string; // Clave de admin.fields si difiere del último segmento de "key"
-  value?: (row: Row) => unknown; // Valor calculado (ej. nombre completo)
-  currencyKey?: string; // Para "money": campo con la moneda
+  label?: string;
+  value?: (row: Row) => unknown;
+  currencyKey?: string;
 }
 
-// OptionsFrom => opciones de un <select>/casillas cargadas de otra API (categorías padre, roles, plantillas)
 export interface OptionsFrom {
   api: string;
   value: string;
@@ -84,17 +75,17 @@ export type ResourceField = FieldDef & { optionsFrom?: OptionsFrom; valuesKey?: 
 export interface FormDef {
   schema: Schema;
   fields: ResourceField[];
-  initial: (row?: Row) => Record<string, unknown>; // Sin fila => valores de creación
-  requests: (values: Record<string, unknown>, row?: Row) => MutationRequest[]; // Una o varias peticiones (Command)
+  initial: (row?: Row) => Record<string, unknown>;
+  requests: (values: Record<string, unknown>, row?: Row) => MutationRequest[];
   roles?: Role[];
 }
 
 export interface ActionDef {
-  key: string; // Clave de traducción admin.actions.<key>
+  key: string;
   roles?: Role[];
   when?: (row: Row) => boolean;
   tone?: "primary" | "secondary" | "danger";
-  request?: (row: Row) => MutationRequest; // Comando directo (con confirmación)
+  request?: (row: Row) => MutationRequest;
   form?: Omit<FormDef, "requests"> & {
     requests: (values: Record<string, unknown>, row: Row) => MutationRequest[];
   };
@@ -102,29 +93,28 @@ export interface ActionDef {
 }
 
 export interface ResourceDef {
-  key: string; // Segmento de URL (/dashboard/<key>) y clave i18n admin.resources.<key>
+  key: string;
   group: GroupKey;
-  icon: string; // Nombre del ícono SVG (ui/AdminIcon.tsx)
+  icon: string;
   roles: Role[];
   api: string;
-  idKey?: string; // Por defecto "id"
-  titleKey: string; // Campo que nombra la fila (título del detalle y lectores de pantalla)
-  detailApi?: ((id: string) => string) | null; // null => no hay GET por id: se busca en el listado
+  idKey?: string;
+  titleKey: string;
+  detailApi?: ((id: string) => string) | null;
   listQuery?: Query;
-  transformList?: (data: unknown) => Row[]; // Ej. árbol de categorías -> lista con sangría
+  transformList?: (data: unknown) => Row[];
   search?: string;
   filters?: Array<{ name: string; values: readonly string[] }>;
   columns: ColumnDef[];
-  detail?: ColumnDef[]; // Campos del detalle (por defecto: columnas)
-  sections?: Array<{ key: string; columns: ColumnDef[] }>; // Arreglos del detalle como sub-tablas (ítems, eventos...)
+  detail?: ColumnDef[];
+  sections?: Array<{ key: string; columns: ColumnDef[] }>;
   create?: FormDef;
   edit?: FormDef & { when?: (row: Row) => boolean };
   remove?: { roles?: Role[]; when?: (row: Row) => boolean; label?: string };
   actions?: ActionDef[];
-  customForm?: boolean; // true => crear/editar en páginas propias (productos: variantes e imágenes)
+  customForm?: boolean;
 }
 
-// ---------- Utilidades puras ----------
 export const get = (row: Row, path: string): unknown =>
   path
     .split(".")
@@ -137,19 +127,15 @@ const dateInput = (value: unknown) => (typeof value === "string" ? value.slice(0
 const idOf = (row: Row | undefined, key = "id") => encodeURIComponent(str(row?.[key]));
 const ALL: Role[] = ["ADMIN", "VENDOR"];
 const ADMIN: Role[] = ["ADMIN"];
-// patch/post => Factories de MutationRequest (DRY)
 const post = (path: string, body: unknown): MutationRequest => ({ path, method: "POST", body });
 const patch = (path: string, body: unknown): MutationRequest => ({ path, method: "PATCH", body });
-// flattenTree => árbol de categorías -> filas con nivel (función pura y recursiva)
 const flattenTree = (nodes: unknown, depth = 0): Row[] =>
   (Array.isArray(nodes) ? (nodes as Row[]) : []).flatMap((node) => [
     { ...node, depth, name: `${"— ".repeat(depth)}${str(node["name"])}` },
     ...flattenTree(node["children"], depth + 1),
   ]);
 
-// ---------- Registro ----------
 export const RESOURCES: ResourceDef[] = [
-  // ===== Catálogo =====
   {
     key: "products",
     group: "catalog",
@@ -457,7 +443,6 @@ export const RESOURCES: ResourceDef[] = [
     ],
     remove: { roles: ADMIN },
   },
-  // ===== Ventas =====
   {
     key: "orders",
     group: "sales",
@@ -763,7 +748,6 @@ export const RESOURCES: ResourceDef[] = [
     },
     remove: {},
   },
-  // ===== Clientes =====
   {
     key: "users",
     group: "customers",
@@ -831,7 +815,6 @@ export const RESOURCES: ResourceDef[] = [
         phone: str(row?.["phone"]),
         roles: (row?.["roles"] as string[] | undefined) ?? [],
       }),
-      // Dos comandos en orden: perfil y luego roles (endpoints distintos en Express)
       requests: (values, row) => [
         patch(`/user/${idOf(row)}`, {
           firstName: values["firstName"],
@@ -931,7 +914,6 @@ export const RESOURCES: ResourceDef[] = [
     },
     remove: { label: "archive", when: (row) => !row["archived"] },
   },
-  // ===== Operaciones =====
   {
     key: "inventory",
     group: "operations",
@@ -1072,7 +1054,6 @@ export const RESOURCES: ResourceDef[] = [
     },
     remove: {},
   },
-  // ===== Marketing =====
   {
     key: "campaigns",
     group: "marketing",
@@ -1217,7 +1198,6 @@ export const RESOURCES: ResourceDef[] = [
     },
     remove: {},
   },
-  // ===== Sistema =====
   {
     key: "roles",
     group: "system",
@@ -1262,7 +1242,7 @@ export const RESOURCES: ResourceDef[] = [
       }),
       requests: (values, row) => [patch(`/role/${idOf(row)}`, values)],
     },
-    remove: { when: (row) => !["ADMIN", "VENDOR", "CUSTOMER"].includes(str(row["name"])) }, // Roles base protegidos
+    remove: { when: (row) => !["ADMIN", "VENDOR", "CUSTOMER"].includes(str(row["name"])) },
   },
   {
     key: "permissions",
@@ -1521,7 +1501,6 @@ export const RESOURCES: ResourceDef[] = [
   },
 ];
 
-// ---------- Campos repetidos (Factories) ----------
 function couponFields(withCode: boolean): ResourceField[] {
   return [
     ...(withCode ? [{ name: "code", label: "code" }] : []),
@@ -1540,7 +1519,6 @@ function couponFields(withCode: boolean): ResourceField[] {
     { name: "endsAt", label: "endsAt", type: "date" },
   ];
 }
-// couponBody => monto fijo en pesos -> centavos; fecha de fin al final del día (Adapter al contrato de Express)
 function couponBody(values: Record<string, unknown>): Record<string, unknown> {
   return {
     ...values,
@@ -1667,8 +1645,7 @@ function workflowFields(): ResourceField[] {
   ];
 }
 
-// ---------- Consultas del registro ----------
-const BY_KEY = new Map(RESOURCES.map((resource) => [resource.key, resource])); // Índice O(1) por clave
+const BY_KEY = new Map(RESOURCES.map((resource) => [resource.key, resource]));
 export const findResource = (key: string) => BY_KEY.get(key);
 export const canUse = (roles: readonly string[], allowed: readonly Role[] | undefined) =>
   !allowed || allowed.some((role) => roles.includes(role));

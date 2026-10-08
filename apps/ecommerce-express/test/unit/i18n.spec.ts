@@ -1,4 +1,3 @@
-// i18n.spec.ts => los textos que genera el backend salen en el idioma pedido (es/en) y nunca quedan vacíos.
 import { localizedPath, parseLocale } from "../../src/shared/util/i18n.util";
 import {
   MESSAGES,

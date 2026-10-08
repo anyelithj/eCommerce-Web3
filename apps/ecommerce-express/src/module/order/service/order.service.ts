@@ -1,4 +1,3 @@
-// order.service.ts => casos de uso del pedido: colocar (desde checkout pagado), listar, detalle, estados, cancelar.
 import type { OrderStatus, ShipmentStatus } from "@prisma/client";
 import {
   orderRepository,
@@ -27,7 +26,6 @@ import { buildPaginationMeta, toPageParams } from "../../../shared/util/paginati
 import type { PaginationMeta } from "../../../shared/types/pagination.types";
 import { Roles } from "../../../shared/constants/roles.constants";
 
-// Viewer => quien ejecuta la acción ("system" = webhook/job interno sin usuario)
 export interface OrderViewer {
   id: string;
   roles: string[];
@@ -36,7 +34,6 @@ export interface OrderViewer {
 export class OrderService {
   constructor(private readonly repository: OrderRepository) {}
 
-  // placeOrder => "crear orden desde checkout confirmado" (idempotente; la invoca el webhook de pago o el cliente)
   public async placeOrder(
     checkoutSessionId: string,
     viewer?: OrderViewer
@@ -46,15 +43,12 @@ export class OrderService {
 
     const order = await this.repository.findDetail(result.orderId);
     if (!order) throw new OrderNotFoundException(result.orderId);
-    if (viewer && !this.canView(order, viewer)) throw new OrderNotFoundException(result.orderId); // No revela pedidos ajenos
+    if (viewer && !this.canView(order, viewer)) throw new OrderNotFoundException(result.orderId);
 
-    // Solo la PRIMERA colocación publica el evento (la llamada idempotente repetida no duplica efectos)
     if (result.created) commerceEvents.emit("order.placed", toPayload(order));
     return order;
   }
 
-  // createManualOrder => "el ADMIN crea un pedido" (venta asistida o pruebas): precios VIGENTES del catálogo, IVA de
-  // la configuración y el mismo evento "order.placed" del checkout (envío, correo, CRM y webhooks reaccionan igual).
   public async createManualOrder(
     input: ManualOrderInput,
     viewer: OrderViewer
@@ -65,7 +59,6 @@ export class OrderService {
     });
     if (!customer) throw new NotFoundException("User", input.customerEmail);
 
-    // Una sola consulta para todas las variantes (sin N+1); "include" trae el nombre del producto y su primera imagen
     const variants = await prisma.productVariant.findMany({
       where: { sku: { in: input.items.map((item) => item.sku) }, isActive: true },
       include: {
@@ -86,7 +79,6 @@ export class OrderService {
         { sku: missing.sku }
       );
 
-    // "!" (non-null assertion de TypeScript) => seguro: "missing" ya garantizó que todas las SKU están en el mapa
     const items: CheckoutItemSnapshot[] = input.items.map(({ sku, quantity }) => {
       const variant = bySku.get(sku)!;
       return {
@@ -117,11 +109,10 @@ export class OrderService {
       changedById: viewer.id,
     });
     const order = await this.getOrderById(orderId, viewer);
-    commerceEvents.emit("order.placed", toPayload(order)); // Observer: mismos efectos que una compra en la tienda
+    commerceEvents.emit("order.placed", toPayload(order));
     return order;
   }
 
-  // listOrders => "listar órdenes con estado y fechas"
   public async listOrders(
     query: ListOrdersQuery,
     viewer: OrderViewer
@@ -131,21 +122,18 @@ export class OrderService {
     return { items, meta: buildPaginationMeta(page, total) };
   }
 
-  // getOrderById => "orden completa con ítems, pagos y envío"
   public async getOrderById(id: string, viewer: OrderViewer): Promise<OrderDetailDto> {
     const order = await this.repository.findDetail(id);
     if (!order || !(await this.canViewAsync(order, viewer))) throw new OrderNotFoundException(id);
     return order;
   }
 
-  // updateOrderStatus => "CONFIRMED→PREPARING→PACKED→SHIPPED→DELIVERED|CANCELLED" (staff)
   public async updateOrderStatus(
     id: string,
     to: OrderStatus,
     note: string | undefined,
     viewer: OrderViewer
   ): Promise<OrderDetailDto> {
-    // El permiso UPDATE:order ya lo exige la ruta (RBAC); aquí solo se valida visibilidad (VENDOR: pedidos con sus productos)
     const order = await this.getOrderById(id, viewer);
     if (to === "CANCELLED") return this.cancelOrder(id, note ?? "Cancelado por el staff", viewer);
     if (!canTransitionOrder(order.status, to))
@@ -156,7 +144,6 @@ export class OrderService {
     return this.getOrderById(id, viewer);
   }
 
-  // cancelOrder => "cancelar orden antes del envío": repone stock y dispara el reembolso (suscriptor en Payment)
   public async cancelOrder(
     id: string,
     reason: string,
@@ -170,7 +157,6 @@ export class OrderService {
     return this.getOrderById(id, viewer);
   }
 
-  // syncFromShipment => el envío manda sobre SHIPPED/DELIVERED (lo invoca el módulo Shipping; sin usuario)
   public async syncFromShipment(orderId: string, shipmentStatus: ShipmentStatus): Promise<void> {
     const target: OrderStatus | null =
       shipmentStatus === "IN_TRANSIT" || shipmentStatus === "OUT_FOR_DELIVERY"
@@ -182,7 +168,6 @@ export class OrderService {
     const order = await this.repository.findDetail(orderId);
     if (!order || order.status === target) return;
 
-    // Avanza paso a paso hasta el objetivo (ej. CONFIRMED -> PREPARING -> PACKED -> SHIPPED) dejando bitácora
     const path: OrderStatus[] = ["CONFIRMED", "PREPARING", "PACKED", "SHIPPED", "DELIVERED"];
     let current = order.status;
     while (
@@ -202,7 +187,6 @@ export class OrderService {
     }
   }
 
-  // scopeFor => ADMIN ve todo; VENDOR, pedidos con sus productos; CUSTOMER, solo los propios
   private scopeFor(viewer: OrderViewer): OrderScope {
     if (viewer.roles.includes(Roles.ADMIN)) return { all: true };
     if (viewer.roles.includes(Roles.VENDOR)) return { vendorId: viewer.id };
@@ -221,7 +205,6 @@ export class OrderService {
   }
 }
 
-// toPayload => proyección mínima de la orden para los eventos
 function toPayload(order: OrderDetailDto): OrderEventPayload {
   return {
     orderId: order.id,

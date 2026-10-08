@@ -1,5 +1,3 @@
-// layout.tsx (account) => hub de cuenta: chrome de la tienda + navegación lateral (móvil: barra horizontal desplazable).
-// Rutas privadas: middleware.ts redirige a /login si no hay sesión.
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
@@ -9,7 +7,6 @@ import { initPage } from "@/shared/lib/i18n/server";
 
 type Props = { children: ReactNode; params: Promise<{ locale: string }> };
 
-// "template" => cada página define solo su título y el layout agrega el sufijo; noindex: datos personales
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale: (await params).locale, namespace: "account" });
   return {

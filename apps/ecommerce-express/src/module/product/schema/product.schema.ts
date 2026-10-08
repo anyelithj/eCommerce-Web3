@@ -1,9 +1,7 @@
-// product.schema.ts => validación Zod del módulo Product (entrada de la API = contrato ejecutable).
 import { z } from "zod";
 import { PaginationQuerySchema } from "../../../shared/util/pagination.util";
 import { queryBoolean } from "../../../shared/pipe/transform.pipe";
 
-// VariantSchema => unidad vendible (SKU + precio + stock). Montos en centavos (enteros)
 export const VariantSchema = z.object({
   sku: z
     .string()
@@ -11,7 +9,6 @@ export const VariantSchema = z.object({
     .toUpperCase()
     .regex(/^[A-Z0-9-]{3,40}$/, { message: "SKU: 3-40 caracteres A-Z, 0-9 o guion" }),
   name: z.string().trim().min(1).max(80),
-  // "z.record(z.string())" => objeto clave->valor libre ({ color: "Rojo", size: "M" })
   attributes: z.record(z.string().max(40)).default({}),
   priceCents: z.number().int().min(0),
   compareAtPriceCents: z.number().int().min(0).nullable().optional(),
@@ -20,12 +17,10 @@ export const VariantSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-// UpdateVariantSchema => variante del PATCH con stock opcional (ver UpdateProductSchema)
 export const UpdateVariantSchema = VariantSchema.extend({
   stock: z.number().int().min(0).optional(),
 });
 
-// ImageSchema => imagen ya subida a Cloudinary (POST /api/v1/media/upload devuelve url/publicId/width/height)
 export const ImageSchema = z.object({
   url: z.string().url(),
   publicId: z.string().min(1),
@@ -36,14 +31,12 @@ export const ImageSchema = z.object({
     .max(160),
   width: z.number().int().positive().optional(),
   height: z.number().int().positive().optional(),
-  variantSku: z.string().optional(), // Asocia la imagen a una variante (ej. color rojo)
+  variantSku: z.string().optional(),
 });
 
-// Validación cruzada: SKUs únicos dentro del mismo payload
 const uniqueSkus = (variants: Array<{ sku: string }> | undefined) =>
   !variants || new Set(variants.map((variant) => variant.sku)).size === variants.length;
 
-// CreateProductSchema => POST /api/v1/product ("crear producto con datos y categorías")
 export const CreateProductSchema = z.object({
   name: z.string().trim().min(2).max(160),
   slug: z
@@ -63,10 +56,6 @@ export const CreateProductSchema = z.object({
   images: z.array(ImageSchema).max(20).default([]),
 });
 
-// UpdateProductSchema => PATCH parcial ("actualizar producto, stock, imágenes, precio")
-// - variants: se hace UPSERT por SKU (crear nuevas / actualizar existentes)
-// - removeVariantSkus: variantes a desactivar (no se borran: las órdenes históricas las referencian)
-// - images: si llega, REEMPLAZA la galería completa (el orden del arreglo es la posición)
 export const UpdateProductSchema = z.object({
   name: z.string().trim().min(2).max(160).optional(),
   slug: z
@@ -77,30 +66,25 @@ export const UpdateProductSchema = z.object({
   status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
   categoryId: z.string().uuid().nullable().optional(),
   brandId: z.string().uuid().nullable().optional(),
-  // En el PATCH el stock es opcional: el stock de variantes existentes se gestiona con movimientos del módulo
-  // Inventory (Fase 7, fuente de verdad auditable); si se omite, la variante conserva su stock actual
   variants: z.array(UpdateVariantSchema).max(100).refine(uniqueSkus, "SKU repetido").optional(),
   removeVariantSkus: z.array(z.string()).optional(),
   images: z.array(ImageSchema).max(20).optional(),
 });
 
-// Ordenamientos soportados (lista cerrada => sin inyección de columnas arbitrarias en ORDER BY)
 export const ProductSorts = ["newest", "price_asc", "price_desc", "rating", "name"] as const;
 
-// ListProductsQuerySchema => GET /api/v1/product ("listar productos con filtros y paginación")
 export const ListProductsQuerySchema = PaginationQuerySchema.extend({
   q: z.string().trim().min(1).max(100).optional(),
-  category: z.string().optional(), // ID o slug; incluye subcategorías
-  brand: z.string().optional(), // ID o slug
-  collection: z.string().optional(), // slug
-  minPrice: z.coerce.number().int().min(0).optional(), // centavos
+  category: z.string().optional(),
+  brand: z.string().optional(),
+  collection: z.string().optional(),
+  minPrice: z.coerce.number().int().min(0).optional(),
   maxPrice: z.coerce.number().int().min(0).optional(),
   inStock: queryBoolean,
-  status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(), // Solo tiene efecto para staff
+  status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
   sort: z.enum(ProductSorts).default("newest"),
 });
 
-// DeleteAllProductsSchema => "archivar lote de productos"
 export const DeleteAllProductsSchema = z.object({
   ids: z.array(z.string().uuid()).min(1).max(200),
 });

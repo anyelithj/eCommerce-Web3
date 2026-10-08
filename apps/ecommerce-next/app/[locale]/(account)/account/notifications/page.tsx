@@ -1,4 +1,3 @@
-// page.tsx (/account/notifications) => bandeja de notificaciones (preferencias de canales en Configuraciones).
 import { getTranslations } from "next-intl/server";
 import { NotificationList } from "@/features/notification/ui/NotificationList";
 import { AccountHeading, accountMetadata } from "../AccountSection";

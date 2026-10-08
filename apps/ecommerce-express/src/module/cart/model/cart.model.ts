@@ -1,10 +1,5 @@
-// cart.model.ts => puerto de inventario (DIP) + cálculos puros del carrito.
-// La matriz pide "validación stock MCP Rust": el CartService depende de la INTERFAZ StockGateway, no de una
-// implementación. Hoy la resuelve PostgreSQL (PrismaStockGateway); cuando el servicio Rust (inventario en tiempo
-// real) exponga su endpoint, basta con otra clase que implemente la interfaz (patrón Ports & Adapters / Hexagonal).
 import type { PrismaClient } from "@prisma/client";
 
-// VariantAvailability => lo que el carrito necesita saber de una variante para aceptarla
 export interface VariantAvailability {
   variantId: string;
   productId: string;
@@ -15,16 +10,14 @@ export interface VariantAvailability {
   imageUrl: string | null;
   priceCents: number;
   currency: string;
-  available: number; // stock - reservado
-  purchasable: boolean; // variante activa Y producto publicado
+  available: number;
+  purchasable: boolean;
 }
 
-// "interface StockGateway" => puerto de salida (Hexagonal): contrato estable para el dominio
 export interface StockGateway {
   getAvailability(variantIds: string[]): Promise<Map<string, VariantAvailability>>;
 }
 
-// PrismaStockGateway => adaptador actual: lee disponibilidad desde PostgreSQL en UNA consulta
 export class PrismaStockGateway implements StockGateway {
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -62,7 +55,6 @@ export class PrismaStockGateway implements StockGateway {
           productSlug: row.product.slug,
           variantName: row.name,
           sku: row.sku,
-          // Imagen de la variante (ej. color) o, si no tiene, la principal del producto
           imageUrl: row.images[0]?.url ?? row.product.images[0]?.url ?? null,
           priceCents: row.priceCents,
           currency: row.product.currency,
@@ -74,7 +66,6 @@ export class PrismaStockGateway implements StockGateway {
   }
 }
 
-// lineTotal / cartSubtotal => cálculos puros (reduce = paradigma funcional)
 export const lineTotal = (item: { unitPriceCents: number; quantity: number }): number =>
   item.unitPriceCents * item.quantity;
 

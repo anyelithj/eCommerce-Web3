@@ -1,5 +1,3 @@
-// PaymentForm.tsx => contenedor del paso de pago: resumen de la entrega + slot con el medio de pago (Stripe).
-// El formulario de Stripe lo inyecta la página desde la feature "payment" (slot => sin imports entre features).
 import type { ReactNode } from "react";
 import { Link } from "@/shared/lib/i18n/navigation";
 import { useTranslations } from "next-intl";
