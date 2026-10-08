@@ -1,11 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
+  // node.json (TypeScript) => preset para backends Node en CommonJS (ecommerce-express)
+  // "extends" => Herencia de configuración (patrón Template): toma todo el modo strict de base.json y solo ajusta el runtime
   "extends": "./base.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "types": ["node"],
-    "declaration": false,
+    "module": "CommonJS", // Formato de módulos que Node ejecuta con require() (compatibilidad amplia del ecosistema Express)
+    "moduleResolution": "Node", // Algoritmo clásico de resolución de node_modules, pareja obligatoria de CommonJS
+    "types": ["node"], // Solo carga los tipos globales de Node (process, Buffer); cada app agrega los suyos (jest, etc.)
+    "declaration": false, // Un backend desplegable no publica .d.ts (anula el valor de base.json pensado para packages/*)
     "declarationMap": false
   }
 }

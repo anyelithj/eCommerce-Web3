@@ -1,14 +1,26 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+// seed.ts => script ejecutado con "pnpm prisma:seed"; puebla datos MÍNIMOS para poder probar
+// el sistema (RBAC completo, un usuario por rol, catálogo de muestra, cupón). Nunca contiene datos de producción reales.
+// IDEMPOTENTE: usa "upsert" en todo => correrlo 2 veces no duplica datos (seguro en CI y en cada "docker compose up").
+import { PrismaClient, Prisma } from "@prisma/client"; // Cliente tipado generado a partir de schema.prisma
 import bcrypt from "bcrypt";
-import { Actions, Resources, RolePolicies, Roles } from "../src/shared/constants/roles.constants";
+import { Actions, Resources, RolePolicies, Roles } from "../src/shared/constants/roles.constants"; // Fuente única RBAC (DRY)
 
+// Instancia única de PrismaClient para este script (Singleton local, se cierra al final)
 const prisma = new PrismaClient();
 
-const DEMO_IMAGE = (publicId: string) => `https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/${publicId}`;
+// Imágenes de muestra del CDN público de Cloudinary ("demo"): dominio ya permitido en next.config.ts
+const DEMO_IMAGE = (publicId: string) =>
+  `https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/${publicId}`;
 
+// --- 1. RBAC: todos los permisos ACCIÓN × recurso + roles base ---
 async function seedRbac(): Promise<void> {
-  const allPermissions = Resources.flatMap((resource) => Actions.map((action) => ({ action, resource })));
+  // "flatMap" => producto cartesiano Actions × Resources en un arreglo plano (programación funcional)
+  const allPermissions = Resources.flatMap((resource) =>
+    Actions.map((action) => ({ action, resource }))
+  );
 
+  // "Promise.all" => ejecuta todas las creaciones EN PARALELO (asíncrono no bloqueante),
+  // más rápido que un "for" con await secuencial cuando las operaciones son independientes entre sí
   const created = await Promise.all(
     allPermissions.map((permission) =>
       prisma.permission.upsert({
@@ -18,11 +30,17 @@ async function seedRbac(): Promise<void> {
       })
     )
   );
-  const idByCode = new Map(created.map((permission) => [`${permission.action}:${permission.resource}`, permission.id]));
+  // Índice "ACCIÓN:recurso" -> id para resolver las políticas por rol
+  const idByCode = new Map(
+    created.map((permission) => [`${permission.action}:${permission.resource}`, permission.id])
+  );
 
+  // ADMIN => todos los permisos | VENDOR/CUSTOMER => los definidos en RolePolicies (roles.constants.ts)
   const policies: Record<string, string[]> = {
     [Roles.ADMIN]: created.map((permission) => permission.id),
-    [Roles.VENDOR]: RolePolicies.VENDOR.map((code) => idByCode.get(code)).filter((id): id is string => Boolean(id)),
+    [Roles.VENDOR]: RolePolicies.VENDOR.map((code) => idByCode.get(code)).filter(
+      (id): id is string => Boolean(id)
+    ),
     [Roles.CUSTOMER]: [],
   };
   const descriptions: Record<string, string> = {
@@ -31,23 +49,50 @@ async function seedRbac(): Promise<void> {
     [Roles.CUSTOMER]: "Rol por defecto de comprador final",
   };
 
+  // "Object.entries" + "for...of" => itera las políticas; secuencial porque cada rol hace varias escrituras
   for (const [name, permissionIds] of Object.entries(policies)) {
     const role = await prisma.role.upsert({
       where: { name },
       update: { description: descriptions[name] ?? null },
       create: { name, description: descriptions[name] ?? null },
     });
+    // Reemplazo idempotente de la relación N-N (borrar + crear) => la política del código es la verdad
     await prisma.rolePermission.deleteMany({ where: { roleId: role.id } });
-    await prisma.rolePermission.createMany({ data: permissionIds.map((permissionId) => ({ roleId: role.id, permissionId })) });
+    await prisma.rolePermission.createMany({
+      data: permissionIds.map((permissionId) => ({ roleId: role.id, permissionId })),
+    });
   }
 }
 
+// --- 2. Un usuario de prueba por rol (credenciales configurables por entorno; listadas en PASOS_LEVANTAR_SERVICIOS.md) ---
 const SEED_USERS = [
-  { role: Roles.ADMIN, env: "ADMIN", email: "admin@ecommerce.local", password: "Admin12345!", firstName: "Admin", lastName: "Plataforma" },
-  { role: Roles.VENDOR, env: "VENDOR", email: "vendedor@ecommerce.local", password: "Vendedor12345!", firstName: "Valeria", lastName: "Vendedora" },
-  { role: Roles.CUSTOMER, env: "CUSTOMER", email: "cliente@ecommerce.local", password: "Cliente12345!", firstName: "Carlos", lastName: "Cliente" },
+  {
+    role: Roles.ADMIN,
+    env: "ADMIN",
+    email: "admin@ecommerce.local",
+    password: "Admin12345!",
+    firstName: "Admin",
+    lastName: "Plataforma",
+  },
+  {
+    role: Roles.VENDOR,
+    env: "VENDOR",
+    email: "vendedor@ecommerce.local",
+    password: "Vendedor12345!",
+    firstName: "Valeria",
+    lastName: "Vendedora",
+  },
+  {
+    role: Roles.CUSTOMER,
+    env: "CUSTOMER",
+    email: "cliente@ecommerce.local",
+    password: "Cliente12345!",
+    firstName: "Carlos",
+    lastName: "Cliente",
+  },
 ] as const;
 
+// seedUsers => crea (o deja intacto si ya existe) cada usuario verificado con su rol; devuelve el ID del admin
 async function seedUsers(): Promise<string> {
   const ids = new Map<string, string>();
   for (const seed of SEED_USERS) {
@@ -72,6 +117,7 @@ async function seedUsers(): Promise<string> {
   return ids.get(Roles.ADMIN) as string;
 }
 
+// --- 3. Catálogo de muestra: árbol de categorías (Composite), marcas, productos con variantes, colección ---
 async function seedCatalog(vendorId: string): Promise<void> {
   const ropa = await prisma.category.upsert({
     where: { slug: "ropa" },
@@ -92,21 +138,60 @@ async function seedCatalog(vendorId: string): Promise<void> {
   const brand = await prisma.brand.upsert({
     where: { slug: "web3-wear" },
     update: {},
-    create: { name: "Web3 Wear", slug: "web3-wear", description: "Ropa urbana con coleccionables NFT" },
+    create: {
+      name: "Web3 Wear",
+      slug: "web3-wear",
+      description: "Ropa urbana con coleccionables NFT",
+    },
   });
 
-  const products: Array<{ slug: string; name: string; categoryId: string; image: string; basePrice: number; sizes: string[] }> = [
-    { slug: "camiseta-genesis", name: "Camiseta Génesis", categoryId: camisetas.id, image: "sample.jpg", basePrice: 7990000, sizes: ["S", "M", "L"] },
-    { slug: "camiseta-blockchain", name: "Camiseta Blockchain", categoryId: camisetas.id, image: "couple.jpg", basePrice: 8990000, sizes: ["M", "L", "XL"] },
-    { slug: "tenis-metaverso", name: "Tenis Metaverso", categoryId: calzado.id, image: "shoes.png", basePrice: 25990000, sizes: ["38", "40", "42"] },
+  // Productos de muestra con variantes (talla) y precio en centavos
+  const products: Array<{
+    slug: string;
+    name: string;
+    categoryId: string;
+    image: string;
+    basePrice: number;
+    sizes: string[];
+  }> = [
+    {
+      slug: "camiseta-genesis",
+      name: "Camiseta Génesis",
+      categoryId: camisetas.id,
+      image: "sample.jpg",
+      basePrice: 7990000,
+      sizes: ["S", "M", "L"],
+    },
+    {
+      slug: "camiseta-blockchain",
+      name: "Camiseta Blockchain",
+      categoryId: camisetas.id,
+      image: "couple.jpg",
+      basePrice: 8990000,
+      sizes: ["M", "L", "XL"],
+    },
+    {
+      slug: "tenis-metaverso",
+      name: "Tenis Metaverso",
+      categoryId: calzado.id,
+      image: "shoes.png",
+      basePrice: 25990000,
+      sizes: ["38", "40", "42"],
+    },
   ];
 
+  // Colección creada UNA vez antes del bucle; cada producto se vincula a ella
   const collection = await prisma.collection.upsert({
     where: { slug: "lanzamiento" },
     update: {},
-    create: { name: "Lanzamiento", slug: "lanzamiento", description: "Primeros productos de la tienda" },
+    create: {
+      name: "Lanzamiento",
+      slug: "lanzamiento",
+      description: "Primeros productos de la tienda",
+    },
   });
 
+  // ".entries()" => pares [índice, elemento] para usar el índice como posición en la colección
   for (const [index, item] of products.entries()) {
     const product = await prisma.product.upsert({
       where: { slug: item.slug },
@@ -121,7 +206,18 @@ async function seedCatalog(vendorId: string): Promise<void> {
         vendorId,
         minPriceCents: item.basePrice,
         maxPriceCents: item.basePrice,
-        images: { create: [{ url: DEMO_IMAGE(item.image), publicId: item.image, alt: item.name, position: 0, width: 864, height: 576 }] },
+        images: {
+          create: [
+            {
+              url: DEMO_IMAGE(item.image),
+              publicId: item.image,
+              alt: item.name,
+              position: 0,
+              width: 864,
+              height: 576,
+            },
+          ],
+        },
         variants: {
           create: item.sizes.map((size, sizeIndex) => ({
             sku: `${item.slug.toUpperCase()}-${size}`,
@@ -134,6 +230,7 @@ async function seedCatalog(vendorId: string): Promise<void> {
         },
       },
     });
+    // Colección destacada con orden manual ("position" = índice del producto en la lista)
     await prisma.collectionProduct.upsert({
       where: { collectionId_productId: { collectionId: collection.id, productId: product.id } },
       update: {},
@@ -142,6 +239,7 @@ async function seedCatalog(vendorId: string): Promise<void> {
   }
 }
 
+// --- 4. Cupón de bienvenida ---
 async function seedCoupons(): Promise<void> {
   await prisma.coupon.upsert({
     where: { code: "BIENVENIDA10" },
@@ -158,19 +256,26 @@ async function seedCoupons(): Promise<void> {
   });
 }
 
+// "async function main()" => punto de entrada; se usa async porque TODAS las queries de Prisma
+// devuelven Promesas (paradigma asíncrono no bloqueante, igual que en los services de Express)
 async function main(): Promise<void> {
   await seedRbac();
   const adminId = await seedUsers();
   await seedCatalog(adminId);
   await seedCoupons();
-  console.log("Seed completo: RBAC, usuarios admin/vendedor/cliente, catálogo de muestra y cupón BIENVENIDA10");
+  console.log(
+    "Seed completo: RBAC, usuarios admin/vendedor/cliente, catálogo de muestra y cupón BIENVENIDA10"
+  );
 }
 
+// "main().catch().finally()" => patrón estándar de Prisma para scripts standalone
 main()
   .catch((error: unknown) => {
+    // "unknown" en vez de "any" en el catch => tipado seguro obligatorio, se debe verificar el tipo antes de usarlo
     console.error("Error ejecutando el seed:", error);
-    process.exit(1);
+    process.exit(1); // Código de salida distinto de 0 => CI/CD detecta el fallo
   })
   .finally(async () => {
+    // "finally" garantiza cerrar la conexión a la DB pase lo que pase (éxito o error)
     await prisma.$disconnect();
   });

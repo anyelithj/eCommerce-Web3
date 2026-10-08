@@ -1,7 +1,8 @@
 {
+  // "extends" => hereda el modo strict del preset compartido (DRY: sin repetir compilerOptions)
   "extends": "@ecommerce/tsconfig/base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true // Paquete de SOLO tipos: se consume como código fuente .ts, no se compila
   },
   "include": ["src/**/*.ts"]
 }

@@ -1,13 +1,20 @@
-listen 443 ssl;
-http2 on;
+# tls.conf.example => HTTPS del gateway en PRODUCCIÓN (certificado gratuito de Let's Encrypt).
+# En el servidor: cp infra/nginx/tls/tls.conf.example infra/nginx/tls/tls.conf  y reemplaza TU_DOMINIO (2 veces).
+# nginx.conf lo incluye dentro del "server" (include /etc/nginx/tls/*.conf); el .example no se carga.
 
+listen 443 ssl;
+http2 on; # HTTP/2: varias peticiones por una sola conexión (carga más rápida)
+
+# Certificados emitidos por certbot en el host; docker-compose.prod.yml monta /etc/letsencrypt en solo lectura
 ssl_certificate /etc/letsencrypt/live/TU_DOMINIO/fullchain.pem;
 ssl_certificate_key /etc/letsencrypt/live/TU_DOMINIO/privkey.pem;
-ssl_protocols TLSv1.2 TLSv1.3;
-ssl_session_cache shared:SSL:10m;
+ssl_protocols TLSv1.2 TLSv1.3; # Solo versiones seguras
+ssl_session_cache shared:SSL:10m; # Reutiliza sesiones TLS: menos CPU por conexión repetida
 
+# Todo el tráfico HTTP se redirige a HTTPS (301 = permanente)
 if ($scheme = http) {
   return 301 https://$host$request_uri;
 }
 
+# HSTS: el navegador recuerda usar solo HTTPS durante 1 año
 add_header Strict-Transport-Security "max-age=31536000" always;

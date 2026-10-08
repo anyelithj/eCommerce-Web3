@@ -1,3 +1,8 @@
 #!/usr/bin/env sh
+# .husky/pre-commit => se ejecuta ANTES de crear el commit (git hook administrado por Husky)
 
-pnpm exec lint-staged
+# pnpm exec => ejecuta un binario de node_modules sin instalarlo globalmente (pnpm en todo el proyecto, reemplaza npx)
+# lint-staged => corre ESLint/Prettier SOLO sobre los archivos en "staging" (git add), no todo el repo
+# Principio DRY: una sola config (.lintstagedrc) reutilizada por todos los desarrolladores
+# --concurrent false => chunks en serie: cada eslint type-aware (project: true) carga un programa TS completo; en paralelo agota la RAM
+pnpm exec lint-staged --concurrent false

@@ -1,30 +1,51 @@
+# docker-compose.dev.yml => ÚNICO compose del monorepo (orquestación del entorno local completo).
+# Estándar de industria en monorepos: 1 Dockerfile POR APP (cómo se construye cada imagen, SRP)
+# + 1 compose en infra/docker/ (cómo se conectan entre sí). Un compose por app duplicaría Postgres/Redis/Mongo (viola DRY).
+#
+# "profiles" => por defecto SOLO levanta la infraestructura (Postgres, MongoDB, Redis, Mailpit); las apps se activan a demanda:
+#   pnpm dev:up  (= docker compose -f infra/docker/docker-compose.dev.yml up -d)   # solo infra (apps con "pnpm dev" en el host)
+#   docker compose -f infra/docker/docker-compose.dev.yml --profile app up --build  # infra + Express + Next + gateway Nginx (Fases 1-4)
+#   ... --profile fastapi | --profile rust | --profile nuxt              # servicios de fases posteriores
+# Rutas relativas a ESTE archivo: "../.." = raíz del monorepo. "build.context: ../.." porque los Dockerfiles necesitan
+# pnpm-lock.yaml, pnpm-workspace.yaml y packages/* (no existen dentro de cada app).
+# Interpolación ${VAR}: Compose lee infra/docker/.env (plantilla: infra/docker/.env.example).
+
+# "name" => nombre del proyecto en Docker Desktop: agrupa todos los contenedores bajo "ecommerce-web3"
 name: ecommerce-web3
 
 services:
+  # ---------------------------------------------------------------------
+  # PostgreSQL + pgvector => fuente de verdad transaccional + embeddings (RAG de FastAPI)
+  # ---------------------------------------------------------------------
   postgres:
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg16 # Postgres 16 oficial con la extensión "vector" preinstalada (CREATE EXTENSION vector;)
     container_name: ecommerce-postgres
-    restart: unless-stopped
+    restart: unless-stopped # Reinicia el container solo si se cae solo, no si lo detienes tú a mano
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres} # ${VAR:-default} => usa .env raíz o valor por defecto
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-ecommerce_db}
     ports:
-      - "5433:5432"
+      - "5433:5432" # host:container — expone Postgres a localhost:5433 (5433 evita choque con otro Postgres local en 5432) (DBeaver, Prisma desde el host, etc.)
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data # Volumen nombrado => persiste los datos aunque el container se borre
     networks:
       - ecommerce-net
     healthcheck:
+      # pg_isready => utilidad nativa de Postgres que confirma que el motor acepta conexiones
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 10s # Cada cuánto se ejecuta el chequeo
+      timeout: 5s # Tiempo máximo de espera de la respuesta
+      retries: 5 # Intentos antes de marcar el container como "unhealthy"
 
+  # ---------------------------------------------------------------------
+  # MongoDB => documentos flexibles (catálogo variantes, eventos, notificaciones, logs)
+  # ---------------------------------------------------------------------
   mongodb:
     image: mongo:7
     container_name: ecommerce-mongodb
     restart: unless-stopped
+    # Caché de WiredTiger en 256 MB: por defecto toma el 50% de la RAM del equipo (ahorro de memoria en desarrollo)
     command: ["--wiredTigerCacheSizeGB", "0.25"]
     ports:
       - "27017:27017"
@@ -33,15 +54,21 @@ services:
     networks:
       - ecommerce-net
     healthcheck:
+      # mongosh --eval => ejecuta un comando Mongo mínimo para confirmar que el servidor responde
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # ---------------------------------------------------------------------
+  # Redis => cache de catálogo/carrito/permisos, rate-limiting y nonce Web3 (todas las claves con TTL).
+  # NO es fuente de verdad (lo es Postgres): si Redis cae, Express sigue funcionando sin cache
+  # ---------------------------------------------------------------------
   redis:
     image: redis:7-alpine
     container_name: ecommerce-redis
     restart: unless-stopped
+    # Tope de 128 MB; al llenarse descarta las claves con TTL menos usadas ("volatile-lru") en vez de fallar o crecer
     command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "volatile-lru"]
     ports:
       - "6379:6379"
@@ -50,34 +77,43 @@ services:
     networks:
       - ecommerce-net
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "ping"] # Responde "PONG" si Redis está vivo
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # ---------------------------------------------------------------------
+  # Mailpit => servidor SMTP de pruebas (open source, MIT): captura TODOS los emails del entorno local
+  # (verificación de cuenta, 2FA, pedidos, facturas) sin enviarlos a nadie. Bandeja web: http://localhost:8025
+  # ---------------------------------------------------------------------
   mailpit:
     image: axllent/mailpit:latest
     container_name: ecommerce-mailpit
     restart: unless-stopped
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "1025:1025" # SMTP (SMTP_HOST=mailpit / localhost, SMTP_PORT=1025)
+      - "8025:8025" # Interfaz web para leer los correos capturados
     networks:
       - ecommerce-net
 
+  # ---------------------------------------------------------------------
+  # Express TS (N-Layer, REST+GraphQL+WebSocket — Fases 1-4)
+  # ---------------------------------------------------------------------
   ecommerce-express:
-    profiles: ["app"]
+    profiles: ["app"] # Solo se levanta con "--profile app"
     build:
-      context: ../..
+      context: ../.. # Raíz del monorepo (ver cabecera)
       dockerfile: apps/ecommerce-express/Dockerfile
-      target: development
+      target: development # Multi-stage build: usa el stage "development" (hot-reload activo)
     container_name: ecommerce-express
     restart: unless-stopped
     ports:
       - "4000:4000"
     env_file:
-      - path: ../../apps/ecommerce-express/.env
-        required: false
+      - path: ../../apps/ecommerce-express/.env # Variables propias del servicio (aisladas — SRP de config)
+        required: false # Compose 2.24+: no falla si aún no copiaste el .env.example
+    # "environment" tiene prioridad sobre env_file: dentro de Docker los hosts son los nombres de servicio
+    # (el .env usa localhost para "pnpm dev"; así el mismo .env sirve para las dos formas de trabajar)
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ecommerce_db}
       MONGO_URL: mongodb://mongodb:27017/ecommerce_docs
@@ -86,11 +122,11 @@ services:
       FASTAPI_URL: http://ecommerce-fastapi:8000
       STOREFRONT_REVALIDATE_URL: http://ecommerce-next:3000/api/revalidate
     volumes:
-      - ../../apps/ecommerce-express:/repo/apps/ecommerce-express
-      - /repo/apps/ecommerce-express/node_modules
+      - ../../apps/ecommerce-express:/repo/apps/ecommerce-express # Bind mount => hot-reload sin rebuild
+      - /repo/apps/ecommerce-express/node_modules # Volumen anónimo: conserva los node_modules Linux del container
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: service_healthy # No arranca hasta que Postgres pase su healthcheck
       mongodb:
         condition: service_healthy
       redis:
@@ -98,6 +134,9 @@ services:
     networks:
       - ecommerce-net
 
+  # ---------------------------------------------------------------------
+  # Next.js 15 (Storefront + Cuenta — Fases 1-4)
+  # ---------------------------------------------------------------------
   ecommerce-next:
     profiles: ["app"]
     build:
@@ -112,16 +151,19 @@ services:
       - path: ../../apps/ecommerce-next/.env
         required: false
     environment:
-      INTERNAL_API_URL: http://ecommerce-express:4000/api/v1
+      INTERNAL_API_URL: http://ecommerce-express:4000/api/v1 # Server Components => red interna de Docker
     volumes:
       - ../../apps/ecommerce-next:/repo/apps/ecommerce-next
       - /repo/apps/ecommerce-next/node_modules
-      - /repo/apps/ecommerce-next/.next
+      - /repo/apps/ecommerce-next/.next # Cache de build de Next fuera del bind mount (evita conflictos host/container)
     depends_on:
       - ecommerce-express
     networks:
       - ecommerce-net
 
+  # ---------------------------------------------------------------------
+  # FastAPI Python (IA/ML engine — fases posteriores). Requiere apps/ecommerce-fastapi/Dockerfile
+  # ---------------------------------------------------------------------
   ecommerce-fastapi:
     profiles: ["fastapi"]
     build:
@@ -139,9 +181,9 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ecommerce_db}
       REDIS_URL: redis://redis:6379/1
       EXPRESS_API_URL: http://ecommerce-express:4000
-      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_BASE_URL: http://host.docker.internal:11434 # Ollama corre en tu equipo, fuera de Docker
     volumes:
-      - ../../apps/ecommerce-fastapi:/app
+      - ../../apps/ecommerce-fastapi:/app # Bind mount => uvicorn --reload detecta cambios
     depends_on:
       postgres:
         condition: service_healthy
@@ -150,12 +192,15 @@ services:
     networks:
       - ecommerce-net
 
+  # ---------------------------------------------------------------------
+  # Rust Axum (módulos de alto rendimiento — fases posteriores). Requiere apps/ecommerce-rust/Dockerfile
+  # ---------------------------------------------------------------------
   ecommerce-rust:
     profiles: ["rust"]
     build:
       context: ../..
       dockerfile: apps/ecommerce-rust/Dockerfile
-      target: development
+      target: development # Stage con "cargo run" (deps precompiladas en la imagen)
     container_name: ecommerce-rust
     restart: unless-stopped
     ports:
@@ -169,7 +214,7 @@ services:
       EXPRESS_API_URL: http://ecommerce-express:4000
       FASTAPI_URL: http://ecommerce-fastapi:8000
     volumes:
-      - ../../apps/ecommerce-rust/src:/app/src
+      - ../../apps/ecommerce-rust/src:/app/src # Bind mount del código fuente => "cargo run" recompila al reiniciar
     depends_on:
       postgres:
         condition: service_healthy
@@ -178,6 +223,9 @@ services:
     networks:
       - ecommerce-net
 
+  # ---------------------------------------------------------------------
+  # Nuxt (CMS/Landing/PWA — fases posteriores). Requiere apps/ecommerce-nuxt/Dockerfile
+  # ---------------------------------------------------------------------
   ecommerce-nuxt:
     profiles: ["nuxt"]
     build:
@@ -199,15 +247,19 @@ services:
     networks:
       - ecommerce-net
 
+  # ---------------------------------------------------------------------
+  # Gateway => Nginx open source (API Gateway + composición de microfrontends por rutas). Config: infra/nginx/nginx.conf
+  # Punto de entrada único: http://localhost:8088 (tienda Next, secciones Nuxt y APIs bajo el mismo dominio y cookie)
+  # ---------------------------------------------------------------------
   gateway:
     profiles: ["app"]
-    image: nginx:1.27-alpine
+    image: nginx:1.27-alpine # ~10 MB de RAM en reposo
     container_name: ecommerce-gateway
     restart: unless-stopped
     ports:
       - "${GATEWAY_PORT:-8088}:80"
     volumes:
-      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro # ":ro" => solo lectura dentro del contenedor
     depends_on:
       - ecommerce-next
       - ecommerce-express
@@ -219,10 +271,12 @@ services:
     networks:
       - ecommerce-net
 
+# "networks" => red virtual interna; los servicios se resuelven entre sí por NOMBRE (ej. "postgres", no IP)
 networks:
   ecommerce-net:
     driver: bridge
 
+# "volumes" => almacenamiento persistente gestionado por Docker (sobrevive a "docker compose down")
 volumes:
   pgdata:
   mongodata:

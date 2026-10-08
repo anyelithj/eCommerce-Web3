@@ -1,14 +1,7 @@
 {
-  "*.{ts,tsx}": [
-    "eslint --fix",
-    "prettier --write"
-  ],
-  "*.{json,md,yml,yaml}": [
-    "prettier --write"
-  ],
-  "*.rs": [
-    "node scripts/run-if-installed.mjs cargo fmt --"
-  ],
+  "*.{ts,tsx}": ["eslint --fix --flag v10_config_lookup_from_file", "prettier --write"],
+  "*.{json,md,yml,yaml}": ["prettier --write"],
+  "*.rs": ["node scripts/run-if-installed.mjs cargo fmt --"],
   "*.py": [
     "node scripts/run-if-installed.mjs ruff check --fix",
     "node scripts/run-if-installed.mjs ruff format"

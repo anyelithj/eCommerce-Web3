@@ -1,3 +1,4 @@
+// product.route.ts => lecturas públicas (con vista de staff vía optionalAuth), escrituras con permiso RBAC.
 import { Router } from "express";
 import { productController } from "../controller/product.controller";
 import { jwtAuthGuard } from "../../auth/guard/auth.guard";
@@ -8,7 +9,27 @@ export const productRouter = Router();
 
 productRouter.get("/", optionalAuth, productController.listProducts);
 productRouter.get("/:id", optionalAuth, productController.getProductById);
-productRouter.post("/", jwtAuthGuard, requirePermission("CREATE", "product"), productController.createProduct);
-productRouter.patch("/:id", jwtAuthGuard, requirePermission("UPDATE", "product"), productController.updateProduct);
-productRouter.delete("/", jwtAuthGuard, requirePermission("DELETE", "product"), productController.deleteAllProducts);
-productRouter.delete("/:id", jwtAuthGuard, requirePermission("DELETE", "product"), productController.deleteProductById);
+productRouter.post(
+  "/",
+  jwtAuthGuard,
+  requirePermission("CREATE", "product"),
+  productController.createProduct
+);
+productRouter.patch(
+  "/:id",
+  jwtAuthGuard,
+  requirePermission("UPDATE", "product"),
+  productController.updateProduct
+);
+productRouter.delete(
+  "/",
+  jwtAuthGuard,
+  requirePermission("DELETE", "product"),
+  productController.deleteAllProducts
+);
+productRouter.delete(
+  "/:id",
+  jwtAuthGuard,
+  requirePermission("DELETE", "product"),
+  productController.deleteProductById
+);

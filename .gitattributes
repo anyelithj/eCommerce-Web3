@@ -1,4 +1,8 @@
+# .gitattributes (Git) => normaliza finales de línea a LF en el repo.
+# Evita que Windows (CRLF) rompa los hooks de Husky y los scripts dentro de Docker (Linux),
+# y coincide con "endOfLine": "lf" de .prettierrc.json
 * text=auto eol=lf
+# Binarios: git no debe tocar sus bytes
 *.png binary
 *.ico binary
 *.xlsx binary

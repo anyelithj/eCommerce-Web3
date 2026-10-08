@@ -1,0 +1,12 @@
+{
+  // "extends" => hereda strict mode + opciones de Next.js (ESNext, Bundler, jsx preserve, noEmit, plugin next)
+  // desde el preset compartido @ecommerce/tsconfig/nextjs.json (DRY: sin duplicar compilerOptions por app)
+  "extends": "@ecommerce/tsconfig/nextjs.json",
+  "compilerOptions": {
+    // "paths" => alias "@/*" apuntando a la raíz del proyecto (usado en imports como "@/features/auth/ui/LoginForm")
+    "baseUrl": ".",
+    "paths": { "@/*": ["./*"] }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

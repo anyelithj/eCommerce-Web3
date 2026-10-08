@@ -1,0 +1,1504 @@
+{
+  "meta": {
+    "description": "Tienda online Web3: moda y coleccionables con envíos a todo el país, pagos seguros y recompensas NFT."
+  },
+  "common": {
+    "skipToContent": "Saltar al contenido principal",
+    "loading": "Cargando",
+    "loadingContent": "Cargando contenido…",
+    "sectionError": "No pudimos cargar esta sección. Recarga la página para intentarlo de nuevo.",
+    "close": "Cerrar",
+    "closeNotification": "Cerrar notificación",
+    "notifications": "Notificaciones",
+    "routeError": {
+      "title": "Algo salió mal",
+      "description": "No pudimos cargar esta página. Intenta de nuevo en unos segundos.",
+      "retry": "Reintentar"
+    },
+    "notFound": {
+      "metaTitle": "Página no encontrada",
+      "title": "No encontramos esta página",
+      "description": "Es posible que el enlace esté roto o que el producto ya no esté disponible.",
+      "action": "Ir a la tienda"
+    },
+    "pagination": {
+      "label": "Paginación",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
+    "photoOf": "Foto de {name}"
+  },
+  "errors": {
+    "UNEXPECTED": "Ocurrió un error inesperado",
+    "NETWORK_ERROR": "No se pudo completar la solicitud. Revisa tu conexión.",
+    "UNAUTHORIZED": "Tu sesión expiró. Inicia sesión de nuevo.",
+    "FORBIDDEN": "No tienes permiso para realizar esta acción.",
+    "NOT_FOUND": "No encontramos lo que buscas.",
+    "VALIDATION_ERROR": "Revisa los datos ingresados.",
+    "TOO_MANY_REQUESTS": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+    "SERVICE_UNAVAILABLE": "El servicio no está disponible en este momento.",
+    "INVALID_CREDENTIALS": "Email o contraseña incorrectos",
+    "INVALID_WEB3_SIGNATURE": "La firma de la wallet no es válida",
+    "WALLET_ALREADY_LINKED": "Esta wallet ya está vinculada a otra cuenta",
+    "ACCOUNT_DISABLED": "Tu cuenta está desactivada.",
+    "ACCOUNT_NOT_VERIFIED": "Verifica tu email antes de iniciar sesión.",
+    "EMAIL_ALREADY_REGISTERED": "Ya existe una cuenta con este email.",
+    "INVALID_CURRENT_PASSWORD": "La contraseña actual no es correcta.",
+    "PASSWORD_UNCHANGED": "La nueva contraseña debe ser distinta de la actual.",
+    "INVALID_PHONE_FORMAT": "Formato de teléfono colombiano inválido.",
+    "INVALID_SESSION": "Tu sesión no es válida. Inicia sesión de nuevo.",
+    "INVALID_TOKEN": "El enlace no es válido o ya expiró.",
+    "INVALID_TWO_FACTOR_CODE": "El código no es válido o ya expiró.",
+    "OAUTH_VERIFICATION_FAILED": "No pudimos verificar tu cuenta con el proveedor.",
+    "ADDRESS_NOT_FOUND": "La dirección no existe.",
+    "PRODUCT_NOT_FOUND": "El producto no existe o ya no está disponible.",
+    "PRODUCT_UNAVAILABLE": "El producto ya no está disponible.",
+    "CART_ITEM_UNAVAILABLE": "Un producto de tu carrito ya no está disponible.",
+    "INSUFFICIENT_STOCK": "No hay unidades suficientes de este producto.",
+    "STOCK_RESERVATION_FAILED": "No pudimos reservar el stock. Revisa tu carrito.",
+    "EMPTY_CART": "Tu carrito está vacío.",
+    "COUPON_NOT_APPLICABLE": "El cupón no aplica para esta compra.",
+    "CHECKOUT_CLOSED": "Esta sesión de compra ya no está activa.",
+    "CHECKOUT_NOT_READY": "Completa la dirección y el envío antes de pagar.",
+    "NO_SHIPPING_RATES": "No hay envíos disponibles para esa dirección.",
+    "INVALID_SHIPPING_RATE": "El método de envío ya no es válido.",
+    "PAYMENT_PENDING": "El pago aún se está procesando.",
+    "PAYMENT_NOT_CONFIRMED": "El pago aún no fue confirmado.",
+    "ORDER_NOT_CANCELLABLE": "Este pedido ya no se puede cancelar.",
+    "REFUND_NOT_ALLOWED": "Este pedido no admite devolución.",
+    "REFUND_AMOUNT_EXCEEDED": "El monto supera lo que se puede reembolsar.",
+    "DUPLICATE_REVIEW": "Ya publicaste una reseña de este producto.",
+    "REVIEW_NOT_EDITABLE": "Esta reseña ya no se puede editar.",
+    "REVIEW_EDIT_WINDOW_CLOSED": "El plazo para editar la reseña terminó.",
+    "WALLET_REQUIRED": "Vincula una wallet para recibir tus insignias NFT.",
+    "TIER_NOT_REACHED": "Aún no alcanzas el nivel requerido para esta insignia.",
+    "INSUFFICIENT_POINTS": "No tienes puntos suficientes.",
+    "INVALID_IMAGE_TYPE": "Formato de imagen no permitido.",
+    "NO_FILES": "Adjunta al menos una imagen.",
+    "MEDIA_UPLOAD_FAILED": "No se pudo subir la imagen.",
+    "UPSTREAM_ERROR": "Un servicio externo no respondió. Inténtalo más tarde.",
+    "WALLET_UNAVAILABLE": "No encontramos una wallet en este navegador. Instala MetaMask u otra wallet compatible.",
+    "LLM_UNAVAILABLE": "El asistente no está disponible en este momento. Intenta de nuevo en unos minutos.",
+    "CONVERSATION_NOT_FOUND": "No encontramos esta conversación.",
+    "MESSAGE_NOT_FOUND": "No encontramos este mensaje.",
+    "GUARDRAIL_VIOLATION": "Por seguridad no compartas tu frase semilla ni tu clave privada: nadie de la tienda te las pedirá.",
+    "RATE_LIMITED": "Enviaste muchos mensajes seguidos. Espera un minuto e inténtalo de nuevo."
+  },
+  "nav": {
+    "categories": "Categorías",
+    "promotions": "Promociones",
+    "viewAll": "Ver todo {name}",
+    "openMenu": "Abrir menú",
+    "menu": "Menú",
+    "mobileMenu": "Menú principal móvil",
+    "allProducts": "Todos los productos",
+    "myAccount": "Mi cuenta",
+    "myOrders": "Mis pedidos",
+    "userMenu": {
+      "label": "Menú de cuenta",
+      "signIn": "Iniciar sesión",
+      "register": "Registrarse",
+      "account": "Mi cuenta",
+      "orders": "Mis pedidos",
+      "wishlist": "Lista de deseos",
+      "loyalty": "Fidelidad y NFTs",
+      "settings": "Configuraciones",
+      "signOut": "Cerrar sesión",
+      "recommendations": "Recomendaciones para ti",
+      "assistant": "Asistente IA"
+    }
+  },
+  "footer": {
+    "columns": {
+      "shop": "Tienda",
+      "account": "Mi cuenta",
+      "help": "Ayuda",
+      "content": "Contenido"
+    },
+    "links": {
+      "allProducts": "Todos los productos",
+      "search": "Buscar",
+      "orders": "Mis pedidos",
+      "wishlist": "Lista de deseos",
+      "loyalty": "Programa de fidelidad",
+      "terms": "Términos y condiciones",
+      "privacy": "Política de privacidad",
+      "returns": "Devoluciones",
+      "social": "Comunidad",
+      "influencers": "Influencers",
+      "promotions": "Promociones",
+      "blog": "Blog",
+      "events": "Eventos",
+      "lookbooks": "Lookbooks"
+    },
+    "legal": "Pagos seguros con Stripe · Facturación electrónica DIAN."
+  },
+  "language": {
+    "label": "Idioma",
+    "es": "Español",
+    "en": "English"
+  },
+  "auth": {
+    "banner": {
+      "expired": "Tu sesión expiró.",
+      "signInAgain": "Inicia sesión de nuevo"
+    },
+    "login": {
+      "metaTitle": "Iniciar sesión",
+      "metaDescription": "Inicia sesión en tu cuenta para continuar comprando.",
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Ingresa tus datos para continuar",
+      "orContinue": "o continúa con",
+      "forgot": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿No tienes cuenta?",
+      "register": "Regístrate",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "failed": "Error al iniciar sesión",
+      "submitting": "Ingresando...",
+      "submit": "Iniciar sesión",
+      "sessionFailed": "No se pudo iniciar la sesión"
+    },
+    "twoFactor": {
+      "sent": "Enviamos un código de 6 dígitos a <strong>{email}</strong>. Vence en 10 minutos.",
+      "code": "Código de verificación",
+      "invalid": "Código incorrecto",
+      "submit": "Verificar e ingresar",
+      "otherAccount": "Usar otra cuenta"
+    },
+    "oauth": {
+      "label": "Iniciar sesión con proveedor externo",
+      "google": "Continuar con Google",
+      "github": "Continuar con GitHub",
+      "discord": "Continuar con Discord",
+      "wallet": "Continuar con wallet (Web3)",
+      "walletPending": "Esperando la firma de tu wallet…",
+      "walletFailed": "No se pudo iniciar sesión con la wallet",
+      "walletHint": "La wallet debe estar vinculada a tu cuenta desde Configuraciones → Seguridad."
+    },
+    "register": {
+      "metaTitle": "Crear cuenta",
+      "metaDescription": "Regístrate para comenzar a comprar en la tienda.",
+      "title": "Crea tu cuenta",
+      "subtitle": "Solo toma un minuto",
+      "orContinue": "o continúa con",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "signIn": "Inicia sesión",
+      "sent": "Te enviamos un enlace de verificación a <strong>{email}</strong>. Ábrelo para activar tu cuenta.",
+      "resent": "Enlace reenviado",
+      "resend": "Reenviar enlace",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "passwordHint": "Mínimo 8 caracteres, una mayúscula y un número",
+      "confirmPassword": "Confirmar contraseña",
+      "failed": "Error al registrar la cuenta",
+      "submitting": "Creando cuenta...",
+      "submit": "Crear cuenta"
+    },
+    "forgot": {
+      "metaTitle": "Recuperar contraseña",
+      "metaDescription": "Recupera el acceso a tu cuenta.",
+      "title": "Recuperar contraseña",
+      "subtitle": "Ingresa tu correo y te enviaremos un enlace para restablecerla",
+      "resetTitle": "Crea tu nueva contraseña",
+      "resetSubtitle": "Elige una contraseña segura que no uses en otros sitios",
+      "backToLogin": "Volver a iniciar sesión",
+      "sent": "Si el correo ingresado está registrado, recibirás un enlace para restablecer tu contraseña.",
+      "email": "Correo electrónico",
+      "sending": "Enviando...",
+      "submit": "Enviar enlace de recuperación"
+    },
+    "updatePassword": {
+      "success": "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "failed": "El enlace pudo haber expirado. Solicita uno nuevo.",
+      "submitting": "Guardando...",
+      "submit": "Actualizar contraseña"
+    },
+    "verify": {
+      "metaTitle": "Verificar cuenta",
+      "title": "Verificación de cuenta",
+      "incomplete": "Enlace de verificación incompleto. Revisa el correo más reciente que te enviamos.",
+      "invalid": "El enlace de verificación es inválido o expiró. Regístrate de nuevo o solicita otro enlace desde el registro.",
+      "success": "¡Cuenta verificada correctamente! Redirigiendo al inicio de sesión...",
+      "pending": "Verificando tu cuenta..."
+    }
+  },
+  "loyalty": {
+    "banner": {
+      "label": "Programa de fidelidad",
+      "balance": "Tienes {points, number} puntos · Nivel {tier}",
+      "invite": "Gana puntos y coleccionables NFT con cada compra",
+      "rule": "1 punto por cada {amount}. Sube de nivel y reclama tu insignia en la blockchain.",
+      "viewRewards": "Ver mis recompensas",
+      "join": "Unirme gratis"
+    },
+    "tiers": {
+      "BRONZE": "Bronce",
+      "SILVER": "Plata",
+      "GOLD": "Oro",
+      "PLATINUM": "Platino"
+    },
+    "tiersTitle": "Niveles y beneficios",
+    "fromPoints": "Desde {points} puntos",
+    "perks": {
+      "BRONZE": ["1 punto por cada $1.000", "Ofertas exclusivas por email"],
+      "SILVER": ["Insignia NFT Plata", "Envío express con descuento"],
+      "GOLD": ["Insignia NFT Oro", "Acceso anticipado a lanzamientos"],
+      "PLATINUM": ["Insignia NFT Platino", "Soporte prioritario", "Regalos de aniversario"]
+    },
+    "badges": {
+      "title": "Tus insignias NFT",
+      "minted": "¡Insignia minteada en tu wallet!",
+      "claim": "Reclamar insignia {tier}",
+      "emptyTitle": "Aún no tienes insignias",
+      "emptyDescription": "Alcanza el nivel Plata para reclamar tu primera insignia NFT (necesitas una wallet vinculada).",
+      "status": {
+        "MINTED": "En tu wallet",
+        "FAILED": "Falló",
+        "PENDING": "Pendiente"
+      },
+      "contract": "Contrato",
+      "tokenId": "Token ID",
+      "transaction": "Transacción",
+      "metadata": "Metadata",
+      "viewIpfs": "Ver en IPFS",
+      "newTab": "(se abre en una pestaña nueva)"
+    },
+    "balance": {
+      "tier": "Nivel {tier}",
+      "points": "puntos",
+      "progress": "Progreso al siguiente nivel",
+      "remaining": "Te faltan {points} puntos para {tier}",
+      "maxTier": "¡Alcanzaste el nivel máximo!",
+      "expiring": "{points} puntos vencen en los próximos 30 días."
+    },
+    "history": {
+      "empty": "Aún no tienes movimientos. ¡Tu primera compra entregada suma puntos!",
+      "title": "Historial de puntos",
+      "date": "Fecha",
+      "concept": "Concepto",
+      "points": "Puntos"
+    }
+  },
+  "product": {
+    "viewCollection": "Ver colección",
+    "carousel": {
+      "previous": "Anteriores en {title}",
+      "next": "Siguientes en {title}",
+      "recentlyViewed": "Vistos recientemente",
+      "recommended": "También te puede gustar"
+    },
+    "ratingOutOf": "{value} de 5 estrellas",
+    "from": "Desde {price}",
+    "soldOut": "Agotado",
+    "before": "Antes",
+    "previousPrice": "Precio anterior",
+    "noImage": "Sin imagen",
+    "buy": {
+      "added": "{name} se agregó al carrito",
+      "soldOut": "Agotado",
+      "selectOption": "Selecciona una opción",
+      "addToCart": "Agregar al carrito",
+      "saved": "Guardado en tu lista",
+      "save": "Guardar en lista de deseos"
+    },
+    "sort": {
+      "newest": "Más recientes",
+      "price_asc": "Precio: menor a mayor",
+      "price_desc": "Precio: mayor a menor",
+      "rating": "Mejor calificados",
+      "name": "Nombre A-Z"
+    },
+    "filters": {
+      "label": "Filtros de productos",
+      "sortBy": "Ordenar por",
+      "category": "Categoría",
+      "brand": "Marca",
+      "all": "Todas",
+      "price": "Precio (COP)",
+      "minPrice": "Precio mínimo",
+      "maxPrice": "Precio máximo",
+      "min": "Mín.",
+      "max": "Máx.",
+      "applyPrice": "Aplicar precio",
+      "inStockOnly": "Solo productos disponibles",
+      "clear": "Limpiar filtros"
+    },
+    "gallery": {
+      "thumbnails": "Miniaturas del producto",
+      "view": "Ver imagen {index}: {alt}"
+    },
+    "grid": {
+      "emptyTitle": "Sin resultados",
+      "emptyDescription": "No encontramos productos con esos filtros.",
+      "viewAll": "Ver todo el catálogo"
+    },
+    "reviews": {
+      "rating": "Calificación {value} de 5.",
+      "count": "{count, plural, one {# reseña} other {# reseñas}}",
+      "beFirst": "Sé el primero en opinar"
+    },
+    "variants": {
+      "quantity": "Cantidad",
+      "unavailable": "Combinación no disponible",
+      "available": "{count, plural, one {# disponible} other {# disponibles}}",
+      "outOfStock": "Sin stock en esta opción"
+    }
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "emailRequired": "El email es obligatorio",
+    "emailInvalid": "Email inválido",
+    "passwordRequired": "La contraseña es obligatoria",
+    "passwordMin": "Mínimo 8 caracteres",
+    "passwordUppercase": "Debe incluir una mayúscula",
+    "passwordNumber": "Debe incluir un número",
+    "otp": "Ingresa los 6 dígitos del código",
+    "firstNameRequired": "El nombre es obligatorio",
+    "lastNameRequired": "El apellido es obligatorio",
+    "confirmPassword": "Confirma tu contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "ratingRequired": "Selecciona una calificación",
+    "min3": "Mínimo 3 caracteres",
+    "reviewBody": "Cuéntanos un poco más (mínimo 10 caracteres)",
+    "couponCode": "Código inválido",
+    "address": {
+      "recipient": "¿Quién recibe el pedido?",
+      "phone": "Teléfono de contacto inválido",
+      "line1": "La dirección es obligatoria",
+      "city": "Ciudad obligatoria",
+      "state": "Departamento obligatorio",
+      "postalCode": "Código postal inválido"
+    },
+    "acceptTerms": "Debes aceptar los términos y condiciones",
+    "cancelReason": "Cuéntanos el motivo",
+    "refundDescription": "Describe el problema (mínimo 10 caracteres)",
+    "colombianMobile": "Formato de celular colombiano inválido",
+    "currentPassword": "Ingresa tu contraseña actual",
+    "messageMax": "Máximo 2000 caracteres",
+    "positive": "Debe ser un número mayor o igual a 0",
+    "taxId": "NIT inválido (5–20 caracteres)",
+    "rating": "Entre 0 y 5",
+    "score": "Entre 0 y 100",
+    "sku": "SKU: 3–40 caracteres A-Z, 0-9 o guion",
+    "description": "Mínimo 10 caracteres",
+    "url": "URL inválida",
+    "roleName": "Usa MAYÚSCULAS_CON_GUION_BAJO",
+    "resource": "Usa minúsculas_con_guion_bajo",
+    "webhookPath": "Ruta inválida (ej. pedidos/nuevo)",
+    "uuid": "ID inválido"
+  },
+  "search": {
+    "suggestions": "Sugerencias de búsqueda",
+    "recent": "Búsqueda reciente",
+    "inputLabel": "Buscar productos",
+    "placeholder": "Buscar productos, marcas o categorías",
+    "submit": "Buscar",
+    "types": {
+      "product": "Producto",
+      "category": "Categoría",
+      "brand": "Marca"
+    },
+    "image": {
+      "tooLarge": "La imagen supera 5 MB",
+      "title": "Buscar con una foto",
+      "choose": "Elegir imagen",
+      "previewAlt": "Imagen seleccionada para buscar",
+      "analyzing": "Analizando la imagen…",
+      "results": "{count, plural, one {# producto similar} other {# productos similares}}",
+      "formats": "JPG, PNG, WebP o AVIF hasta 5 MB",
+      "noResults": "No encontramos productos parecidos."
+    },
+    "filters": {
+      "label": "Filtrar resultados",
+      "category": "Categoría",
+      "brand": "Marca",
+      "priceRange": "Precios entre {min} y {max}",
+      "inStockOnly": "Solo disponibles",
+      "clear": "Limpiar filtros"
+    },
+    "results": {
+      "prompt": "Escribe en el buscador qué producto quieres encontrar.",
+      "count": "{count, plural, one {# resultado} other {# resultados}} para <strong>“{query}”</strong>",
+      "sort": "Ordenar",
+      "noResults": "Prueba con otras palabras o quita algunos filtros."
+    },
+    "sort": {
+      "relevance": "Relevancia",
+      "price_asc": "Precio: menor a mayor",
+      "price_desc": "Precio: mayor a menor",
+      "newest": "Más recientes",
+      "rating": "Mejor calificados"
+    },
+    "page": {
+      "metaTitle": "Buscar",
+      "metaTitleQuery": "Resultados para “{query}”",
+      "title": "Buscar productos"
+    }
+  },
+  "review": {
+    "loadError": "No pudimos cargar las reseñas.",
+    "emptyMine": "Aún no has escrito reseñas.",
+    "empty": "Todavía no hay reseñas con este filtro.",
+    "stars": "{count, plural, one {# de 5 estrellas} other {# de 5 estrellas}}",
+    "verified": "Compra verificada",
+    "vendorReply": "Respuesta del vendedor",
+    "deleted": "Reseña eliminada",
+    "delete": "Eliminar",
+    "previous": "Anteriores",
+    "next": "Siguientes",
+    "page": "Página {page} de {total}",
+    "ratingLabel": "Calificación",
+    "status": {
+      "APPROVED": "Publicada",
+      "PENDING": "En revisión",
+      "REJECTED": "No publicada"
+    },
+    "summary": {
+      "outOf": "de 5 · {count, plural, one {# reseña} other {# reseñas}}",
+      "bar": "{count, plural, one {# reseña} other {# reseñas}} de {stars} estrellas"
+    },
+    "form": {
+      "signIn": "Inicia sesión",
+      "toWrite": "para escribir una reseña.",
+      "published": "¡Gracias! Tu reseña fue publicada.",
+      "inReview": "¡Gracias! Tu reseña está en revisión.",
+      "title": "Escribe tu reseña",
+      "titleLabel": "Título",
+      "body": "Tu opinión",
+      "submit": "Publicar reseña"
+    }
+  },
+  "home": {
+    "heroTitle": "Moda urbana con recompensas Web3",
+    "heroText": "Compra, acumula puntos y colecciona insignias NFT en la blockchain. Envíos a toda Colombia.",
+    "shopNow": "Comprar ahora",
+    "loyalty": "Programa de fidelidad",
+    "featured": "Lanzamiento",
+    "shopByCategory": "Compra por categoría"
+  },
+  "catalog": {
+    "metaTitle": "Todos los productos",
+    "metaTitlePage": "Productos — página {page}",
+    "metaDescription": "Explora el catálogo completo: ropa, calzado y coleccionables con envío a todo el país.",
+    "title": "Todos los productos",
+    "count": "{count, plural, one {# producto} other {# productos}}",
+    "breadcrumb": "Ruta de navegación",
+    "home": "Inicio",
+    "subcategories": "Subcategorías",
+    "categoryNotFound": "Categoría no encontrada",
+    "categoryDescription": "Compra {name} online con envío a todo el país.",
+    "brandNotFound": "Marca no encontrada",
+    "brandDescription": "Productos {name}",
+    "brandLogo": "Logo de {name}",
+    "collectionNotFound": "Colección no encontrada"
+  },
+  "productPage": {
+    "notFound": "Producto no encontrado",
+    "breadcrumb": "Ruta de navegación",
+    "home": "Inicio",
+    "description": "Descripción",
+    "reviews": "Opiniones de clientes"
+  },
+  "cart": {
+    "badge": "{count, plural, =0 {Carrito vacío} one {Carrito, # producto} other {Carrito, # productos}}",
+    "title": "Tu carrito",
+    "pageTitle": "Tu carrito",
+    "loadError": "No pudimos cargar tu carrito",
+    "itemsLabel": "Productos en el carrito",
+    "empty": {
+      "title": "Tu carrito está vacío",
+      "description": "Explora el catálogo y agrega tus productos favoritos.",
+      "action": "Ir a la tienda"
+    },
+    "item": {
+      "priceChanged": "El precio cambió desde que lo agregaste.",
+      "unavailable": "No disponible en esta cantidad (quedan {count}).",
+      "quantityOf": "Cantidad de {name}",
+      "decrease": "Disminuir cantidad",
+      "increase": "Aumentar cantidad",
+      "remove": "Quitar"
+    },
+    "summary": {
+      "title": "Resumen",
+      "subtotal": "Subtotal ({count, plural, one {# producto} other {# productos}})",
+      "coupon": "Cupón {code}",
+      "removeCoupon": "quitar",
+      "shippingNote": "Envío e impuestos se calculan en el checkout.",
+      "couponLabel": "Código de cupón",
+      "apply": "Aplicar",
+      "blocked": "Ajusta los productos sin stock antes de continuar.",
+      "reasons": {
+        "INACTIVE": "Este cupón no está activo.",
+        "NOT_STARTED": "Este cupón aún no está vigente.",
+        "EXPIRED": "Este cupón ya expiró.",
+        "USAGE_LIMIT_REACHED": "Este cupón alcanzó su límite de usos.",
+        "USER_LIMIT_REACHED": "Ya usaste este cupón el máximo de veces.",
+        "MIN_ORDER_NOT_MET": "Tu compra no alcanza el mínimo para este cupón."
+      }
+    }
+  },
+  "address": {
+    "recipient": "Nombre de quien recibe",
+    "phone": "Teléfono",
+    "line1": "Dirección",
+    "line2": "Apartamento, torre, oficina (opcional)",
+    "city": "Ciudad",
+    "state": "Departamento",
+    "postalCode": "Código postal",
+    "country": "País (código ISO)",
+    "save": "Guardar dirección"
+  },
+  "checkout": {
+    "start": "Finalizar compra",
+    "steps": {
+      "label": "Progreso de la compra",
+      "address": "Envío",
+      "payment": "Pago",
+      "confirm": "Confirmación"
+    },
+    "shipping": {
+      "address": "Dirección de envío",
+      "addAddress": "+ Agregar dirección",
+      "method": "Método de envío",
+      "noRates": "No hay envíos disponibles para esa dirección",
+      "arrives": "{days, plural, one {Llega en # día hábil} other {Llega en # días hábiles}}",
+      "free": "Gratis",
+      "continue": "Continuar al pago"
+    },
+    "confirm": {
+      "failed": "No pudimos confirmar tu pago.",
+      "reviewOrders": "Revisar mis pedidos",
+      "pending": "Confirmando tu pago con el banco… esto toma unos segundos.",
+      "thanks": "¡Gracias por tu compra!",
+      "confirmed": "Tu pedido <strong>{number}</strong> por {total} fue confirmado. Te enviamos el detalle por email.",
+      "viewOrder": "Ver pedido",
+      "keepShopping": "Seguir comprando"
+    },
+    "summary": {
+      "title": "Tu pedido",
+      "subtotal": "Subtotal",
+      "discount": "Descuento",
+      "shipping": "Envío",
+      "free": "Gratis",
+      "pending": "Por calcular",
+      "tax": "IVA",
+      "total": "Total"
+    },
+    "payment": {
+      "deliverTo": "Entregar a",
+      "change": "Cambiar",
+      "method": "Medio de pago",
+      "stripeNote": "Pagos procesados por Stripe. Los datos de tu tarjeta nunca pasan por nuestros servidores."
+    },
+    "page": {
+      "metaAddress": "Checkout — Envío",
+      "metaPayment": "Checkout — Pago",
+      "metaConfirm": "Checkout — Confirmación",
+      "notFound": "La sesión de compra no existe o expiró.",
+      "backToCart": "Volver al carrito",
+      "inactive": "Esta sesión de compra ya no está activa.",
+      "viewOrder": "Ver mi pedido",
+      "goToCart": "Ir al carrito"
+    }
+  },
+  "payment": {
+    "history": {
+      "empty": "Aún no tienes pagos registrados.",
+      "caption": "Historial de pagos",
+      "date": "Fecha",
+      "amount": "Monto",
+      "refunded": "Reembolsado",
+      "status": "Estado",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
+    "status": {
+      "PENDING": "Pendiente",
+      "REQUIRES_ACTION": "Requiere acción",
+      "SUCCEEDED": "Aprobado",
+      "FAILED": "Rechazado",
+      "CANCELLED": "Anulado",
+      "REFUNDED": "Reembolsado",
+      "PARTIALLY_REFUNDED": "Reembolso parcial"
+    },
+    "form": {
+      "failed": "No se pudo procesar el pago",
+      "terms": "Acepto los <link>términos y condiciones</link> y la política de devoluciones.",
+      "pay": "Pagar {amount}",
+      "notConfigured": "Pagos no configurados (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).",
+      "initFailed": "No pudimos iniciar el pago"
+    }
+  },
+  "order": {
+    "number": "Pedido {number}",
+    "items": "{count, plural, one {# producto} other {# productos}}",
+    "filterLabel": "Filtrar por estado",
+    "all": "Todos",
+    "previous": "Anteriores",
+    "next": "Siguientes",
+    "page": "Página {page} de {total}",
+    "empty": {
+      "title": "No hay pedidos aquí",
+      "description": "Cuando compres, verás tus pedidos y su seguimiento en esta sección.",
+      "action": "Explorar productos"
+    },
+    "status": {
+      "CONFIRMED": "Confirmado",
+      "PREPARING": "Preparando",
+      "PACKED": "Empacado",
+      "SHIPPED": "Enviado",
+      "DELIVERED": "Entregado",
+      "CANCELLED": "Cancelado"
+    },
+    "tracking": {
+      "pending": "El envío se creará en cuanto confirmemos tu pago.",
+      "title": "Seguimiento",
+      "noCarrier": "Transportadora por asignar",
+      "trackingNumber": "Guía",
+      "eta": "Llega aprox. el {date}",
+      "status": {
+        "PENDING": "Preparando envío",
+        "LABEL_CREATED": "Guía generada",
+        "IN_TRANSIT": "En camino",
+        "OUT_FOR_DELIVERY": "En reparto",
+        "DELIVERED": "Entregado",
+        "CANCELLED": "Cancelado",
+        "RETURNED": "Devuelto"
+      }
+    },
+    "cancel": {
+      "title": "Cancelar pedido",
+      "success": "Pedido cancelado. El reembolso se procesará automáticamente.",
+      "reason": "Motivo de la cancelación",
+      "confirm": "Confirmar cancelación"
+    },
+    "refund": {
+      "title": "Solicitar devolución",
+      "success": "Recibimos tu solicitud. Te avisaremos cuando la revisemos.",
+      "reason": "Motivo",
+      "description": "Describe el problema",
+      "submit": "Enviar solicitud"
+    },
+    "refundReasons": {
+      "DAMAGED": "Llegó dañado",
+      "WRONG_ITEM": "Recibí un producto equivocado",
+      "NOT_AS_DESCRIBED": "No es como se describía",
+      "NOT_RECEIVED": "No lo recibí",
+      "CHANGED_MIND": "Cambié de opinión",
+      "OTHER": "Otro motivo"
+    },
+    "detail": {
+      "notFound": "No encontramos este pedido",
+      "title": "Pedido {number}",
+      "placedOn": "Realizado el",
+      "items": "Productos",
+      "subtotal": "Subtotal",
+      "discount": "Descuento",
+      "shipping": "Envío",
+      "free": "Gratis",
+      "tax": "IVA",
+      "total": "Total",
+      "shipTo": "Envío a",
+      "downloadInvoice": "Descargar factura {number}",
+      "cancel": "Cancelar pedido",
+      "requestRefund": "Solicitar devolución",
+      "refundsInProgress": "{count, plural, one {Tienes # solicitud de devolución en curso.} other {Tienes # solicitudes de devolución en curso.}}"
+    }
+  },
+  "notification": {
+    "bell": "{count, plural, =0 {Notificaciones} one {Notificaciones, # sin leer} other {Notificaciones, # sin leer}}",
+    "unreadOnly": "Solo no leídas",
+    "markAllRead": "Marcar todas como leídas",
+    "clear": "Vaciar bandeja",
+    "emptyTitle": "No tienes notificaciones",
+    "emptyDescription": "Aquí verás las novedades de tus pedidos, envíos y recompensas.",
+    "unread": "No leída",
+    "viewDetail": "Ver detalle",
+    "markRead": "Marcar como leída",
+    "delete": "Eliminar",
+    "previous": "Anteriores",
+    "next": "Siguientes",
+    "dismiss": "Cerrar aviso",
+    "types": {
+      "ORDER": "Pedido",
+      "PAYMENT": "Pago",
+      "SHIPPING": "Envío",
+      "REFUND": "Devolución",
+      "REVIEW": "Reseña",
+      "LOYALTY": "Fidelidad",
+      "SECURITY": "Seguridad",
+      "PROMOTION": "Promoción",
+      "SYSTEM": "Sistema"
+    }
+  },
+  "settings": {
+    "notifications": {
+      "inApp": {
+        "label": "En la aplicación",
+        "description": "Campana de notificaciones y avisos en tiempo real"
+      },
+      "email": {
+        "label": "Correo electrónico",
+        "description": "Confirmaciones, envíos y devoluciones (los avisos de seguridad siempre se envían)"
+      },
+      "push": {
+        "label": "Notificaciones push",
+        "description": "Alertas en tu navegador o celular"
+      },
+      "marketing": {
+        "label": "Promociones",
+        "description": "Ofertas y lanzamientos (puedes darte de baja cuando quieras)"
+      }
+    },
+    "profile": {
+      "saved": "Perfil actualizado",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "emailHint": "Para cambiar tu email contacta a soporte",
+      "phone": "Celular",
+      "save": "Guardar cambios"
+    },
+    "wallet": {
+      "title": "Wallet Web3",
+      "linked": "Vinculada: <mono>{address}</mono>. Puedes iniciar sesión con ella y recibir tus insignias NFT.",
+      "description": "Vincula tu wallet para iniciar sesión sin contraseña y recibir tus insignias NFT de fidelidad.",
+      "success": "Wallet vinculada",
+      "change": "Cambiar wallet",
+      "link": "Vincular wallet"
+    },
+    "security": {
+      "passwordSaved": "Contraseña actualizada",
+      "passwordTitle": "Cambiar contraseña",
+      "currentPassword": "Contraseña actual",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "updatePassword": "Actualizar contraseña",
+      "twoFactorTitle": "Verificación en dos pasos",
+      "twoFactorOn": "Activa: pediremos un código enviado a tu email en cada inicio de sesión.",
+      "twoFactorOff": "Agrega una capa extra de seguridad con un código enviado a tu email.",
+      "confirmWithPassword": "Confirma tu contraseña",
+      "twoFactorDisabled": "2FA desactivado",
+      "twoFactorEnabled": "2FA activado",
+      "disableTwoFactor": "Desactivar 2FA",
+      "enableTwoFactor": "Activar 2FA",
+      "deleteTitle": "Eliminar cuenta",
+      "deleteDescription": "Anonimizaremos tus datos personales. Tus pedidos y facturas se conservan por obligación legal, sin datos que te identifiquen.",
+      "deleteButton": "Eliminar mi cuenta",
+      "deleteConfirmTitle": "¿Eliminar tu cuenta?",
+      "deleteConfirmText": "Esta acción no se puede deshacer. Se cerrará tu sesión en todos los dispositivos.",
+      "deleteConfirm": "Sí, eliminar",
+      "cancel": "Cancelar"
+    },
+    "display": {
+      "textSize": "Tamaño del texto",
+      "sizes": {
+        "normal": "Normal",
+        "large": "Grande",
+        "x-large": "Muy grande"
+      },
+      "reduceMotion": "Reducir animaciones y transiciones"
+    }
+  },
+  "account": {
+    "title": "Mi cuenta",
+    "nav": {
+      "label": "Mi cuenta",
+      "overview": "Resumen",
+      "orders": "Pedidos",
+      "wishlist": "Lista de deseos",
+      "reviews": "Mis reseñas",
+      "loyalty": "Fidelidad y NFT",
+      "addresses": "Direcciones",
+      "notifications": "Notificaciones",
+      "settings": "Configuraciones"
+    },
+    "overview": {
+      "greeting": "Hola, {name}",
+      "unverified": "Tu email aún no está verificado. Revisa tu bandeja de entrada para activar todas las funciones.",
+      "recentOrders": "Pedidos recientes",
+      "viewAll": "Ver todos"
+    },
+    "pages": {
+      "orders": "Mis pedidos",
+      "orderDetail": "Detalle del pedido",
+      "backToOrders": "← Volver a mis pedidos",
+      "wishlist": "Lista de deseos",
+      "wishlistEmpty": "Guarda productos con el corazón para encontrarlos aquí después.",
+      "reviews": "Mis reseñas",
+      "loyalty": "Fidelidad y recompensas",
+      "notifications": "Notificaciones",
+      "preferences": "Preferencias",
+      "settings": "Configuraciones",
+      "addresses": "Mis direcciones"
+    },
+    "addresses": {
+      "emptyTitle": "Sin direcciones guardadas",
+      "emptyDescription": "Agrega una dirección para agilizar tus compras.",
+      "default": "Predeterminada",
+      "makeDefault": "Usar como predeterminada",
+      "confirmDelete": "¿Eliminar esta dirección?",
+      "deleteLabel": "Eliminar dirección {line}",
+      "delete": "Eliminar",
+      "saved": "Dirección guardada",
+      "add": "+ Agregar dirección"
+    }
+  },
+  "aiChat": {
+    "title": "Asistente de compras",
+    "subtitle": "Pregunta por productos, envíos o devoluciones. Responde una IA local: tus conversaciones no salen de nuestros servidores.",
+    "conversations": "Conversaciones",
+    "new": "Nueva conversación",
+    "noConversations": "Aún no tienes conversaciones.",
+    "untitled": "Conversación sin título",
+    "delete": "Eliminar conversación «{title}»",
+    "confirmDelete": "¿Eliminar «{title}» y todos sus mensajes? Esta acción no se puede deshacer.",
+    "loadMore": "Cargar más",
+    "chat": "Chat",
+    "history": "Historial de la conversación",
+    "welcome": "Escribe tu pregunta para empezar una conversación.",
+    "you": "Tú",
+    "assistant": "Asistente",
+    "typing": "El asistente está escribiendo…",
+    "feedbackLabel": "¿Te sirvió esta respuesta?",
+    "feedback": {
+      "up": "Me sirvió",
+      "down": "No me sirvió"
+    },
+    "inputLabel": "Escribe tu mensaje",
+    "placeholder": "Escribe tu pregunta…",
+    "send": "Enviar",
+    "stop": "Detener",
+    "hint": "{count}/{max} · Enter para enviar, Mayús+Enter para nueva línea",
+    "error": "No pudimos obtener la respuesta. Intenta de nuevo.",
+    "sources": "Fuentes",
+    "tools": {
+      "search_products": "Buscando productos…",
+      "get_order_status": "Consultando tu pedido…",
+      "get_product_stock": "Revisando el stock…"
+    }
+  },
+  "social": {
+    "title": "Comunidad",
+    "titleInfluencer": "Publicaciones de @{handle}",
+    "description": "Inspírate con las publicaciones de nuestra comunidad y compra los productos que aparecen en ellas.",
+    "notFound": "Publicación no encontrada",
+    "newPosts": "{count, plural, one {# publicación nueva} other {# publicaciones nuevas}} · Mostrar",
+    "filterLabel": "Filtrar por red social",
+    "platform": {
+      "ALL": "Todas",
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "TIKTOK": "TikTok"
+    },
+    "empty": "Aún no hay publicaciones.",
+    "goShopping": "Ir a la tienda",
+    "shopPost": "{count, plural, =0 {Ver publicación} one {Comprar # producto} other {Comprar # productos}}",
+    "taggedProducts": "{count, plural, =0 {Sin productos etiquetados} one {# producto en esta publicación} other {# productos en esta publicación}}",
+    "pagination": "Paginación del feed",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página {page} de {total}",
+    "metrics": {
+      "likes": "Me gusta",
+      "comments": "Comentarios",
+      "clicks": "Clics",
+      "purchases": "Compras"
+    },
+    "share": {
+      "share": "Compartir",
+      "copied": "Enlace copiado",
+      "failed": "No se pudo compartir",
+      "whatsapp": "WhatsApp",
+      "facebook": "Facebook",
+      "x": "X",
+      "newTab": "(abre en una pestaña nueva)"
+    },
+    "influencers": {
+      "title": "Influencers",
+      "description": "Creadores que recomiendan nuestros productos.",
+      "stats": "{posts, plural, one {# publicación} other {# publicaciones}} · {products, plural, one {# producto} other {# productos}}",
+      "viewPosts": "Ver publicaciones de {name}",
+      "empty": "Aún no hay influencers.",
+      "goFeed": "Ver la comunidad"
+    }
+  },
+  "recommendations": {
+    "title": "Recomendaciones para ti",
+    "subtitle": "Selección generada por IA a partir de tus compras y de lo que compran clientes como tú.",
+    "generate": "Generar recomendaciones",
+    "forYou": "Para ti · {date}",
+    "empty": "Aún no tienes recomendaciones.",
+    "emptyHint": "Pulsa «Generar recomendaciones» para obtener tu primera selección.",
+    "loadError": "No pudimos cargar tus recomendaciones. Intenta de nuevo más tarde.",
+    "clear": "Borrar historial"
+  },
+  "admin": {
+    "title": "Panel de administración",
+    "backToStore": "Volver a la tienda",
+    "nav": {
+      "label": "Menú del panel",
+      "overview": "Resumen",
+      "analytics": "Analítica",
+      "products": "Productos",
+      "productNew": "Nuevo producto",
+      "productEdit": "Editar producto",
+      "orders": "Pedidos",
+      "customers": "Clientes",
+      "inventory": "Inventario",
+      "media": "Medios",
+      "marketing": "Marketing",
+      "aiAssistant": "Asistente IA",
+      "settings": "Configuración",
+      "content": "Contenido y social"
+    },
+    "descriptions": {
+      "overview": "Indicadores del período, operación del día y widgets personalizables.",
+      "analytics": "Ventas por período, embudo de conversión, reportes y relaciones entre productos.",
+      "products": "Catálogo: crea, edita, publica o archiva productos.",
+      "productNew": "Completa los datos, agrega al menos una variante y sube imágenes con texto alternativo.",
+      "productEdit": "El stock de variantes existentes se ajusta en Inventario para conservar el historial.",
+      "orders": "Pedidos, envíos, facturas electrónicas y devoluciones.",
+      "customers": "CRM: segmentos, valor de vida, puntaje, etiquetas y notas.",
+      "inventory": "Stock por variante, movimientos, reposición y proveedores.",
+      "media": "Imágenes en Cloudinary: sube, organiza por carpeta y define el texto alternativo.",
+      "marketing": "Campañas por segmento, correos, plantillas y cupones.",
+      "aiAssistant": "Base de conocimiento, herramientas usadas y calidad del asistente (Ollama local).",
+      "settings": "Roles y permisos, webhooks, automatización n8n, auditoría y transacciones MCP."
+    },
+    "common": {
+      "actions": "Acciones",
+      "all": "Todos",
+      "search": "Buscar",
+      "new": "Nuevo",
+      "newTitle": "Nuevo: {name}",
+      "editTitle": "Editar: {name}",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "create": "Crear",
+      "save": "Guardar",
+      "saved": "Cambios guardados",
+      "deleted": "Eliminado",
+      "confirmDelete": "¿Eliminar «{name}»? Esta acción no se puede deshacer."
+    },
+    "table": {
+      "empty": "No hay registros",
+      "pagination": "Paginación de la tabla",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página {page} de {total} · {count} registros"
+    },
+    "chart": {
+      "empty": "Sin datos en el período",
+      "period": "Período",
+      "revenue": "Ingresos",
+      "orders": "Pedidos"
+    },
+    "overview": {
+      "title": "Resumen del negocio",
+      "generatedAt": "Actualizado: {date}",
+      "range": "Período",
+      "ranges": {
+        "7d": "Últimos 7 días",
+        "30d": "Últimos 30 días",
+        "90d": "Últimos 90 días",
+        "365d": "Último año"
+      },
+      "liveOn": "En vivo: activo",
+      "liveOff": "Activar en vivo",
+      "waiting": "Esperando actividad…",
+      "tick": "{events} eventos y {orders} pedidos nuevos",
+      "operations": "Operación",
+      "activeOrders": "Pedidos activos",
+      "pendingRefunds": "Devoluciones pendientes",
+      "lowStock": "Variantes con bajo stock",
+      "widgets": "Widgets",
+      "vsPrevious": "vs. período anterior",
+      "product": "Producto",
+      "units": "Unidades",
+      "revenue": "Ingresos",
+      "removeWidget": "Quitar widget",
+      "addWidget": "Agregar widget",
+      "add": "Agregar",
+      "widgetTypes": {
+        "KPI": "Indicador",
+        "SALES_CHART": "Gráfico de ventas",
+        "TOP_PRODUCTS": "Productos más vendidos",
+        "LOW_STOCK": "Bajo stock",
+        "RECENT_ORDERS": "Pedidos activos",
+        "FUNNEL": "Embudo de conversión"
+      }
+    },
+    "analytics": {
+      "title": "Analítica de ventas",
+      "range": "Período",
+      "ranges": {
+        "7d": "Últimos 7 días",
+        "30d": "Últimos 30 días",
+        "90d": "Últimos 90 días",
+        "365d": "Último año"
+      },
+      "granularity": "Agrupar por",
+      "granularities": {
+        "day": "Día",
+        "week": "Semana",
+        "month": "Mes"
+      },
+      "totals": "Totales del período",
+      "revenue": "Ingresos",
+      "sessions": "Sesiones",
+      "conversion": "Conversión",
+      "cartAbandonment": "Abandono de carrito",
+      "salesChart": "Ingresos y pedidos",
+      "funnel": "Embudo de conversión",
+      "events": {
+        "page_view": "Vistas de página",
+        "click": "Clics",
+        "search": "Búsquedas",
+        "view_item": "Vistas de producto",
+        "add_to_cart": "Agregados al carrito",
+        "remove_from_cart": "Quitados del carrito",
+        "begin_checkout": "Checkout iniciado",
+        "add_shipping_info": "Envío elegido",
+        "add_payment_info": "Pago ingresado",
+        "purchase": "Compras"
+      },
+      "report": "Reporte",
+      "dimension": "Dimensión",
+      "dimensions": {
+        "product": "Producto",
+        "category": "Categoría",
+        "brand": "Marca",
+        "path": "Página",
+        "channel": "Canal",
+        "event": "Evento"
+      },
+      "count": "Cantidad",
+      "views": "Vistas",
+      "addToCart": "Al carrito",
+      "units": "Unidades",
+      "graph": "Relaciones entre productos (IA)",
+      "graphHint": "Agrupa productos que se compran juntos; el resumen con IA es opcional (consume más energía).",
+      "runCluster": "Analizar agrupaciones",
+      "minWeight": "Pedidos en común mínimos",
+      "minWeightHint": "Más alto = grupos más fuertes y menos ruido",
+      "explain": "Resumir con IA",
+      "date": "Fecha",
+      "queryType": "Tipo",
+      "queryTypes": {
+        "RELATED": "Relacionados",
+        "PURCHASED_TOGETHER": "Comprados juntos",
+        "SIMILAR": "Similares",
+        "CLUSTER": "Agrupaciones"
+      },
+      "size": "Tamaño",
+      "graphSize": "{nodes} productos · {edges} relaciones",
+      "groups": "Grupos",
+      "summary": "Resumen"
+    },
+    "products": {
+      "title": "Productos",
+      "new": "Nuevo producto",
+      "name": "Nombre",
+      "description": "Descripción",
+      "status": "Estado",
+      "statuses": {
+        "DRAFT": "Borrador",
+        "ACTIVE": "Publicado",
+        "ARCHIVED": "Archivado"
+      },
+      "category": "Categoría",
+      "brand": "Marca",
+      "price": "Precio",
+      "stock": "Stock",
+      "inStock": "Disponible",
+      "outOfStock": "Agotado",
+      "edit": "Editar",
+      "general": "Datos generales",
+      "variants": "Variantes",
+      "variantN": "Variante {n}",
+      "sku": "SKU",
+      "variantName": "Nombre de la variante",
+      "stockHint": "Se ajusta en Inventario",
+      "removeVariant": "Quitar",
+      "addVariant": "Agregar variante",
+      "images": "Imágenes",
+      "alt": "Texto alternativo",
+      "removeImage": "Quitar imagen",
+      "save": "Guardar cambios",
+      "create": "Crear producto",
+      "cancel": "Cancelar"
+    },
+    "orders": {
+      "tabs": {
+        "label": "Secciones de ventas",
+        "orders": "Pedidos",
+        "shipments": "Envíos",
+        "invoices": "Facturas",
+        "refunds": "Devoluciones"
+      },
+      "number": "Pedido",
+      "status": "Estado",
+      "items": "Productos",
+      "total": "Total",
+      "date": "Fecha",
+      "note": "Nota interna",
+      "carrier": "Transportadora",
+      "tracking": "Guía",
+      "eta": "Entrega estimada",
+      "label": "Guía PDF",
+      "createLabel": "Generar guía",
+      "labelCreated": "Guía generada",
+      "downloadError": "No se pudo descargar el archivo",
+      "eventDescription": "Descripción del evento",
+      "location": "Ubicación",
+      "invoiceNumber": "Factura",
+      "invoiceStatus": {
+        "DRAFT": "Borrador",
+        "ISSUED": "Emitida",
+        "ACCEPTED": "Aceptada DIAN",
+        "REJECTED": "Rechazada"
+      },
+      "orderId": "ID del pedido",
+      "orderIdHint": "Copia el ID (UUID) del pedido a facturar",
+      "creditAmount": "Valor de la nota crédito",
+      "creditHint": "En pesos; se envía en centavos",
+      "reason": "Motivo",
+      "refundStatus": {
+        "REQUESTED": "Solicitada",
+        "APPROVED": "Aprobada",
+        "REJECTED": "Rechazada",
+        "PROCESSED": "Reembolsada",
+        "CANCELLED": "Cancelada"
+      },
+      "decision": "Decisión",
+      "approve": "Aprobar y reembolsar",
+      "reject": "Rechazar"
+    },
+    "customers": {
+      "title": "Clientes",
+      "name": "Cliente",
+      "email": "Email",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "phone": "Teléfono",
+      "segment": "Segmento",
+      "segments": {
+        "VIP": "VIP",
+        "REGULAR": "Regular",
+        "NEW": "Nuevo",
+        "INACTIVE": "Inactivo"
+      },
+      "state": "Estado",
+      "archived": "Archivados",
+      "orders": "Pedidos",
+      "ltv": "Valor de vida",
+      "score": "Puntaje",
+      "scoreHint": "0–100; vacío = cálculo automático RFM",
+      "tags": "Etiquetas",
+      "tagsHint": "Separadas por comas",
+      "note": "Nota",
+      "addNote": "Agregar nota",
+      "view360": "Vista 360°",
+      "avgOrder": "Ticket promedio",
+      "loyalty": "Fidelidad",
+      "nextPurchase": "Próxima compra estimada",
+      "favorites": "Categorías favoritas",
+      "recentOrders": "Pedidos recientes",
+      "notes": "Notas",
+      "date": "Fecha"
+    },
+    "inventory": {
+      "tabs": {
+        "label": "Secciones de inventario",
+        "stock": "Stock",
+        "suppliers": "Proveedores"
+      },
+      "alert": "Alerta",
+      "lowOnly": "Solo bajo stock",
+      "product": "Producto",
+      "variant": "Variante",
+      "stock": "Stock",
+      "reserved": "Reservado",
+      "available": "Disponible",
+      "low": "{count} · bajo",
+      "history": "Historial",
+      "historyTitle": "Historial de {sku}",
+      "movement": "Movimiento",
+      "movementTitle": "Registrar movimiento de {sku}",
+      "movementType": "Tipo",
+      "movementTypes": {
+        "IN": "Entrada",
+        "OUT": "Salida",
+        "RETURN": "Devolución",
+        "DAMAGE": "Daño",
+        "ADJUSTMENT": "Ajuste",
+        "TRANSFER": "Traslado",
+        "SALE": "Venta",
+        "RESERVE": "Reserva",
+        "RELEASE": "Liberación"
+      },
+      "quantity": "Cantidad",
+      "reason": "Motivo",
+      "reference": "Referencia",
+      "referenceHint": "Factura del proveedor, pedido…",
+      "newStock": "Stock nuevo",
+      "adjustHint": "Valor absoluto contado en bodega",
+      "avgDaily": "Ventas diarias promedio",
+      "daysOfCover": "Días de cobertura",
+      "reorder": "Reponer",
+      "movements": "Movimientos",
+      "date": "Fecha",
+      "supplierName": "Proveedor",
+      "taxId": "NIT",
+      "email": "Email",
+      "phone": "Teléfono",
+      "contact": "Contacto",
+      "paymentTerms": "Plazo de pago (días)",
+      "leadTime": "Tiempo de entrega",
+      "days": "{count, plural, one {# día} other {# días}}",
+      "rating": "Calificación (0–5)",
+      "contractEnds": "Fin de contrato",
+      "state": "Estado",
+      "active": "Activos",
+      "inactive": "Inactivos"
+    },
+    "media": {
+      "folder": "Carpeta",
+      "allFolders": "Todas",
+      "folders": {
+        "products": "Productos",
+        "brands": "Marcas",
+        "categories": "Categorías",
+        "collections": "Colecciones",
+        "avatars": "Avatares",
+        "reviews": "Reseñas",
+        "refunds": "Devoluciones",
+        "marketing": "Marketing",
+        "email": "Correo",
+        "suppliers": "Proveedores"
+      },
+      "drop": "Arrastra imágenes aquí o haz clic para elegir",
+      "limits": "JPG, PNG, WebP o AVIF · máx. 5 MB · hasta 10 por envío",
+      "uploading": "Subiendo…",
+      "uploaded": "{count, plural, one {# imagen subida} other {# imágenes subidas}}",
+      "errors": {
+        "type": "{name}: formato no permitido",
+        "size": "{name}: supera 5 MB",
+        "count": "Máximo 10 por envío: se omitieron {name}"
+      },
+      "empty": "No hay imágenes en esta carpeta",
+      "select": "Seleccionar {name}",
+      "selected": "{count, plural, one {# seleccionada} other {# seleccionadas}}",
+      "clear": "Quitar selección",
+      "deleteSelected": "Eliminar seleccionadas",
+      "confirmBulk": "¿Eliminar {count} imágenes? Los productos que las usen quedarán sin ellas.",
+      "loadMore": "Cargar más",
+      "detail": "Detalle de la imagen",
+      "size": "Dimensiones",
+      "alt": "Texto alternativo",
+      "altHint": "Describe la imagen para lectores de pantalla y buscadores",
+      "saveAlt": "Guardar texto",
+      "saved": "Texto alternativo guardado",
+      "copyUrl": "Copiar URL",
+      "copied": "URL copiada",
+      "replace": "Reemplazar archivo",
+      "replaced": "Archivo reemplazado",
+      "delete": "Eliminar",
+      "deleted": "Imágenes eliminadas",
+      "confirmDelete": "¿Eliminar esta imagen?"
+    },
+    "marketing": {
+      "tabs": {
+        "label": "Secciones de marketing",
+        "campaigns": "Campañas",
+        "emails": "Correos enviados",
+        "templates": "Plantillas",
+        "coupons": "Cupones"
+      },
+      "name": "Nombre",
+      "channel": "Canal",
+      "channels": {
+        "EMAIL": "Correo",
+        "PUSH": "Push",
+        "WHATSAPP": "WhatsApp"
+      },
+      "audience": "Audiencia",
+      "audiences": {
+        "ALL": "Todos los clientes",
+        "VIP": "VIP",
+        "REGULAR": "Regulares",
+        "NEW": "Nuevos",
+        "INACTIVE": "Inactivos"
+      },
+      "status": "Estado",
+      "campaignStatus": {
+        "DRAFT": "Borrador",
+        "SCHEDULED": "Programada",
+        "SENDING": "Enviando",
+        "SENT": "Enviada",
+        "FAILED": "Fallida",
+        "ARCHIVED": "Archivada"
+      },
+      "subject": "Asunto",
+      "content": "Contenido",
+      "contentHint": "Admite variables entre llaves dobles, p. ej. nombre",
+      "scheduledAt": "Programar para",
+      "scheduleHint": "Vacío = queda como borrador",
+      "sent": "Enviados",
+      "openRate": "Apertura",
+      "sendNow": "Enviar ahora",
+      "confirmSend": "¿Enviar la campaña «{name}» ahora?",
+      "sending": "Campaña en envío",
+      "sendEmail": "Enviar correo",
+      "send": "Enviar",
+      "emailQueued": "Correo en cola de envío",
+      "to": "Para",
+      "template": "Plantilla",
+      "variables": "Variables",
+      "variablesHint": "nombre=Ana, codigo=X1",
+      "emailStatus": {
+        "QUEUED": "En cola",
+        "SENT": "Enviado",
+        "FAILED": "Fallido"
+      },
+      "opens": "Aperturas",
+      "date": "Fecha",
+      "html": "HTML",
+      "htmlHint": "Las variables van entre llaves dobles, p. ej. nombre",
+      "locale": "Idioma",
+      "code": "Código",
+      "couponType": "Tipo",
+      "couponTypes": {
+        "PERCENTAGE": "Porcentaje",
+        "FIXED_AMOUNT": "Monto fijo",
+        "FREE_SHIPPING": "Envío gratis"
+      },
+      "value": "Valor",
+      "valueHint": "Porcentaje (1–100) o monto en pesos",
+      "usageLimit": "Límite de usos",
+      "used": "Usos",
+      "endsAt": "Vence",
+      "active": "Activos",
+      "inactive": "Inactivos"
+    },
+    "settings": {
+      "tabs": {
+        "label": "Secciones de configuración",
+        "roles": "Roles",
+        "permissions": "Permisos",
+        "webhooks": "Webhooks",
+        "automation": "Automatización n8n",
+        "audit": "Auditoría",
+        "mcp": "Transacciones MCP"
+      },
+      "roleName": "Rol",
+      "roleHint": "MAYÚSCULAS_CON_GUION_BAJO, p. ej. SOPORTE",
+      "description": "Descripción",
+      "action": "Acción",
+      "resource": "Recurso",
+      "resourceHint": "minúsculas_con_guion_bajo, p. ej. product",
+      "name": "Nombre",
+      "url": "URL",
+      "urlHint": "HTTPS recomendado; se firma con HMAC-SHA256",
+      "events": "Eventos",
+      "maxAttempts": "Reintentos máximos",
+      "active": "Activo",
+      "successRate": "Éxito · entregas",
+      "yes": "Sí",
+      "no": "No",
+      "test": "Probar",
+      "testSent": "Evento de prueba enviado",
+      "trigger": "Disparador",
+      "triggers": {
+        "EVENT": "Evento",
+        "MANUAL": "Manual",
+        "SCHEDULE": "Programado",
+        "WEBHOOK": "Webhook"
+      },
+      "event": "Evento",
+      "eventHint": "Obligatorio si el disparador es Evento",
+      "webhookPath": "Ruta del webhook n8n",
+      "webhookPathHint": "p. ej. pedidos/nuevo",
+      "runs": "Ejecuciones · éxito",
+      "lastRun": "Última ejecución",
+      "run": "Ejecutar",
+      "runStarted": "Flujo en ejecución",
+      "severity": "Severidad",
+      "severities": {
+        "INFO": "Info",
+        "WARNING": "Advertencia",
+        "CRITICAL": "Crítica"
+      },
+      "reviewed": "Revisado",
+      "pending": "Pendiente",
+      "markReviewed": "Marcar revisado",
+      "module": "Módulo",
+      "date": "Fecha",
+      "status": "Estado",
+      "type": "Tipo",
+      "steps": "Pasos",
+      "rollback": "Revertir",
+      "rollbackTitle": "Revertir transacción {type}",
+      "reason": "Motivo"
+    },
+    "ai": {
+      "tabs": {
+        "label": "Secciones del asistente",
+        "knowledge": "Conocimiento",
+        "tools": "Herramientas",
+        "evaluations": "Evaluaciones"
+      },
+      "source": "Fuente",
+      "sources": {
+        "product": "Producto",
+        "faq": "Preguntas frecuentes",
+        "policy": "Política"
+      },
+      "indexSources": {
+        "products": "Catálogo de productos",
+        "faq": "Preguntas frecuentes",
+        "policies": "Políticas"
+      },
+      "lang": "Idioma",
+      "titleCol": "Título",
+      "content": "Fragmento",
+      "reindex": "Re-indexar",
+      "start": "Iniciar",
+      "jobAccepted": "Trabajo en cola: los resultados aparecerán en unos minutos",
+      "clear": "Vaciar índice",
+      "clearTitle": "Se borrarán todos los fragmentos; el asistente responderá sin contexto hasta re-indexar.",
+      "clearConfirm": "Vaciar",
+      "cleared": "Índice vaciado",
+      "status": "Estado",
+      "toolStatus": {
+        "ok": "OK",
+        "denied": "Denegada",
+        "not_found": "No encontrada",
+        "rejected": "Rechazada",
+        "error": "Error"
+      },
+      "date": "Fecha",
+      "tool": "Herramienta",
+      "arguments": "Argumentos",
+      "latency": "Latencia",
+      "lastRun": "Última evaluación",
+      "faithfulness": "Fidelidad",
+      "hallucination": "Alucinación",
+      "tokens": "Tokens estimados",
+      "evaluate": "Nueva evaluación",
+      "tier": "Modelo",
+      "tiers": {
+        "economic": "Económico",
+        "strong": "Potente"
+      },
+      "model": "Modelo",
+      "error": "Ver error"
+    }
+  }
+}

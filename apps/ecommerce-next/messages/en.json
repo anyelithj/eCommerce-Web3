@@ -1,0 +1,1504 @@
+{
+  "meta": {
+    "description": "Web3 online store: fashion and collectibles shipped nationwide, secure payments and NFT rewards."
+  },
+  "common": {
+    "skipToContent": "Skip to main content",
+    "loading": "Loading",
+    "loadingContent": "Loading content…",
+    "sectionError": "We couldn't load this section. Reload the page to try again.",
+    "close": "Close",
+    "closeNotification": "Dismiss notification",
+    "notifications": "Notifications",
+    "routeError": {
+      "title": "Something went wrong",
+      "description": "We couldn't load this page. Please try again in a few seconds.",
+      "retry": "Try again"
+    },
+    "notFound": {
+      "metaTitle": "Page not found",
+      "title": "We couldn't find this page",
+      "description": "The link may be broken or the product may no longer be available.",
+      "action": "Go to the store"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "photoOf": "Photo of {name}"
+  },
+  "errors": {
+    "UNEXPECTED": "An unexpected error occurred",
+    "NETWORK_ERROR": "The request could not be completed. Check your connection.",
+    "UNAUTHORIZED": "Your session expired. Please sign in again.",
+    "FORBIDDEN": "You don't have permission to do this.",
+    "NOT_FOUND": "We couldn't find what you're looking for.",
+    "VALIDATION_ERROR": "Please review the information you entered.",
+    "TOO_MANY_REQUESTS": "Too many attempts. Please wait a moment and try again.",
+    "SERVICE_UNAVAILABLE": "The service is currently unavailable.",
+    "INVALID_CREDENTIALS": "Incorrect email or password",
+    "INVALID_WEB3_SIGNATURE": "The wallet signature is not valid",
+    "WALLET_ALREADY_LINKED": "This wallet is already linked to another account",
+    "ACCOUNT_DISABLED": "Your account is disabled.",
+    "ACCOUNT_NOT_VERIFIED": "Verify your email before signing in.",
+    "EMAIL_ALREADY_REGISTERED": "An account with this email already exists.",
+    "INVALID_CURRENT_PASSWORD": "Your current password is incorrect.",
+    "PASSWORD_UNCHANGED": "The new password must be different from the current one.",
+    "INVALID_PHONE_FORMAT": "Invalid Colombian phone number format.",
+    "INVALID_SESSION": "Your session is not valid. Please sign in again.",
+    "INVALID_TOKEN": "The link is invalid or has expired.",
+    "INVALID_TWO_FACTOR_CODE": "The code is invalid or has expired.",
+    "OAUTH_VERIFICATION_FAILED": "We couldn't verify your account with the provider.",
+    "ADDRESS_NOT_FOUND": "The address does not exist.",
+    "PRODUCT_NOT_FOUND": "The product does not exist or is no longer available.",
+    "PRODUCT_UNAVAILABLE": "The product is no longer available.",
+    "CART_ITEM_UNAVAILABLE": "An item in your cart is no longer available.",
+    "INSUFFICIENT_STOCK": "There aren't enough units of this product.",
+    "STOCK_RESERVATION_FAILED": "We couldn't reserve the stock. Please review your cart.",
+    "EMPTY_CART": "Your cart is empty.",
+    "COUPON_NOT_APPLICABLE": "This coupon doesn't apply to this purchase.",
+    "CHECKOUT_CLOSED": "This checkout session is no longer active.",
+    "CHECKOUT_NOT_READY": "Complete the address and shipping before paying.",
+    "NO_SHIPPING_RATES": "No shipping options are available for that address.",
+    "INVALID_SHIPPING_RATE": "The shipping method is no longer valid.",
+    "PAYMENT_PENDING": "The payment is still being processed.",
+    "PAYMENT_NOT_CONFIRMED": "The payment has not been confirmed yet.",
+    "ORDER_NOT_CANCELLABLE": "This order can no longer be cancelled.",
+    "REFUND_NOT_ALLOWED": "This order is not eligible for a refund.",
+    "REFUND_AMOUNT_EXCEEDED": "The amount exceeds what can be refunded.",
+    "DUPLICATE_REVIEW": "You already reviewed this product.",
+    "REVIEW_NOT_EDITABLE": "This review can no longer be edited.",
+    "REVIEW_EDIT_WINDOW_CLOSED": "The time to edit this review has ended.",
+    "WALLET_REQUIRED": "Link a wallet to receive your NFT badges.",
+    "TIER_NOT_REACHED": "You haven't reached the tier required for this badge yet.",
+    "INSUFFICIENT_POINTS": "You don't have enough points.",
+    "INVALID_IMAGE_TYPE": "Image format not allowed.",
+    "NO_FILES": "Attach at least one image.",
+    "MEDIA_UPLOAD_FAILED": "The image could not be uploaded.",
+    "UPSTREAM_ERROR": "An external service did not respond. Please try again later.",
+    "WALLET_UNAVAILABLE": "We couldn't find a wallet in this browser. Install MetaMask or another compatible wallet.",
+    "LLM_UNAVAILABLE": "The assistant is not available right now. Please try again in a few minutes.",
+    "CONVERSATION_NOT_FOUND": "We couldn't find this conversation.",
+    "MESSAGE_NOT_FOUND": "We couldn't find this message.",
+    "GUARDRAIL_VIOLATION": "For your security, never share your seed phrase or private key: the store will never ask for them.",
+    "RATE_LIMITED": "You sent too many messages in a row. Please wait a minute and try again."
+  },
+  "nav": {
+    "categories": "Categories",
+    "promotions": "Promotions",
+    "viewAll": "View all {name}",
+    "openMenu": "Open menu",
+    "menu": "Menu",
+    "mobileMenu": "Mobile main menu",
+    "allProducts": "All products",
+    "myAccount": "My account",
+    "myOrders": "My orders",
+    "userMenu": {
+      "label": "Account menu",
+      "signIn": "Sign in",
+      "register": "Sign up",
+      "account": "My account",
+      "orders": "My orders",
+      "wishlist": "Wishlist",
+      "loyalty": "Loyalty & NFTs",
+      "settings": "Settings",
+      "signOut": "Sign out",
+      "recommendations": "Recommended for you",
+      "assistant": "AI assistant"
+    }
+  },
+  "footer": {
+    "columns": {
+      "shop": "Shop",
+      "account": "My account",
+      "help": "Help",
+      "content": "Content"
+    },
+    "links": {
+      "allProducts": "All products",
+      "search": "Search",
+      "orders": "My orders",
+      "wishlist": "Wishlist",
+      "loyalty": "Loyalty program",
+      "terms": "Terms and conditions",
+      "privacy": "Privacy policy",
+      "returns": "Returns",
+      "social": "Community",
+      "influencers": "Influencers",
+      "promotions": "Promotions",
+      "blog": "Blog",
+      "events": "Events",
+      "lookbooks": "Lookbooks"
+    },
+    "legal": "Secure payments with Stripe · DIAN electronic invoicing."
+  },
+  "language": {
+    "label": "Language",
+    "es": "Español",
+    "en": "English"
+  },
+  "auth": {
+    "banner": {
+      "expired": "Your session expired.",
+      "signInAgain": "Sign in again"
+    },
+    "login": {
+      "metaTitle": "Sign in",
+      "metaDescription": "Sign in to your account to keep shopping.",
+      "title": "Welcome back",
+      "subtitle": "Enter your details to continue",
+      "orContinue": "or continue with",
+      "forgot": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up",
+      "email": "Email",
+      "password": "Password",
+      "failed": "Could not sign in",
+      "submitting": "Signing in...",
+      "submit": "Sign in",
+      "sessionFailed": "The session could not be started"
+    },
+    "twoFactor": {
+      "sent": "We sent a 6-digit code to <strong>{email}</strong>. It expires in 10 minutes.",
+      "code": "Verification code",
+      "invalid": "Incorrect code",
+      "submit": "Verify and sign in",
+      "otherAccount": "Use another account"
+    },
+    "oauth": {
+      "label": "Sign in with an external provider",
+      "google": "Continue with Google",
+      "github": "Continue with GitHub",
+      "discord": "Continue with Discord",
+      "wallet": "Continue with wallet (Web3)",
+      "walletPending": "Waiting for your wallet signature…",
+      "walletFailed": "Could not sign in with the wallet",
+      "walletHint": "The wallet must be linked to your account in Settings → Security."
+    },
+    "register": {
+      "metaTitle": "Create account",
+      "metaDescription": "Sign up to start shopping in the store.",
+      "title": "Create your account",
+      "subtitle": "It only takes a minute",
+      "orContinue": "or continue with",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "sent": "We sent a verification link to <strong>{email}</strong>. Open it to activate your account.",
+      "resent": "Link resent",
+      "resend": "Resend link",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "At least 8 characters, one uppercase letter and one number",
+      "confirmPassword": "Confirm password",
+      "failed": "Could not create the account",
+      "submitting": "Creating account...",
+      "submit": "Create account"
+    },
+    "forgot": {
+      "metaTitle": "Recover password",
+      "metaDescription": "Recover access to your account.",
+      "title": "Recover password",
+      "subtitle": "Enter your email and we'll send you a link to reset it",
+      "resetTitle": "Create your new password",
+      "resetSubtitle": "Choose a strong password you don't use on other sites",
+      "backToLogin": "Back to sign in",
+      "sent": "If the email is registered, you'll receive a link to reset your password.",
+      "email": "Email",
+      "sending": "Sending...",
+      "submit": "Send recovery link"
+    },
+    "updatePassword": {
+      "success": "Password updated. Sign in with your new password.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "failed": "The link may have expired. Request a new one.",
+      "submitting": "Saving...",
+      "submit": "Update password"
+    },
+    "verify": {
+      "metaTitle": "Verify account",
+      "title": "Account verification",
+      "incomplete": "Incomplete verification link. Check the most recent email we sent you.",
+      "invalid": "The verification link is invalid or has expired. Sign up again or request another link from the sign-up page.",
+      "success": "Account verified! Redirecting to sign in...",
+      "pending": "Verifying your account..."
+    }
+  },
+  "loyalty": {
+    "banner": {
+      "label": "Loyalty program",
+      "balance": "You have {points, number} points · {tier} tier",
+      "invite": "Earn points and NFT collectibles with every purchase",
+      "rule": "1 point for every {amount}. Level up and claim your badge on the blockchain.",
+      "viewRewards": "View my rewards",
+      "join": "Join for free"
+    },
+    "tiers": {
+      "BRONZE": "Bronze",
+      "SILVER": "Silver",
+      "GOLD": "Gold",
+      "PLATINUM": "Platinum"
+    },
+    "tiersTitle": "Tiers and benefits",
+    "fromPoints": "From {points} points",
+    "perks": {
+      "BRONZE": ["1 point for every $1,000 COP", "Exclusive email offers"],
+      "SILVER": ["Silver NFT badge", "Discounted express shipping"],
+      "GOLD": ["Gold NFT badge", "Early access to releases"],
+      "PLATINUM": ["Platinum NFT badge", "Priority support", "Anniversary gifts"]
+    },
+    "badges": {
+      "title": "Your NFT badges",
+      "minted": "Badge minted to your wallet!",
+      "claim": "Claim {tier} badge",
+      "emptyTitle": "You don't have badges yet",
+      "emptyDescription": "Reach the Silver tier to claim your first NFT badge (you need a linked wallet).",
+      "status": {
+        "MINTED": "In your wallet",
+        "FAILED": "Failed",
+        "PENDING": "Pending"
+      },
+      "contract": "Contract",
+      "tokenId": "Token ID",
+      "transaction": "Transaction",
+      "metadata": "Metadata",
+      "viewIpfs": "View on IPFS",
+      "newTab": "(opens in a new tab)"
+    },
+    "balance": {
+      "tier": "{tier} tier",
+      "points": "points",
+      "progress": "Progress to the next tier",
+      "remaining": "{points} points to go for {tier}",
+      "maxTier": "You've reached the top tier!",
+      "expiring": "{points} points expire in the next 30 days."
+    },
+    "history": {
+      "empty": "No activity yet. Your first delivered order earns points!",
+      "title": "Points history",
+      "date": "Date",
+      "concept": "Description",
+      "points": "Points"
+    }
+  },
+  "product": {
+    "viewCollection": "View collection",
+    "carousel": {
+      "previous": "Previous in {title}",
+      "next": "Next in {title}",
+      "recentlyViewed": "Recently viewed",
+      "recommended": "You may also like"
+    },
+    "ratingOutOf": "{value} out of 5 stars",
+    "from": "From {price}",
+    "soldOut": "Sold out",
+    "before": "Was",
+    "previousPrice": "Previous price",
+    "noImage": "No image",
+    "buy": {
+      "added": "{name} was added to your cart",
+      "soldOut": "Sold out",
+      "selectOption": "Select an option",
+      "addToCart": "Add to cart",
+      "saved": "Saved to your list",
+      "save": "Save to wishlist"
+    },
+    "sort": {
+      "newest": "Newest",
+      "price_asc": "Price: low to high",
+      "price_desc": "Price: high to low",
+      "rating": "Top rated",
+      "name": "Name A-Z"
+    },
+    "filters": {
+      "label": "Product filters",
+      "sortBy": "Sort by",
+      "category": "Category",
+      "brand": "Brand",
+      "all": "All",
+      "price": "Price (COP)",
+      "minPrice": "Minimum price",
+      "maxPrice": "Maximum price",
+      "min": "Min.",
+      "max": "Max.",
+      "applyPrice": "Apply price",
+      "inStockOnly": "In-stock products only",
+      "clear": "Clear filters"
+    },
+    "gallery": {
+      "thumbnails": "Product thumbnails",
+      "view": "View image {index}: {alt}"
+    },
+    "grid": {
+      "emptyTitle": "No results",
+      "emptyDescription": "We couldn't find products matching those filters.",
+      "viewAll": "Browse the full catalog"
+    },
+    "reviews": {
+      "rating": "Rated {value} out of 5.",
+      "count": "{count, plural, one {# review} other {# reviews}}",
+      "beFirst": "Be the first to review"
+    },
+    "variants": {
+      "quantity": "Quantity",
+      "unavailable": "Combination not available",
+      "available": "{count, plural, one {# available} other {# available}}",
+      "outOfStock": "Out of stock for this option"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email",
+    "passwordRequired": "Password is required",
+    "passwordMin": "At least 8 characters",
+    "passwordUppercase": "Must include an uppercase letter",
+    "passwordNumber": "Must include a number",
+    "otp": "Enter the 6-digit code",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "confirmPassword": "Confirm your password",
+    "passwordMismatch": "Passwords do not match",
+    "ratingRequired": "Select a rating",
+    "min3": "At least 3 characters",
+    "reviewBody": "Tell us a bit more (at least 10 characters)",
+    "couponCode": "Invalid code",
+    "address": {
+      "recipient": "Who will receive the order?",
+      "phone": "Invalid contact phone",
+      "line1": "The address is required",
+      "city": "City is required",
+      "state": "State is required",
+      "postalCode": "Invalid postal code"
+    },
+    "acceptTerms": "You must accept the terms and conditions",
+    "cancelReason": "Tell us the reason",
+    "refundDescription": "Describe the problem (at least 10 characters)",
+    "colombianMobile": "Invalid Colombian mobile number format",
+    "currentPassword": "Enter your current password",
+    "messageMax": "Maximum 2000 characters",
+    "positive": "Must be a number greater than or equal to 0",
+    "taxId": "Invalid tax ID (5–20 characters)",
+    "rating": "Between 0 and 5",
+    "score": "Between 0 and 100",
+    "sku": "SKU: 3–40 characters A-Z, 0-9 or hyphen",
+    "description": "At least 10 characters",
+    "url": "Invalid URL",
+    "roleName": "Use UPPER_SNAKE_CASE",
+    "resource": "Use lower_snake_case",
+    "webhookPath": "Invalid path (e.g. orders/new)",
+    "uuid": "Invalid ID"
+  },
+  "search": {
+    "suggestions": "Search suggestions",
+    "recent": "Recent search",
+    "inputLabel": "Search products",
+    "placeholder": "Search products, brands or categories",
+    "submit": "Search",
+    "types": {
+      "product": "Product",
+      "category": "Category",
+      "brand": "Brand"
+    },
+    "image": {
+      "tooLarge": "The image exceeds 5 MB",
+      "title": "Search with a photo",
+      "choose": "Choose image",
+      "previewAlt": "Image selected for search",
+      "analyzing": "Analyzing the image…",
+      "results": "{count, plural, one {# similar product} other {# similar products}}",
+      "formats": "JPG, PNG, WebP or AVIF up to 5 MB",
+      "noResults": "We couldn't find similar products."
+    },
+    "filters": {
+      "label": "Filter results",
+      "category": "Category",
+      "brand": "Brand",
+      "priceRange": "Prices between {min} and {max}",
+      "inStockOnly": "In stock only",
+      "clear": "Clear filters"
+    },
+    "results": {
+      "prompt": "Type in the search box what you're looking for.",
+      "count": "{count, plural, one {# result} other {# results}} for <strong>“{query}”</strong>",
+      "sort": "Sort",
+      "noResults": "Try different words or remove some filters."
+    },
+    "sort": {
+      "relevance": "Relevance",
+      "price_asc": "Price: low to high",
+      "price_desc": "Price: high to low",
+      "newest": "Newest",
+      "rating": "Top rated"
+    },
+    "page": {
+      "metaTitle": "Search",
+      "metaTitleQuery": "Results for “{query}”",
+      "title": "Search products"
+    }
+  },
+  "review": {
+    "loadError": "We couldn't load the reviews.",
+    "emptyMine": "You haven't written any reviews yet.",
+    "empty": "There are no reviews with this filter yet.",
+    "stars": "{count, plural, one {# out of 5 stars} other {# out of 5 stars}}",
+    "verified": "Verified purchase",
+    "vendorReply": "Seller's reply",
+    "deleted": "Review deleted",
+    "delete": "Delete",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {total}",
+    "ratingLabel": "Rating",
+    "status": {
+      "APPROVED": "Published",
+      "PENDING": "Under review",
+      "REJECTED": "Not published"
+    },
+    "summary": {
+      "outOf": "out of 5 · {count, plural, one {# review} other {# reviews}}",
+      "bar": "{count, plural, one {# review} other {# reviews}} with {stars} stars"
+    },
+    "form": {
+      "signIn": "Sign in",
+      "toWrite": "to write a review.",
+      "published": "Thank you! Your review was published.",
+      "inReview": "Thank you! Your review is under review.",
+      "title": "Write your review",
+      "titleLabel": "Title",
+      "body": "Your opinion",
+      "submit": "Post review"
+    }
+  },
+  "home": {
+    "heroTitle": "Streetwear with Web3 rewards",
+    "heroText": "Shop, earn points and collect NFT badges on the blockchain. Shipping across Colombia.",
+    "shopNow": "Shop now",
+    "loyalty": "Loyalty program",
+    "featured": "New release",
+    "shopByCategory": "Shop by category"
+  },
+  "catalog": {
+    "metaTitle": "All products",
+    "metaTitlePage": "Products — page {page}",
+    "metaDescription": "Browse the full catalog: clothing, footwear and collectibles shipped nationwide.",
+    "title": "All products",
+    "count": "{count, plural, one {# product} other {# products}}",
+    "breadcrumb": "Breadcrumb",
+    "home": "Home",
+    "subcategories": "Subcategories",
+    "categoryNotFound": "Category not found",
+    "categoryDescription": "Shop {name} online with nationwide shipping.",
+    "brandNotFound": "Brand not found",
+    "brandDescription": "{name} products",
+    "brandLogo": "{name} logo",
+    "collectionNotFound": "Collection not found"
+  },
+  "productPage": {
+    "notFound": "Product not found",
+    "breadcrumb": "Breadcrumb",
+    "home": "Home",
+    "description": "Description",
+    "reviews": "Customer reviews"
+  },
+  "cart": {
+    "badge": "{count, plural, =0 {Empty cart} one {Cart, # item} other {Cart, # items}}",
+    "title": "Your cart",
+    "pageTitle": "Your cart",
+    "loadError": "We couldn't load your cart",
+    "itemsLabel": "Items in the cart",
+    "empty": {
+      "title": "Your cart is empty",
+      "description": "Browse the catalog and add your favorite products.",
+      "action": "Go to the store"
+    },
+    "item": {
+      "priceChanged": "The price changed since you added it.",
+      "unavailable": "Not available in this quantity ({count} left).",
+      "quantityOf": "Quantity of {name}",
+      "decrease": "Decrease quantity",
+      "increase": "Increase quantity",
+      "remove": "Remove"
+    },
+    "summary": {
+      "title": "Summary",
+      "subtotal": "Subtotal ({count, plural, one {# item} other {# items}})",
+      "coupon": "Coupon {code}",
+      "removeCoupon": "remove",
+      "shippingNote": "Shipping and taxes are calculated at checkout.",
+      "couponLabel": "Coupon code",
+      "apply": "Apply",
+      "blocked": "Adjust out-of-stock items before continuing.",
+      "reasons": {
+        "INACTIVE": "This coupon is not active.",
+        "NOT_STARTED": "This coupon is not valid yet.",
+        "EXPIRED": "This coupon has expired.",
+        "USAGE_LIMIT_REACHED": "This coupon has reached its usage limit.",
+        "USER_LIMIT_REACHED": "You've already used this coupon the maximum number of times.",
+        "MIN_ORDER_NOT_MET": "Your order doesn't meet the minimum for this coupon."
+      }
+    }
+  },
+  "address": {
+    "recipient": "Recipient name",
+    "phone": "Phone",
+    "line1": "Address",
+    "line2": "Apartment, building, office (optional)",
+    "city": "City",
+    "state": "State / department",
+    "postalCode": "Postal code",
+    "country": "Country (ISO code)",
+    "save": "Save address"
+  },
+  "checkout": {
+    "start": "Checkout",
+    "steps": {
+      "label": "Checkout progress",
+      "address": "Shipping",
+      "payment": "Payment",
+      "confirm": "Confirmation"
+    },
+    "shipping": {
+      "address": "Shipping address",
+      "addAddress": "+ Add address",
+      "method": "Shipping method",
+      "noRates": "No shipping options are available for that address",
+      "arrives": "{days, plural, one {Arrives in # business day} other {Arrives in # business days}}",
+      "free": "Free",
+      "continue": "Continue to payment"
+    },
+    "confirm": {
+      "failed": "We couldn't confirm your payment.",
+      "reviewOrders": "Check my orders",
+      "pending": "Confirming your payment with the bank… this takes a few seconds.",
+      "thanks": "Thank you for your purchase!",
+      "confirmed": "Your order <strong>{number}</strong> for {total} was confirmed. We emailed you the details.",
+      "viewOrder": "View order",
+      "keepShopping": "Keep shopping"
+    },
+    "summary": {
+      "title": "Your order",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "free": "Free",
+      "pending": "To be calculated",
+      "tax": "VAT",
+      "total": "Total"
+    },
+    "payment": {
+      "deliverTo": "Deliver to",
+      "change": "Change",
+      "method": "Payment method",
+      "stripeNote": "Payments processed by Stripe. Your card details never touch our servers."
+    },
+    "page": {
+      "metaAddress": "Checkout — Shipping",
+      "metaPayment": "Checkout — Payment",
+      "metaConfirm": "Checkout — Confirmation",
+      "notFound": "The checkout session doesn't exist or has expired.",
+      "backToCart": "Back to cart",
+      "inactive": "This checkout session is no longer active.",
+      "viewOrder": "View my order",
+      "goToCart": "Go to cart"
+    }
+  },
+  "payment": {
+    "history": {
+      "empty": "You don't have any payments yet.",
+      "caption": "Payment history",
+      "date": "Date",
+      "amount": "Amount",
+      "refunded": "Refunded",
+      "status": "Status",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "REQUIRES_ACTION": "Action required",
+      "SUCCEEDED": "Approved",
+      "FAILED": "Declined",
+      "CANCELLED": "Voided",
+      "REFUNDED": "Refunded",
+      "PARTIALLY_REFUNDED": "Partially refunded"
+    },
+    "form": {
+      "failed": "The payment could not be processed",
+      "terms": "I accept the <link>terms and conditions</link> and the return policy.",
+      "pay": "Pay {amount}",
+      "notConfigured": "Payments are not configured (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).",
+      "initFailed": "We couldn't start the payment"
+    }
+  },
+  "order": {
+    "number": "Order {number}",
+    "items": "{count, plural, one {# item} other {# items}}",
+    "filterLabel": "Filter by status",
+    "all": "All",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {total}",
+    "empty": {
+      "title": "No orders here",
+      "description": "When you shop, you'll see your orders and their tracking in this section.",
+      "action": "Browse products"
+    },
+    "status": {
+      "CONFIRMED": "Confirmed",
+      "PREPARING": "Preparing",
+      "PACKED": "Packed",
+      "SHIPPED": "Shipped",
+      "DELIVERED": "Delivered",
+      "CANCELLED": "Cancelled"
+    },
+    "tracking": {
+      "pending": "The shipment will be created as soon as we confirm your payment.",
+      "title": "Tracking",
+      "noCarrier": "Carrier to be assigned",
+      "trackingNumber": "Tracking number",
+      "eta": "Estimated arrival {date}",
+      "status": {
+        "PENDING": "Preparing shipment",
+        "LABEL_CREATED": "Label created",
+        "IN_TRANSIT": "In transit",
+        "OUT_FOR_DELIVERY": "Out for delivery",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled",
+        "RETURNED": "Returned"
+      }
+    },
+    "cancel": {
+      "title": "Cancel order",
+      "success": "Order cancelled. The refund will be processed automatically.",
+      "reason": "Reason for cancellation",
+      "confirm": "Confirm cancellation"
+    },
+    "refund": {
+      "title": "Request a return",
+      "success": "We received your request. We'll let you know once we review it.",
+      "reason": "Reason",
+      "description": "Describe the problem",
+      "submit": "Send request"
+    },
+    "refundReasons": {
+      "DAMAGED": "Arrived damaged",
+      "WRONG_ITEM": "I received the wrong item",
+      "NOT_AS_DESCRIBED": "Not as described",
+      "NOT_RECEIVED": "I didn't receive it",
+      "CHANGED_MIND": "I changed my mind",
+      "OTHER": "Other reason"
+    },
+    "detail": {
+      "notFound": "We couldn't find this order",
+      "title": "Order {number}",
+      "placedOn": "Placed on",
+      "items": "Items",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "free": "Free",
+      "tax": "VAT",
+      "total": "Total",
+      "shipTo": "Ship to",
+      "downloadInvoice": "Download invoice {number}",
+      "cancel": "Cancel order",
+      "requestRefund": "Request a return",
+      "refundsInProgress": "{count, plural, one {You have # return request in progress.} other {You have # return requests in progress.}}"
+    }
+  },
+  "notification": {
+    "bell": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
+    "unreadOnly": "Unread only",
+    "markAllRead": "Mark all as read",
+    "clear": "Clear inbox",
+    "emptyTitle": "You have no notifications",
+    "emptyDescription": "Updates about your orders, shipments and rewards will show up here.",
+    "unread": "Unread",
+    "viewDetail": "View details",
+    "markRead": "Mark as read",
+    "delete": "Delete",
+    "previous": "Previous",
+    "next": "Next",
+    "dismiss": "Dismiss notice",
+    "types": {
+      "ORDER": "Order",
+      "PAYMENT": "Payment",
+      "SHIPPING": "Shipping",
+      "REFUND": "Return",
+      "REVIEW": "Review",
+      "LOYALTY": "Loyalty",
+      "SECURITY": "Security",
+      "PROMOTION": "Promotion",
+      "SYSTEM": "System"
+    }
+  },
+  "settings": {
+    "notifications": {
+      "inApp": {
+        "label": "In the app",
+        "description": "Notification bell and real-time alerts"
+      },
+      "email": {
+        "label": "Email",
+        "description": "Confirmations, shipments and returns (security alerts are always sent)"
+      },
+      "push": {
+        "label": "Push notifications",
+        "description": "Alerts on your browser or phone"
+      },
+      "marketing": {
+        "label": "Promotions",
+        "description": "Offers and releases (you can unsubscribe anytime)"
+      }
+    },
+    "profile": {
+      "saved": "Profile updated",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "emailHint": "To change your email, contact support",
+      "phone": "Mobile phone",
+      "save": "Save changes"
+    },
+    "wallet": {
+      "title": "Web3 wallet",
+      "linked": "Linked: <mono>{address}</mono>. You can sign in with it and receive your NFT badges.",
+      "description": "Link your wallet to sign in without a password and receive your loyalty NFT badges.",
+      "success": "Wallet linked",
+      "change": "Change wallet",
+      "link": "Link wallet"
+    },
+    "security": {
+      "passwordSaved": "Password updated",
+      "passwordTitle": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "updatePassword": "Update password",
+      "twoFactorTitle": "Two-step verification",
+      "twoFactorOn": "On: we'll ask for a code sent to your email every time you sign in.",
+      "twoFactorOff": "Add an extra layer of security with a code sent to your email.",
+      "confirmWithPassword": "Confirm your password",
+      "twoFactorDisabled": "2FA disabled",
+      "twoFactorEnabled": "2FA enabled",
+      "disableTwoFactor": "Disable 2FA",
+      "enableTwoFactor": "Enable 2FA",
+      "deleteTitle": "Delete account",
+      "deleteDescription": "We'll anonymize your personal data. Your orders and invoices are kept as required by law, without data that identifies you.",
+      "deleteButton": "Delete my account",
+      "deleteConfirmTitle": "Delete your account?",
+      "deleteConfirmText": "This action cannot be undone. You'll be signed out on all devices.",
+      "deleteConfirm": "Yes, delete",
+      "cancel": "Cancel"
+    },
+    "display": {
+      "textSize": "Text size",
+      "sizes": {
+        "normal": "Normal",
+        "large": "Large",
+        "x-large": "Extra large"
+      },
+      "reduceMotion": "Reduce animations and transitions"
+    }
+  },
+  "account": {
+    "title": "My account",
+    "nav": {
+      "label": "My account",
+      "overview": "Overview",
+      "orders": "Orders",
+      "wishlist": "Wishlist",
+      "reviews": "My reviews",
+      "loyalty": "Loyalty & NFTs",
+      "addresses": "Addresses",
+      "notifications": "Notifications",
+      "settings": "Settings"
+    },
+    "overview": {
+      "greeting": "Hi, {name}",
+      "unverified": "Your email isn't verified yet. Check your inbox to unlock every feature.",
+      "recentOrders": "Recent orders",
+      "viewAll": "View all"
+    },
+    "pages": {
+      "orders": "My orders",
+      "orderDetail": "Order details",
+      "backToOrders": "← Back to my orders",
+      "wishlist": "Wishlist",
+      "wishlistEmpty": "Save products with the heart to find them here later.",
+      "reviews": "My reviews",
+      "loyalty": "Loyalty and rewards",
+      "notifications": "Notifications",
+      "preferences": "Preferences",
+      "settings": "Settings",
+      "addresses": "My addresses"
+    },
+    "addresses": {
+      "emptyTitle": "No saved addresses",
+      "emptyDescription": "Add an address to speed up your purchases.",
+      "default": "Default",
+      "makeDefault": "Set as default",
+      "confirmDelete": "Delete this address?",
+      "deleteLabel": "Delete address {line}",
+      "delete": "Delete",
+      "saved": "Address saved",
+      "add": "+ Add address"
+    }
+  },
+  "aiChat": {
+    "title": "Shopping assistant",
+    "subtitle": "Ask about products, shipping or returns. Answered by a local AI: your conversations never leave our servers.",
+    "conversations": "Conversations",
+    "new": "New conversation",
+    "noConversations": "You don't have conversations yet.",
+    "untitled": "Untitled conversation",
+    "delete": "Delete conversation “{title}”",
+    "confirmDelete": "Delete “{title}” and all its messages? This can't be undone.",
+    "loadMore": "Load more",
+    "chat": "Chat",
+    "history": "Conversation history",
+    "welcome": "Type your question to start a conversation.",
+    "you": "You",
+    "assistant": "Assistant",
+    "typing": "The assistant is typing…",
+    "feedbackLabel": "Was this answer helpful?",
+    "feedback": {
+      "up": "Helpful",
+      "down": "Not helpful"
+    },
+    "inputLabel": "Type your message",
+    "placeholder": "Type your question…",
+    "send": "Send",
+    "stop": "Stop",
+    "hint": "{count}/{max} · Enter to send, Shift+Enter for a new line",
+    "error": "We couldn't get the answer. Please try again.",
+    "sources": "Sources",
+    "tools": {
+      "search_products": "Searching products…",
+      "get_order_status": "Checking your order…",
+      "get_product_stock": "Checking stock…"
+    }
+  },
+  "social": {
+    "title": "Community",
+    "titleInfluencer": "Posts by @{handle}",
+    "description": "Get inspired by our community's posts and shop the products featured in them.",
+    "notFound": "Post not found",
+    "newPosts": "{count, plural, one {# new post} other {# new posts}} · Show",
+    "filterLabel": "Filter by social network",
+    "platform": {
+      "ALL": "All",
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "TIKTOK": "TikTok"
+    },
+    "empty": "No posts yet.",
+    "goShopping": "Go to the store",
+    "shopPost": "{count, plural, =0 {View post} one {Shop # product} other {Shop # products}}",
+    "taggedProducts": "{count, plural, =0 {No tagged products} one {# product in this post} other {# products in this post}}",
+    "pagination": "Feed pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {total}",
+    "metrics": {
+      "likes": "Likes",
+      "comments": "Comments",
+      "clicks": "Clicks",
+      "purchases": "Purchases"
+    },
+    "share": {
+      "share": "Share",
+      "copied": "Link copied",
+      "failed": "Couldn't share",
+      "whatsapp": "WhatsApp",
+      "facebook": "Facebook",
+      "x": "X",
+      "newTab": "(opens in a new tab)"
+    },
+    "influencers": {
+      "title": "Influencers",
+      "description": "Creators who recommend our products.",
+      "stats": "{posts, plural, one {# post} other {# posts}} · {products, plural, one {# product} other {# products}}",
+      "viewPosts": "View posts by {name}",
+      "empty": "No influencers yet.",
+      "goFeed": "See the community"
+    }
+  },
+  "recommendations": {
+    "title": "Recommended for you",
+    "subtitle": "AI-generated picks based on your purchases and what similar customers buy.",
+    "generate": "Generate recommendations",
+    "forYou": "For you · {date}",
+    "empty": "You don't have recommendations yet.",
+    "emptyHint": "Press “Generate recommendations” to get your first picks.",
+    "loadError": "We couldn't load your recommendations. Please try again later.",
+    "clear": "Clear history"
+  },
+  "admin": {
+    "title": "Admin panel",
+    "backToStore": "Back to store",
+    "nav": {
+      "label": "Admin menu",
+      "overview": "Overview",
+      "analytics": "Analytics",
+      "products": "Products",
+      "productNew": "New product",
+      "productEdit": "Edit product",
+      "orders": "Orders",
+      "customers": "Customers",
+      "inventory": "Inventory",
+      "media": "Media",
+      "marketing": "Marketing",
+      "aiAssistant": "AI assistant",
+      "settings": "Settings",
+      "content": "Content & social"
+    },
+    "descriptions": {
+      "overview": "Period KPIs, daily operations and customizable widgets.",
+      "analytics": "Sales by period, conversion funnel, reports and product relationships.",
+      "products": "Catalog: create, edit, publish or archive products.",
+      "productNew": "Fill in the details, add at least one variant and upload images with alt text.",
+      "productEdit": "Stock of existing variants is adjusted in Inventory to keep the history.",
+      "orders": "Orders, shipments, e-invoices and returns.",
+      "customers": "CRM: segments, lifetime value, score, tags and notes.",
+      "inventory": "Stock per variant, movements, restocking and suppliers.",
+      "media": "Cloudinary images: upload, organize by folder and set alt text.",
+      "marketing": "Segment campaigns, emails, templates and coupons.",
+      "aiAssistant": "Knowledge base, tools used and assistant quality (local Ollama).",
+      "settings": "Roles and permissions, webhooks, n8n automation, audit and MCP transactions."
+    },
+    "common": {
+      "actions": "Actions",
+      "all": "All",
+      "search": "Search",
+      "new": "New",
+      "newTitle": "New: {name}",
+      "editTitle": "Edit: {name}",
+      "edit": "Edit",
+      "delete": "Delete",
+      "create": "Create",
+      "save": "Save",
+      "saved": "Changes saved",
+      "deleted": "Deleted",
+      "confirmDelete": "Delete “{name}”? This cannot be undone."
+    },
+    "table": {
+      "empty": "No records",
+      "pagination": "Table pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {total} · {count} records"
+    },
+    "chart": {
+      "empty": "No data for this period",
+      "period": "Period",
+      "revenue": "Revenue",
+      "orders": "Orders"
+    },
+    "overview": {
+      "title": "Business overview",
+      "generatedAt": "Updated: {date}",
+      "range": "Period",
+      "ranges": {
+        "7d": "Last 7 days",
+        "30d": "Last 30 days",
+        "90d": "Last 90 days",
+        "365d": "Last year"
+      },
+      "liveOn": "Live: on",
+      "liveOff": "Turn on live",
+      "waiting": "Waiting for activity…",
+      "tick": "{events} events and {orders} new orders",
+      "operations": "Operations",
+      "activeOrders": "Active orders",
+      "pendingRefunds": "Pending returns",
+      "lowStock": "Low-stock variants",
+      "widgets": "Widgets",
+      "vsPrevious": "vs. previous period",
+      "product": "Product",
+      "units": "Units",
+      "revenue": "Revenue",
+      "removeWidget": "Remove widget",
+      "addWidget": "Add widget",
+      "add": "Add",
+      "widgetTypes": {
+        "KPI": "KPI",
+        "SALES_CHART": "Sales chart",
+        "TOP_PRODUCTS": "Top products",
+        "LOW_STOCK": "Low stock",
+        "RECENT_ORDERS": "Active orders",
+        "FUNNEL": "Conversion funnel"
+      }
+    },
+    "analytics": {
+      "title": "Sales analytics",
+      "range": "Period",
+      "ranges": {
+        "7d": "Last 7 days",
+        "30d": "Last 30 days",
+        "90d": "Last 90 days",
+        "365d": "Last year"
+      },
+      "granularity": "Group by",
+      "granularities": {
+        "day": "Day",
+        "week": "Week",
+        "month": "Month"
+      },
+      "totals": "Period totals",
+      "revenue": "Revenue",
+      "sessions": "Sessions",
+      "conversion": "Conversion",
+      "cartAbandonment": "Cart abandonment",
+      "salesChart": "Revenue and orders",
+      "funnel": "Conversion funnel",
+      "events": {
+        "page_view": "Page views",
+        "click": "Clicks",
+        "search": "Searches",
+        "view_item": "Product views",
+        "add_to_cart": "Added to cart",
+        "remove_from_cart": "Removed from cart",
+        "begin_checkout": "Checkout started",
+        "add_shipping_info": "Shipping chosen",
+        "add_payment_info": "Payment entered",
+        "purchase": "Purchases"
+      },
+      "report": "Report",
+      "dimension": "Dimension",
+      "dimensions": {
+        "product": "Product",
+        "category": "Category",
+        "brand": "Brand",
+        "path": "Page",
+        "channel": "Channel",
+        "event": "Event"
+      },
+      "count": "Count",
+      "views": "Views",
+      "addToCart": "To cart",
+      "units": "Units",
+      "graph": "Product relationships (AI)",
+      "graphHint": "Groups products bought together; the AI summary is optional (uses more energy).",
+      "runCluster": "Analyze clusters",
+      "minWeight": "Minimum shared orders",
+      "minWeightHint": "Higher = stronger groups, less noise",
+      "explain": "Summarize with AI",
+      "date": "Date",
+      "queryType": "Type",
+      "queryTypes": {
+        "RELATED": "Related",
+        "PURCHASED_TOGETHER": "Bought together",
+        "SIMILAR": "Similar",
+        "CLUSTER": "Clusters"
+      },
+      "size": "Size",
+      "graphSize": "{nodes} products · {edges} links",
+      "groups": "Groups",
+      "summary": "Summary"
+    },
+    "products": {
+      "title": "Products",
+      "new": "New product",
+      "name": "Name",
+      "description": "Description",
+      "status": "Status",
+      "statuses": {
+        "DRAFT": "Draft",
+        "ACTIVE": "Published",
+        "ARCHIVED": "Archived"
+      },
+      "category": "Category",
+      "brand": "Brand",
+      "price": "Price",
+      "stock": "Stock",
+      "inStock": "In stock",
+      "outOfStock": "Out of stock",
+      "edit": "Edit",
+      "general": "General information",
+      "variants": "Variants",
+      "variantN": "Variant {n}",
+      "sku": "SKU",
+      "variantName": "Variant name",
+      "stockHint": "Adjusted in Inventory",
+      "removeVariant": "Remove",
+      "addVariant": "Add variant",
+      "images": "Images",
+      "alt": "Alt text",
+      "removeImage": "Remove image",
+      "save": "Save changes",
+      "create": "Create product",
+      "cancel": "Cancel"
+    },
+    "orders": {
+      "tabs": {
+        "label": "Sales sections",
+        "orders": "Orders",
+        "shipments": "Shipments",
+        "invoices": "Invoices",
+        "refunds": "Returns"
+      },
+      "number": "Order",
+      "status": "Status",
+      "items": "Items",
+      "total": "Total",
+      "date": "Date",
+      "note": "Internal note",
+      "carrier": "Carrier",
+      "tracking": "Tracking",
+      "eta": "Estimated delivery",
+      "label": "Label PDF",
+      "createLabel": "Create label",
+      "labelCreated": "Label created",
+      "downloadError": "Could not download the file",
+      "eventDescription": "Event description",
+      "location": "Location",
+      "invoiceNumber": "Invoice",
+      "invoiceStatus": {
+        "DRAFT": "Draft",
+        "ISSUED": "Issued",
+        "ACCEPTED": "Accepted",
+        "REJECTED": "Rejected"
+      },
+      "orderId": "Order ID",
+      "orderIdHint": "Paste the ID (UUID) of the order to invoice",
+      "creditAmount": "Credit note amount",
+      "creditHint": "In currency units; sent as cents",
+      "reason": "Reason",
+      "refundStatus": {
+        "REQUESTED": "Requested",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "PROCESSED": "Refunded",
+        "CANCELLED": "Cancelled"
+      },
+      "decision": "Decision",
+      "approve": "Approve and refund",
+      "reject": "Reject"
+    },
+    "customers": {
+      "title": "Customers",
+      "name": "Customer",
+      "email": "Email",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Phone",
+      "segment": "Segment",
+      "segments": {
+        "VIP": "VIP",
+        "REGULAR": "Regular",
+        "NEW": "New",
+        "INACTIVE": "Inactive"
+      },
+      "state": "Status",
+      "archived": "Archived",
+      "orders": "Orders",
+      "ltv": "Lifetime value",
+      "score": "Score",
+      "scoreHint": "0–100; empty = automatic RFM score",
+      "tags": "Tags",
+      "tagsHint": "Comma separated",
+      "note": "Note",
+      "addNote": "Add note",
+      "view360": "360° view",
+      "avgOrder": "Average order",
+      "loyalty": "Loyalty",
+      "nextPurchase": "Estimated next purchase",
+      "favorites": "Favorite categories",
+      "recentOrders": "Recent orders",
+      "notes": "Notes",
+      "date": "Date"
+    },
+    "inventory": {
+      "tabs": {
+        "label": "Inventory sections",
+        "stock": "Stock",
+        "suppliers": "Suppliers"
+      },
+      "alert": "Alert",
+      "lowOnly": "Low stock only",
+      "product": "Product",
+      "variant": "Variant",
+      "stock": "Stock",
+      "reserved": "Reserved",
+      "available": "Available",
+      "low": "{count} · low",
+      "history": "History",
+      "historyTitle": "History of {sku}",
+      "movement": "Movement",
+      "movementTitle": "Record movement for {sku}",
+      "movementType": "Type",
+      "movementTypes": {
+        "IN": "Inbound",
+        "OUT": "Outbound",
+        "RETURN": "Return",
+        "DAMAGE": "Damage",
+        "ADJUSTMENT": "Adjustment",
+        "TRANSFER": "Transfer",
+        "SALE": "Sale",
+        "RESERVE": "Reservation",
+        "RELEASE": "Release"
+      },
+      "quantity": "Quantity",
+      "reason": "Reason",
+      "reference": "Reference",
+      "referenceHint": "Supplier invoice, order…",
+      "newStock": "New stock",
+      "adjustHint": "Absolute count from the warehouse",
+      "avgDaily": "Average daily sales",
+      "daysOfCover": "Days of cover",
+      "reorder": "Reorder",
+      "movements": "Movements",
+      "date": "Date",
+      "supplierName": "Supplier",
+      "taxId": "Tax ID",
+      "email": "Email",
+      "phone": "Phone",
+      "contact": "Contact",
+      "paymentTerms": "Payment terms (days)",
+      "leadTime": "Lead time",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "rating": "Rating (0–5)",
+      "contractEnds": "Contract ends",
+      "state": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "media": {
+      "folder": "Folder",
+      "allFolders": "All",
+      "folders": {
+        "products": "Products",
+        "brands": "Brands",
+        "categories": "Categories",
+        "collections": "Collections",
+        "avatars": "Avatars",
+        "reviews": "Reviews",
+        "refunds": "Returns",
+        "marketing": "Marketing",
+        "email": "Email",
+        "suppliers": "Suppliers"
+      },
+      "drop": "Drag images here or click to choose",
+      "limits": "JPG, PNG, WebP or AVIF · max 5 MB · up to 10 per upload",
+      "uploading": "Uploading…",
+      "uploaded": "{count, plural, one {# image uploaded} other {# images uploaded}}",
+      "errors": {
+        "type": "{name}: format not allowed",
+        "size": "{name}: larger than 5 MB",
+        "count": "Max 10 per upload: {name} skipped"
+      },
+      "empty": "No images in this folder",
+      "select": "Select {name}",
+      "selected": "{count, plural, one {# selected} other {# selected}}",
+      "clear": "Clear selection",
+      "deleteSelected": "Delete selected",
+      "confirmBulk": "Delete {count} images? Products using them will lose them.",
+      "loadMore": "Load more",
+      "detail": "Image details",
+      "size": "Dimensions",
+      "alt": "Alt text",
+      "altHint": "Describe the image for screen readers and search engines",
+      "saveAlt": "Save text",
+      "saved": "Alt text saved",
+      "copyUrl": "Copy URL",
+      "copied": "URL copied",
+      "replace": "Replace file",
+      "replaced": "File replaced",
+      "delete": "Delete",
+      "deleted": "Images deleted",
+      "confirmDelete": "Delete this image?"
+    },
+    "marketing": {
+      "tabs": {
+        "label": "Marketing sections",
+        "campaigns": "Campaigns",
+        "emails": "Sent emails",
+        "templates": "Templates",
+        "coupons": "Coupons"
+      },
+      "name": "Name",
+      "channel": "Channel",
+      "channels": {
+        "EMAIL": "Email",
+        "PUSH": "Push",
+        "WHATSAPP": "WhatsApp"
+      },
+      "audience": "Audience",
+      "audiences": {
+        "ALL": "All customers",
+        "VIP": "VIP",
+        "REGULAR": "Regular",
+        "NEW": "New",
+        "INACTIVE": "Inactive"
+      },
+      "status": "Status",
+      "campaignStatus": {
+        "DRAFT": "Draft",
+        "SCHEDULED": "Scheduled",
+        "SENDING": "Sending",
+        "SENT": "Sent",
+        "FAILED": "Failed",
+        "ARCHIVED": "Archived"
+      },
+      "subject": "Subject",
+      "content": "Content",
+      "contentHint": "Supports variables in double braces, e.g. name",
+      "scheduledAt": "Schedule for",
+      "scheduleHint": "Empty = stays as draft",
+      "sent": "Sent",
+      "openRate": "Open rate",
+      "sendNow": "Send now",
+      "confirmSend": "Send campaign “{name}” now?",
+      "sending": "Campaign is being sent",
+      "sendEmail": "Send email",
+      "send": "Send",
+      "emailQueued": "Email queued",
+      "to": "To",
+      "template": "Template",
+      "variables": "Variables",
+      "variablesHint": "name=Ana, code=X1",
+      "emailStatus": {
+        "QUEUED": "Queued",
+        "SENT": "Sent",
+        "FAILED": "Failed"
+      },
+      "opens": "Opens",
+      "date": "Date",
+      "html": "HTML",
+      "htmlHint": "Variables go in double braces, e.g. name",
+      "locale": "Language",
+      "code": "Code",
+      "couponType": "Type",
+      "couponTypes": {
+        "PERCENTAGE": "Percentage",
+        "FIXED_AMOUNT": "Fixed amount",
+        "FREE_SHIPPING": "Free shipping"
+      },
+      "value": "Value",
+      "valueHint": "Percentage (1–100) or amount in currency units",
+      "usageLimit": "Usage limit",
+      "used": "Uses",
+      "endsAt": "Expires",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "settings": {
+      "tabs": {
+        "label": "Settings sections",
+        "roles": "Roles",
+        "permissions": "Permissions",
+        "webhooks": "Webhooks",
+        "automation": "n8n automation",
+        "audit": "Audit",
+        "mcp": "MCP transactions"
+      },
+      "roleName": "Role",
+      "roleHint": "UPPER_SNAKE_CASE, e.g. SUPPORT",
+      "description": "Description",
+      "action": "Action",
+      "resource": "Resource",
+      "resourceHint": "lower_snake_case, e.g. product",
+      "name": "Name",
+      "url": "URL",
+      "urlHint": "HTTPS recommended; signed with HMAC-SHA256",
+      "events": "Events",
+      "maxAttempts": "Max attempts",
+      "active": "Active",
+      "successRate": "Success · deliveries",
+      "yes": "Yes",
+      "no": "No",
+      "test": "Test",
+      "testSent": "Test event sent",
+      "trigger": "Trigger",
+      "triggers": {
+        "EVENT": "Event",
+        "MANUAL": "Manual",
+        "SCHEDULE": "Scheduled",
+        "WEBHOOK": "Webhook"
+      },
+      "event": "Event",
+      "eventHint": "Required when the trigger is Event",
+      "webhookPath": "n8n webhook path",
+      "webhookPathHint": "e.g. orders/new",
+      "runs": "Runs · success",
+      "lastRun": "Last run",
+      "run": "Run",
+      "runStarted": "Workflow started",
+      "severity": "Severity",
+      "severities": {
+        "INFO": "Info",
+        "WARNING": "Warning",
+        "CRITICAL": "Critical"
+      },
+      "reviewed": "Reviewed",
+      "pending": "Pending",
+      "markReviewed": "Mark reviewed",
+      "module": "Module",
+      "date": "Date",
+      "status": "Status",
+      "type": "Type",
+      "steps": "Steps",
+      "rollback": "Roll back",
+      "rollbackTitle": "Roll back transaction {type}",
+      "reason": "Reason"
+    },
+    "ai": {
+      "tabs": {
+        "label": "Assistant sections",
+        "knowledge": "Knowledge",
+        "tools": "Tools",
+        "evaluations": "Evaluations"
+      },
+      "source": "Source",
+      "sources": {
+        "product": "Product",
+        "faq": "FAQ",
+        "policy": "Policy"
+      },
+      "indexSources": {
+        "products": "Product catalog",
+        "faq": "FAQ",
+        "policies": "Policies"
+      },
+      "lang": "Language",
+      "titleCol": "Title",
+      "content": "Chunk",
+      "reindex": "Re-index",
+      "start": "Start",
+      "jobAccepted": "Job queued: results will appear in a few minutes",
+      "clear": "Clear index",
+      "clearTitle": "All chunks will be deleted; the assistant answers without context until re-indexed.",
+      "clearConfirm": "Clear",
+      "cleared": "Index cleared",
+      "status": "Status",
+      "toolStatus": {
+        "ok": "OK",
+        "denied": "Denied",
+        "not_found": "Not found",
+        "rejected": "Rejected",
+        "error": "Error"
+      },
+      "date": "Date",
+      "tool": "Tool",
+      "arguments": "Arguments",
+      "latency": "Latency",
+      "lastRun": "Last evaluation",
+      "faithfulness": "Faithfulness",
+      "hallucination": "Hallucination",
+      "tokens": "Estimated tokens",
+      "evaluate": "New evaluation",
+      "tier": "Model",
+      "tiers": {
+        "economic": "Economic",
+        "strong": "Strong"
+      },
+      "model": "Model",
+      "error": "View error"
+    }
+  }
+}
